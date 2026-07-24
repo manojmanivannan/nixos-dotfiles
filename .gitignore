@@ -1,0 +1,8 @@
+# Nix build outputs
+result
+result-*
+
+# Editor / OS cruft
+.DS_Store
+*.swp
+*~
