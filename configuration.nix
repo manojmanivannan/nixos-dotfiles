@@ -1,10 +1,16 @@
-{ config, lib, pkgs, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Allow unfree software (needed for vscode, sublime4, etc.).
   # With home-manager.useGlobalPkgs = true this also covers Home Manager packages.
@@ -24,15 +30,14 @@
   # Set your time zone.
   time.timeZone = "Europe/London";
 
-
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
   services.displayManager.ly.enable = true;
   services.xserver = {
-	enable = true;
-	autoRepeatDelay = 200;
-	autoRepeatInterval = 35;
-	windowManager.qtile.enable = true;
+    enable = true;
+    autoRepeatDelay = 200;
+    autoRepeatInterval = 35;
+    windowManager.qtile.enable = true;
 
   };
 
@@ -46,11 +51,14 @@
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.manoj = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "sudo" "docker" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "sudo"
+      "docker"
+    ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
     ];
@@ -58,18 +66,18 @@
 
   programs.firefox.enable = true;
   programs.hyprland = {
-	enable = true;
-	withUWSM = true;
-	xwayland.enable = true;
+    enable = true;
+    withUWSM = true;
+    xwayland.enable = true;
   };
 
   programs.nix-ld.enable = true;
 
-#  programs.hyprland = {
-#	enable = true;
-#	package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-#	portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
-#  };
+  #  programs.hyprland = {
+  #	enable = true;
+  #	package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+  #	portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+  #  };
   # Docker (daemon must be system-level; there is no Home Manager equivalent).
   virtualisation.docker.enable = true;
 
@@ -103,12 +111,16 @@
   services.gnome.gnome-keyring.enable = true;
 
   fonts.packages = with pkgs; [
-	nerd-fonts.jetbrains-mono
+    nerd-fonts.jetbrains-mono
+    cascadia-code
+    fira-code
   ];
 
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   system.stateVersion = "26.05"; # Did you read the comment?
 
 }
-
