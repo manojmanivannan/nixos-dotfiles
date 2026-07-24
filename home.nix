@@ -61,7 +61,20 @@ home.packages = with pkgs; [
   gcc
   rofi
   xwallpaper
+  sublime4
+  docker-compose
 ];
+
+# VS Code — managed by Home Manager so extensions/settings are declarative.
+programs.vscode = {
+  enable = true;
+  extensions = with pkgs.vscode-extensions; [
+    bbenoist.nix # Nix syntax support
+  ];
+  userSettings = {
+    "editor.fontSize" = 14;
+  };
+};
 
 wayland.windowManager.hyprland.systemd.enable = false;
 }

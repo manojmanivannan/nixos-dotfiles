@@ -6,6 +6,12 @@
       ./hardware-configuration.nix
     ];
 
+  # Allow unfree software (needed for vscode, sublime4, etc.).
+  # With home-manager.useGlobalPkgs = true this also covers Home Manager packages.
+  nixpkgs.config.allowUnfree = true;
+  # sublime4 depends on the EOL openssl-1.1.1w; permit it explicitly.
+  nixpkgs.config.permittedInsecurePackages = [ "openssl-1.1.1w" ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -16,7 +22,7 @@
   networking.networkmanager.enable = true;
 
   # Set your time zone.
-  time.timeZone = "Europe/Londonm";
+  time.timeZone = "Europe/London";
 
 
   # Enable the X11 windowing system.
@@ -34,7 +40,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.manoj = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "sudo" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "sudo" "docker" ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
     ];
@@ -52,6 +58,9 @@
 #	package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
 #	portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
 #  };
+  # Docker (daemon must be system-level; there is no Home Manager equivalent).
+  virtualisation.docker.enable = true;
+
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
