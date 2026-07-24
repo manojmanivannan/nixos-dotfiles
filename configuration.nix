@@ -63,6 +63,8 @@
 	xwayland.enable = true;
   };
 
+  programs.nix-ld.enable = true;
+
 #  programs.hyprland = {
 #	enable = true;
 #	package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
@@ -91,6 +93,7 @@
     nvitop
     lazydocker
     grimblast
+    uv
   ];
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
