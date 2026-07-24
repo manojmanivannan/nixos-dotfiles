@@ -36,6 +36,16 @@
 
   };
 
+  # NVIDIA — GeForce RTX 4090 (Ada Lovelace). Open kernel modules (Turing+),
+  # modesetting on for Wayland (Hyprland) and X11 (qtile).
+  hardware.graphics.enable = true;
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia = {
+    modesetting.enable = true;
+    open = true; # open-source kernel modules; set false for proprietary
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+  };
+
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.manoj = {
