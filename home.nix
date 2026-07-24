@@ -68,11 +68,13 @@ home.packages = with pkgs; [
 # VS Code — managed by Home Manager so extensions/settings are declarative.
 programs.vscode = {
   enable = true;
-  extensions = with pkgs.vscode-extensions; [
-    bbenoist.nix # Nix syntax support
-  ];
-  userSettings = {
-    "editor.fontSize" = 14;
+  profiles.default = {
+    extensions = with pkgs.vscode-extensions; [
+      bbenoist.nix # Nix syntax support
+    ];
+    userSettings = {
+      "editor.fontSize" = 14;
+    };
   };
 };
 
