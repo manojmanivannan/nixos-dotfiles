@@ -1,137 +1,133 @@
 /*
- * Tokyonight colorscheme (big icons) for rofi
- * User: w8ste
+ * Tokyonight colorscheme for rofi (Wayland/Hyprland-safe)
+ *
+ * Replaces the original "screenshot" transparency variant, which is broken
+ * under Wayland: rofi cannot capture the root window, so the launcher
+ * rendered as a black/garbage blob and was unreadable. This version uses a
+ * real semi-transparent background instead.
  */
 
-
-// define colors etc.
+// TokyoNight Night palette
 * {
-    bg: #24283b;
-    hv: #9274ca; 
-    primary: #444b6a;  // TokyoNight bright black
-    ug: #0B2447;
-    font: "Monospace 11";
-    background-color: @bg;
-    //dark: @bg;
-    border: 0px;
-    kl: #7aa2f7;
-    black: #000000;
+    bg:           #585963;          // night background
+    bg-alt:       #6a6b73;          // night bg highlight
+    fg:           #d4daf2;          // night foreground
+    fg-dim:       #81869d;          // night comment / dim
+    accent:       #7aa2f7;          // night blue
+    accent2:      #bb9af7;          // night purple
+    selected:     #33467c;          // night bg selection
+    urgent:       #f7768e;          // night red
+    border:       #2ac3de;          // night cyan
+    transparent:  rgba(26,27,38,0);
 
-    transparent: rgba(46,52,64,0);
+    background-color: @transparent;
+    text-color:       @fg;
+    font:             "JetBrainsMono Nerd Font 11";
+
+    margin:    0;
+    padding:   0;
+    spacing:   0;
+    border:    0;
+    highlight: none;
 }
 
-// defines different aspects of the window
+// ---- window -------------------------------------------------------------
 window {
-    width: 700;
-    /*since line wont work with height, i comment it out 
-    if you rather control the size via height
-    just comment it out */
-    //height: 500;
-
-    orientation: horizontal;
-    location: center;
-    anchor: center;
-    transparency: "screenshot";
-    border-color: @transparent;   
-    border: 0px;
-    border-radius: 6px;
-    spacing: 0;
-    children: [ mainbox ];
+    width:                       560px;
+    location:                    center;
+    anchor:                      center;
+    transparency:                "real";        // works on Wayland (no screenshot grab)
+    background-color:            rgba(26,27,38,0.92);
+    border:                      2px solid;
+    border-color:                @border;
+    border-radius:               12px;
+    padding:                     12px;
+    children:                    [ mainbox ];
 }
 
 mainbox {
-    spacing: 0;
-    children: [ inputbar, message, listview ];
+    children:    [ inputbar, listview ];
+    spacing:     8px;
 }
 
+// ---- input bar ----------------------------------------------------------
 inputbar {
-    color: @kl;
-    padding: 11px;
-    border: 3px 3px 2px 3px;
-    border-color: @primary;
-    border-radius: 6px 6px 0px 0px;
-}
-
-message {
-    padding: 0;
-    border-color: @primary;
-    border: 0px 1px 1px 1px;
-}
-
-entry, prompt, case-indicator {
-    text-font: inherit;
-    text-color: inherit;
-}
-
-entry {
-    cursor: pointer;
+    children:      [ prompt, entry ];
+    background-color: @bg-alt;
+    border-radius:    8px;
+    padding:          10px 14px;
+    spacing:          8px;
 }
 
 prompt {
-    margin: 0px 5px 0px 0px;
+    text-color:       @accent;
+    font:             "JetBrainsMono Nerd Font Bold 11";
+    padding:          0px 6px 0px 0px;
 }
 
+entry {
+    text-color:       @fg;
+    placeholder:      "Search...";
+    placeholder-color:@fg-dim;
+    cursor:           text;
+}
+
+// ---- list ---------------------------------------------------------------
 listview {
-    layout: vertical;
-    //spacing: 5px;
-    padding: 8px;
-    lines: 7;
-    columns: 2;
-    border: 0px 3px 3px 3px; 
-    border-radius: 0px 0px 6px 6px;
-    border-color: @primary;
-    dynamic: false;
+    background-color: @transparent;
+    columns:          1;
+    lines:            8;
+    cycle:            true;
+    dynamic:          true;
+    scrollbar:        false;
+    padding:          4px 0px 0px 0px;
+    spacing:          2px;
 }
 
 element {
-    padding: 2px;
-    vertical-align: 1;
-    color: @kl;
-    font: inherit;
-}
-
-element-text {
-    background-color: inherit;
-    text-color: inherit;
-    vertical-align: 0.5;
+    background-color: @transparent;
+    text-color:       @fg;
+    padding:          8px 12px;
+    border-radius:    6px;
+    spacing:          10px;
+    cursor:           pointer;
 }
 
 element selected.normal {
-    color: @black;
-    background-color: @hv;
+    background-color: @selected;
+    text-color:       @fg;
 }
 
-element normal active {
-    background-color: @hv;
-    color: @black;
+element normal.urgent {
+    background-color: @transparent;
+    text-color:       @urgent;
+}
+
+element selected.urgent {
+    background-color: @urgent;
+    text-color:       @bg;
+}
+
+element normal.active {
+    background-color: @transparent;
+    text-color:       @accent2;
+}
+
+element selected.active {
+    background-color: @accent2;
+    text-color:       @bg;
 }
 
 element-icon {
     background-color: inherit;
-    text-color: inherit;
-    size: 2.5em;
+    text-color:       inherit;
+    size:             24px;
+    margin:           0px 4px 0px 0px;
 }
 
-element normal urgent {
-    background-color: @primary;
-}
-
-element selected active {
-    background: @hv;
-    foreground: @bg;
-}
-
-button {
-    padding: 6px;
-    color: @primary;
-    horizonatal-align: 0.5;
-
-    border: 2px 0px 2px 2px;
-    border-radius: 4px 0px 0px 4px;
-    border-color: @primary;
-}
-
-button selected normal {
-    border: 2px 0px 2px 2px;
-    border-color: @primary;
+element-text {
+    background-color: inherit;
+    text-color:       inherit;
+    vertical-align:   0.5;
+    horizontal-align: 0.0;
 }

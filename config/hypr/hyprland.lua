@@ -19,7 +19,7 @@ hl.monitor({
 local terminal = "alacritty"
 local fileManager = "nautilus"
 local browser = "firefox"
-local menu = "wofi --show drun"
+local menu = "rofi -show drun"
 local reload_waybar = "pkill waybar; waybar &"
 local snip = "grimblast --notify copysave area"
 
@@ -142,8 +142,10 @@ hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd(browser .. " https://calendar
 hl.bind(mainMod .. " + Q", hl.dsp.window.close(), { description = "Close window" })
 hl.bind(mainMod .. " + W", hl.dsp.send_shortcut({ mods = "CTRL", key = "W", window = "activewindow" }), { description = "Send Ctrl+W" })
 hl.bind(mainMod .. " + M", hl.dsp.exit(), { description = "Exit Hyprland" })
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }), { description = "Toggle floating" })
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(menu), { description = "Launcher" })
+hl.bind(mainMod .. " + O", hl.dsp.window.float({ action = "toggle" }), { description = "Toggle floating" })
+hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL", key = "C", window = "activewindow" }), { description = "Send Ctrl+C" })
+hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "CTRL", key = "V", window = "activewindow" }), { description = "Send Ctrl+V" })
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu), { description = "Launcher" })
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(reload_waybar), { description = "Reload waybar" })
 hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(snip), { description = "Screenshot" })
 
