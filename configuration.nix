@@ -82,7 +82,15 @@
     walker
     hyprpaper
     wofi
-    
+    # bar / launcher on-click targets + keybind targets
+    pavucontrol
+    blueman
+    networkmanagerapplet
+    pamixer
+    btop
+    nvitop
+    lazydocker
+    grimblast
   ];
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
