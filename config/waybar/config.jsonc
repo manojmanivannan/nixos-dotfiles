@@ -1,0 +1,273 @@
+{
+  "reload_style_on_change": true,
+  "layer": "top",
+  "position": "top",
+  "spacing": 2,
+  "height": 26,
+  "modules-left": [
+    "custom/omarchy",
+    "hyprland/workspaces",
+    "custom/separator",
+    // "wlr/taskbar",
+    "hyprland/window"
+  ],
+  "modules-center": [
+    "custom/weather",
+    "clock",
+    "custom/update",
+    "custom/screenrecording-indicator",
+  ],
+  "modules-right": [
+    "group/tray-expander",
+    "custom/separator",
+    "cpu",
+    "memory",
+    "temperature",
+    "custom/separator",
+    "custom/gpu-usage",
+    "custom/gpu-memory",
+    "custom/gpu-temperature",
+    "custom/separator",
+    "bluetooth",
+    "network",
+    "pulseaudio",
+  ],
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "format": "{icon}",
+    "format-icons": {
+      "default": "",
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8",
+      "9": "9",
+      "10": "0",
+      "active": "󱓻"
+    },
+    "persistent-workspaces": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": []
+    }
+  },
+  "hyprland/window": {
+    "format": "{}",
+    // "rewrite": {
+    //     "(.*) — Google Chrome": "🌎 ",
+    //    "(.*)": " ",
+    //    "(.*) - zsh": " []"
+    // },
+    "separate-outputs": true,
+    "icon-size": 14,
+    "icon": true
+  },
+  "custom/weather": {
+    "format": "{}°",
+    "tooltip": true,
+    "interval": 600,
+    "exec": "wttrbar --location Camberley --hide-conditions",
+    "return-type": "json"
+  },
+  "custom/omarchy": {
+    "format": "<span font='omarchy'>\ue900</span>",
+    "on-click": "omarchy-menu",
+    "on-click-right": "xdg-terminal-exec",
+    "tooltip-format": "Omarchy Menu\n\nSuper + Alt + Space"
+  },
+  "custom/update": {
+    "format": "",
+    "exec": "omarchy-update-available",
+    "on-click": "omarchy-launch-floating-terminal-with-presentation omarchy-update",
+    "tooltip-format": "Omarchy update available",
+    "signal": 7,
+    "interval": 3600
+  },
+  "cpu": {
+    "interval": 5,
+    "format": "CPU: {}%  ",
+    "max-length": 14,
+    "on-click": "omarchy-launch-or-focus-tui btop"
+  },
+  "custom/gpu-usage": {
+    "exec": "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits",
+    "format": "GPU: {}%  ",
+    "return-type": "",
+    "interval": 5,
+    "max-length": 14,
+    "on-click": "omarchy-launch-or-focus-tui nvtop"
+  },
+  "memory": {
+    "interval": 30,
+    "format": "{}%  "
+  },
+  "custom/gpu-memory": {
+    "exec": "nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits",
+    "format": "{}%  ",
+    "return-type": "",
+    "interval": 5
+  },
+  "temperature": {
+    // "thermal-zone": 2,
+    "hwmon-path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp1_input",
+    // "critical-threshold": 80,
+    // "format-critical": "{temperatureC}°C ",
+    "format": "{temperatureC}°C "
+  },
+  "custom/gpu-temperature": {
+    "exec": "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits",
+    "format": "{}°C ",
+    "return-type": "",
+    "interval": 5
+  },
+  "clock": {
+    "format": "{:L%A %H:%M   %d-%b-%Y}",
+    "format-alt": "{:L%d %B W%V %Y}",
+    "tooltip": true,
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    // "on-click-right": "omarchy-launch-floating-terminal-with-presentation omarchy-tz-select",
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 4,
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color='#ffead3'><b>{}</b></span>",
+        "days": "<span color='#ecc6d9'><b>{}</b></span>",
+        "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+        "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+        "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+      }
+    },
+    "actions": {
+      "on-click-right": "mode",
+      // "on-scroll-up": "tz_up",
+      // "on-scroll-down": "tz_down",
+      "on-scroll-up": "shift_up",
+      "on-scroll-down": "shift_down"
+    }
+  },
+  "network": {
+    "format-icons": [
+      "󰤯",
+      "󰤟",
+      "󰤢",
+      "󰤥",
+      "󰤨"
+    ],
+    "format": "{icon}",
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰀂",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{essid} ({frequency} GHz)",
+    "tooltip-format-ethernet": "Connected",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "spacing": 1,
+    "on-click": "omarchy-launch-wifi"
+  },
+  "bluetooth": {
+    "format": "",
+    "format-disabled": "󰂲",
+    "format-off": "󰂲",
+    "format-connected": "󰂱",
+    "format-no-controller": "",
+    "tooltip-format": "Devices connected: {num_connections}",
+    "on-click": "omarchy-launch-bluetooth"
+  },
+  "pulseaudio": {
+    "format": "{icon}",
+    "on-click": "omarchy-launch-audio",
+    "on-click-right": "pamixer -t",
+    "tooltip-format": "Playing at {volume}%",
+    "scroll-step": 5,
+    "format-muted": "",
+    "format-icons": {
+      "headphone": "",
+      "headset": "",
+      "default": [
+        " ",
+        " ",
+        " "
+      ]
+    }
+  },
+  "group/tray-expander": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 600,
+      "children-class": "tray-group-item"
+    },
+    "modules": [
+      "custom/expand-icon",
+      "tray"
+    ]
+  },
+  "custom/expand-icon": {
+    "format": " ",
+    "tooltip": false
+  },
+  "custom/screenrecording-indicator": {
+    "on-click": "omarchy-capture-screenrecording",
+    "exec": "/default/waybar/indicators/screen-recording.sh",
+    "signal": 8,
+    "return-type": "json"
+  },
+  "custom/voxtype": {
+    "exec": "omarchy-voxtype-status",
+    "return-type": "json",
+    "format": "{icon}",
+    "format-icons": {
+      "idle": "",
+      "recording": "󰍬",
+      "transcribing": "󰔟"
+    },
+    "tooltip": true,
+    "on-click-right": "omarchy-voxtype-config",
+    "on-click": "omarchy-voxtype-model"
+  },
+  "custom/idle-indicator": {
+    "on-click": "omarchy-toggle-idle",
+    "exec": "/default/waybar/indicators/idle.sh",
+    "signal": 9,
+    "return-type": "json"
+  },
+  "custom/notification-silencing-indicator": {
+    "on-click": "omarchy-toggle-notification-silencing",
+    "exec": "/default/waybar/indicators/notification-silencing.sh",
+    "signal": 10,
+    "return-type": "json"
+  },
+  "tray": {
+    "icon-size": 12,
+    "spacing": 12
+  },
+  // "wlr/taskbar": {
+  //   "format": "{icon} {name}",
+  //   "icon-size": 14,
+  //   "icon-theme": "Numix-Circle",
+  //   "tooltip-format": "{title}",
+  //   "on-click": "activate",
+  //   "on-click-middle": "close",
+  //   "ignore-list": [
+  //     "Alacritty"
+  //   ],
+  //   "app_ids-mapping": {
+  //     "firefoxdeveloperedition": "firefox-developer-edition"
+  //   },
+  //   "rewrite": {
+  //     "Firefox Web Browser": "Firefox",
+  //     "Foot Server": "Terminal"
+  //   }
+  // },
+  "custom/separator": {
+    "format": "|",
+    "interval": "once",
+    "tooltip": false
+  }
+}
