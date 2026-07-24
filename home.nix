@@ -72,9 +72,9 @@ programs.vscode = {
     extensions = with pkgs.vscode-extensions; [
       bbenoist.nix # Nix syntax support
     ];
-    userSettings = {
-      "editor.fontSize" = 14;
-    };
+    # NOTE: userSettings intentionally omitted — Settings Sync owns
+    # settings.json (see ~/.config/Code/User/settings.json). Letting Home
+    # Manager write it caused a conflict loop on every `home-manager switch`.
   };
 };
 

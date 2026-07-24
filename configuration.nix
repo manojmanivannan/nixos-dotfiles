@@ -95,6 +95,10 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
+  # Secret Service provider (gnome-keyring) so browsers / VS Code / Electron
+  # apps can store credentials via libsecret. PAM auto-unlocks it at login.
+  services.gnome.gnome-keyring.enable = true;
+
   fonts.packages = with pkgs; [
 	nerd-fonts.jetbrains-mono
   ];
