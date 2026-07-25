@@ -7,7 +7,6 @@
   "margin-top": 6,
   "margin-left": 6,
   "margin-right": 6,
-
   "modules-left": [
     "hyprland/workspaces",
     "hyprland/window"
@@ -24,9 +23,9 @@
     "temperature",
     "custom/gpu",
     "custom/gpu-temp",
-    "tray"
+    "tray",
+    "custom/power"
   ],
-
   "hyprland/workspaces": {
     "on-click": "activate",
     "format": "{name}",
@@ -38,14 +37,12 @@
       "5": []
     }
   },
-
   "hyprland/window": {
     "format": "{}",
     "separate-outputs": true,
     "icon-size": 14,
     "icon": true
   },
-
   "clock": {
     "format": "  {:%H:%M  %d %b}",
     "format-alt": "  {:%A, %d %B %Y}",
@@ -69,32 +66,39 @@
       "on-scroll-down": "shift_down"
     }
   },
-
   "pulseaudio": {
     "format": "{icon} {volume}%",
     "format-muted": " Muted",
     "format-icons": {
       "headphone": "",
       "headset": "",
-      "default": ["", "", ""]
+      "default": [
+        "",
+        "",
+        ""
+      ]
     },
     "scroll-step": 5,
     "on-click": "pavucontrol",
     "on-click-right": "pamixer -t",
     "tooltip-format": "Playing at {volume}%"
   },
-
   "network": {
     "format": "{icon}",
     "format-wifi": "  {essid}",
     "format-ethernet": "  Wired",
     "format-disconnected": "  Offline",
-    "format-icons": ["", "", "", "", ""],
+    "format-icons": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
     "tooltip-format-wifi": "{essid} ({signalStrength}%)",
     "interval": 3,
     "on-click": "nm-connection-editor"
   },
-
   "bluetooth": {
     "format": "",
     "format-disabled": "",
@@ -104,41 +108,39 @@
     "tooltip-format": "{num_connections} device(s) connected",
     "on-click": "blueman-manager"
   },
-
   "cpu": {
     "interval": 2,
     "format": "  {usage}%",
     "on-click": "alacritty -e btop"
   },
-
   "memory": {
     "interval": 10,
     "format": "  {percentage}%",
     "on-click": "alacritty -e btop"
   },
-
   "temperature": {
     "hwmon-path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp1_input",
     "critical-threshold": 80,
     "format": "  {temperatureC}°C",
     "format-critical": "  {temperatureC}°C"
   },
-
   "custom/gpu": {
     "exec": "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits",
     "format": "  {}%",
     "interval": 2,
     "on-click": "alacritty -e nvitop"
   },
-
   "custom/gpu-temp": {
     "exec": "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits",
     "format": "  {}°C",
     "interval": 2
   },
-
   "tray": {
     "icon-size": 16,
     "spacing": 12
+  },
+  "custom/power": {
+    "on-click": "wlogout --protocol layer-shell",
+    "format": " ⏻ "
   }
 }

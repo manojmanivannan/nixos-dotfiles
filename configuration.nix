@@ -21,6 +21,7 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.configurationLimit = 5;
 
   networking.hostName = "nixos"; # Define your hostname.
 
@@ -100,6 +101,8 @@
     waybar
     walker
     hyprpaper
+    hyprlock
+    wlogout
     wofi
     # bar / launcher on-click targets + keybind targets
     pavucontrol

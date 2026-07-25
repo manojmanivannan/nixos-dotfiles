@@ -13,6 +13,7 @@ let
     picom = "picom";
     hypr = "hypr";
     waybar = "waybar";
+    wlogout = "wlogout";
   };
 in
 
