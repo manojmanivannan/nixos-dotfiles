@@ -41,18 +41,30 @@ in
     shellAliases = {
       btw = "echo i use nixos-btw";
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
-      gcommit = "git commit -m";
+      # NOTE: `gcommit` is intentionally not an alias here — the JIRA-aware
+      # `gcommit` function in zshrc_addon.zsh handles it (an alias would shadow
+      # the function, since shellAliases are emitted after initContent).
     };
 
-    # Custom prompt — runs AFTER oh-my-zsh loads the amuse theme (initExtra is
-    # appended to .zshrc after `source $ZSH/oh-my-zsh.sh`), so it overrides the
-    # theme's PROMPT/RPROMPT. git_prompt_info/git_prompt_status come from the
-    # `git` oh-my-zsh plugin and reuse amuse's ZSH_THEME_GIT_PROMPT_* settings.
+    # Custom prompt — runs AFTER oh-my-zsh loads the amuse theme (initContent
+    # is ordered after the oh-my-zsh source in .zshrc), so it overrides the
+    # theme's PROMPT/RPROMPT. git_prompt_info comes from the `git` oh-my-zsh
+    # plugin; virtualenv_prompt_info from the `virtualenv` plugin. The
+    # ZSH_THEME_*_PROMPT vars mirror the amuse theme so the venv segment
+    # matches the original Arch setup.
     initContent = ''
-      # Left prompt:  <path> <git (branch)(dirty)> <exit-code on failure> ↪
-      PROMPT='%F{blue}%~%f $(git_prompt_info)%F{red}%(?.. [%?])%f %F{yellow}$%f '
-      # Right prompt: [HH:MM:SS] user@host
+      VIRTUAL_ENV_DISABLE_PROMPT=0
+      ZSH_THEME_VIRTUAL_ENV_PROMPT_PREFIX=" %F{cyan}🐍 ("
+      ZSH_THEME_VIRTUAL_ENV_PROMPT_SUFFIX=")%f"
+      ZSH_THEME_VIRTUALENV_PREFIX=$ZSH_THEME_VIRTUAL_ENV_PROMPT_PREFIX
+      ZSH_THEME_VIRTUALENV_SUFFIX=$ZSH_THEME_VIRTUAL_ENV_PROMPT_SUFFIX
+
+      # Left prompt:  <path> <git> <venv> <exit-code on failure> ↪
+      PROMPT='%F{blue}%~%f $(git_prompt_info)$(virtualenv_prompt_info)%F{red}%(?.. [%?])%f %F{yellow}$%f '
+      # Right prompt: [HH:MM:SS]
       RPROMPT='⌚%F{cyan}[%D{%H:%M:%S}]%f'
+
+      source "${config.home.homeDirectory}/nixos-dotfiles/config/zsh/zshrc_addon.zsh"
     '';
 
     # oh-my-zsh manages the prompt/theme (matches the old Arch setup: amuse).
