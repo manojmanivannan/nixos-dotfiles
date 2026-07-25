@@ -147,6 +147,7 @@ hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL + SHIFT", key = "
 hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "CTRL + SHIFT", key = "V", window = "activewindow" }), { description = "Send Ctrl+V" })
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu), { description = "Launcher" })
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(reload_waybar), { description = "Reload waybar" })
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t -sw"), { description = "Notification center" })
 hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(snip), { description = "Screenshot" })
 
 -- Resize active window. Super + +/- adjusts height (vertical);
@@ -373,6 +374,9 @@ hl.config({
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("waybar")
+    -- swaync notification daemon (config + style in ~/.config/swaync).
+    -- Toggle the control center with Super+N (see binds below).
+    hl.exec_cmd("swaync")
     -- swaybg sets the wallpaper (-m fill scales to cover the screen, cropping if needed).
     hl.exec_cmd("swaybg -i /home/manoj/nixos-dotfiles/wallpaper/samurai-sunset.jpg -m fill")
 end)

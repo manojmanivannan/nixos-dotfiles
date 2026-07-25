@@ -15,6 +15,7 @@ let
     waybar = "waybar";
     wlogout = "wlogout";
     sway = "sway";
+    swaync = "swaync";
   };
 in
 
@@ -123,6 +124,8 @@ in
     rofi
     xwallpaper
     sublime4
+    swaynotificationcenter # ships the `swaync` daemon + `swaync-client`; started from hyprland.start
+    libnotify # provides `notify-send` for testing swaync
     docker-compose
     eza # modern ls replacement; the zsh-eza plugin wraps it
   ];
