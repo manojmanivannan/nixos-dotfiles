@@ -36,6 +36,8 @@ in
   home.stateVersion = "26.05";
   programs.zsh = {
     enable = true;
+    enableCompletion = true;
+
     shellAliases = {
       btw = "echo i use nixos-btw";
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
@@ -58,10 +60,7 @@ in
         "gh"
         "zsh-interactive-cd"
         # external, from ZSH_CUSTOM (built in `let`)
-        "zsh-autocomplete"
-        "fzf-zsh-plugin"
-        "zsh-history-substring-search"
-        "zsh-eza"
+
       ];
     };
 
@@ -74,7 +73,10 @@ in
 
   # fzf key bindings + fuzzy completion — replaces the old `source <(fzf --zsh)`.
   # Required by the fzf-zsh-plugin oh-my-zsh plugin.
-  programs.fzf.enable = true;
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+  };
 
   xdg.configFile = builtins.mapAttrs (name: subpath: {
     source = create_symlink "${dotfiles}/${subpath}";
