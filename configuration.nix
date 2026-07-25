@@ -59,6 +59,9 @@
   # Zsh as the system shell. Setting users.users.<name>.shell requires the
   # shell to be enabled in programs.<shell>.enabled.
   programs.zsh.enable = true;
+  programs.steam = {
+    enable = true;
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.manoj = {
