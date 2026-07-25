@@ -41,7 +41,19 @@ in
     shellAliases = {
       btw = "echo i use nixos-btw";
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
+      gcommit = "git commit -m";
     };
+
+    # Custom prompt — runs AFTER oh-my-zsh loads the amuse theme (initExtra is
+    # appended to .zshrc after `source $ZSH/oh-my-zsh.sh`), so it overrides the
+    # theme's PROMPT/RPROMPT. git_prompt_info/git_prompt_status come from the
+    # `git` oh-my-zsh plugin and reuse amuse's ZSH_THEME_GIT_PROMPT_* settings.
+    initContent = ''
+      # Left prompt:  <path> <git (branch)(dirty)> <exit-code on failure> ↪
+      PROMPT='%F{blue}%~%f $(git_prompt_info)%F{red}%(?.. [%?])%f %F{yellow}$%f '
+      # Right prompt: [HH:MM:SS] user@host
+      RPROMPT='⌚%F{cyan}[%D{%H:%M:%S}]%f'
+    '';
 
     # oh-my-zsh manages the prompt/theme (matches the old Arch setup: amuse).
     oh-my-zsh = {
