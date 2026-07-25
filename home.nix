@@ -103,6 +103,10 @@ in
     enableZshIntegration = true;
   };
 
+  services.hyprpaper = {
+    enable = true;
+  };
+
   # NOTE: hyprpaper config lives in config/hypr/hyprpaper.conf, delivered via the
   # `hypr` symlink below (alongside hyprland.lua). We deliberately do NOT use
   # services.hyprpaper here — it would generate its own ~/.config/hypr/hyprpaper.conf
