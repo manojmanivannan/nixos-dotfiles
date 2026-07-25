@@ -55,9 +55,14 @@
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
+  # Zsh as the system shell. Setting users.users.<name>.shell requires the
+  # shell to be enabled in programs.<shell>.enabled.
+  programs.zsh.enable = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.manoj = {
     isNormalUser = true;
+    shell = pkgs.zsh;
     extraGroups = [
       "wheel"
       "sudo"

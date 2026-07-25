@@ -34,16 +34,47 @@ in
     #	};
   };
   home.stateVersion = "26.05";
-  programs.bash = {
+  programs.zsh = {
     enable = true;
     shellAliases = {
       btw = "echo i use nixos-btw";
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
     };
-    initExtra = ''
-      	  export PS1="\[\e[38;5;75m\]\u@\h \[\e[38;5;113m\]\w \[\e[38;5;189m\]\$ \[\e[0m\]"
-      	'';
+
+    # oh-my-zsh manages the prompt/theme (matches the old Arch setup: amuse).
+    oh-my-zsh = {
+      enable = true;
+      theme = "amuse";
+      plugins = [
+        # built-in
+        "git"
+        "colored-man-pages"
+        "colorize"
+        "command-not-found"
+        "web-search"
+        "kubectl"
+        "z"
+        "virtualenv"
+        "gh"
+        "zsh-interactive-cd"
+        # external, from ZSH_CUSTOM (built in `let`)
+        "zsh-autocomplete"
+        "fzf-zsh-plugin"
+        "zsh-history-substring-search"
+        "zsh-eza"
+      ];
+    };
+
+    # zsh-autosuggestions and zsh-syntax-highlighting have no `.plugin.zsh`
+    # in their nixpkgs packages, so they can't live in ZSH_CUSTOM. Home Manager
+    # sources them directly (and in the correct order) via these options.
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
   };
+
+  # fzf key bindings + fuzzy completion — replaces the old `source <(fzf --zsh)`.
+  # Required by the fzf-zsh-plugin oh-my-zsh plugin.
+  programs.fzf.enable = true;
 
   xdg.configFile = builtins.mapAttrs (name: subpath: {
     source = create_symlink "${dotfiles}/${subpath}";
@@ -62,6 +93,7 @@ in
     xwallpaper
     sublime4
     docker-compose
+    eza # modern ls replacement; the zsh-eza plugin wraps it
   ];
 
   # VS Code — managed by Home Manager so extensions/settings are declarative.

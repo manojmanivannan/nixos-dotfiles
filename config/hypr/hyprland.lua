@@ -149,6 +149,13 @@ hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu), { description = "Launcher"
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(reload_waybar), { description = "Reload waybar" })
 hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(snip), { description = "Screenshot" })
 
+-- Resize active window. Super + +/- adjusts height (vertical);
+-- Super + SHIFT + +/- adjusts width (horizontal).
+hl.bind(mainMod .. " + Minus", hl.dsp.window.resize({ x = 0, y = -50, relative = true }), { description = "Resize shorter (vertical)" })
+hl.bind(mainMod .. " + Equal", hl.dsp.window.resize({ x = 0, y = 50, relative = true }), { description = "Resize taller (vertical)" })
+hl.bind(mainMod .. " + SHIFT + Minus", hl.dsp.window.resize({ x = -50, y = 0, relative = true }), { description = "Resize narrower (horizontal)" })
+hl.bind(mainMod .. " + SHIFT + Equal", hl.dsp.window.resize({ x = 50, y = 0, relative = true }), { description = "Resize wider (horizontal)" })
+
 -- hl.bind(mainMod .. " + l", hl.dsp.focus({ direction = "left" }))
 -- hl.bind(mainMod .. " + h", hl.dsp.focus({ direction = "right" }))
 -- hl.bind(mainMod .. " + k", hl.dsp.focus({ direction = "up" }))
