@@ -149,10 +149,10 @@ hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu), { description = "Launcher"
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(reload_waybar), { description = "Reload waybar" })
 hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(snip), { description = "Screenshot" })
 
-hl.bind(mainMod .. " + l", hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + h", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + k", hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + j", hl.dsp.focus({ direction = "down" }))
+-- hl.bind(mainMod .. " + l", hl.dsp.focus({ direction = "left" }))
+-- hl.bind(mainMod .. " + h", hl.dsp.focus({ direction = "right" }))
+-- hl.bind(mainMod .. " + k", hl.dsp.focus({ direction = "up" }))
+-- hl.bind(mainMod .. " + j", hl.dsp.focus({ direction = "down" }))
 
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))

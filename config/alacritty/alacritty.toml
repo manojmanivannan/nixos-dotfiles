@@ -1,0 +1,9 @@
+# Alacritty terminal configuration.
+# Symlinked into ~/.config/alacritty via home.nix (xdg.configFile).
+
+[font]
+size = 14
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+style = "Regular"

@@ -27,6 +27,11 @@
   # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
 
+  # Bluetooth — power on the controller automatically at boot.
+  # blueman (in environment.systemPackages) provides the GUI applet.
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+
   # Set your time zone.
   time.timeZone = "Europe/London";
 
@@ -37,12 +42,11 @@
     enable = true;
     autoRepeatDelay = 200;
     autoRepeatInterval = 35;
-    windowManager.qtile.enable = true;
 
   };
 
   # NVIDIA — GeForce RTX 4090 (Ada Lovelace). Open kernel modules (Turing+),
-  # modesetting on for Wayland (Hyprland) and X11 (qtile).
+  # modesetting on for Wayland (Hyprland).
   hardware.graphics.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
@@ -105,6 +109,9 @@
   ];
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+
+  # Auto-start blueman-applet (Bluetooth tray applet) at login.
+  services.blueman.enable = true;
 
   # Secret Service provider (gnome-keyring) so browsers / VS Code / Electron
   # apps can store credentials via libsecret. PAM auto-unlocks it at login.
