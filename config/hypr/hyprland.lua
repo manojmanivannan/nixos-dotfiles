@@ -56,71 +56,76 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 
 -- https://wiki.hyprland.org/Configuring/Variables/#general
 
-hl.curve("wind", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } } })
-hl.curve("winIn", { type = "bezier", points = { { 0.32, 0.72 }, { 0, 1 } } })
-hl.curve("winOut", { type = "bezier", points = { { 0.32, 0.72 }, { 0, 1 } } })
-hl.curve("liner", { type = "bezier", points = { { 1, 1 }, { 1, 1 } } })
-hl.curve("overshot", { type = "bezier", points = { { 0.13, 0.63 }, { 0.35, 1 } } })
+-- Custom easing curves tuned for fluid, springy-but-settled motion.
+-- (Hyprland cubic-bezier control points; P0=(0,0) and P3=(1,1) are implicit,
+--  so each curve lists only the two middle control points.)
+hl.curve("wind", { type = "bezier", points = { { 0.05, 0.7 }, { 0.1, 1.0 } } })       -- gentle ease-out; window moves
+hl.curve("winIn", { type = "bezier", points = { { 0.32, 0.72 }, { 0, 1 } } })          -- ease-out w/ soft settle; window open
+hl.curve("winOut", { type = "bezier", points = { { 0.36, 0 }, { 0.66, -0.56 } } })     -- smooth ease-out w/ slight anticipation; window close
+hl.curve("liner", { type = "bezier", points = { { 1, 1 }, { 1, 1 } } })               -- linear; looping borderangle
+hl.curve("overshot", { type = "bezier", points = { { 0.13, 0.63 }, { 0.35, 1 } } })   -- subtle overshoot; workspaces
+hl.curve("smoothIn", { type = "bezier", points = { { 0.25, 1 }, { 0.5, 1 } } })       -- slow ease-in; fades
+hl.curve("smoothOut", { type = "bezier", points = { { 0.36, 0 }, { 0.66, -0.56 } } }) -- smooth ease-out; layers/fades
 hl.animation({
     leaf = "windows",
     enabled = true,
-    speed = 4,
+    speed = 5, -- slower (lower = longer) than the old 4 for a smoother open
     bezier = "winIn",
-    style = "popin 80%",
+    style = "popin 90%", -- 90% start scale vs 80%: less aggressive, more glide
 })
 hl.animation({
     leaf = "windowsIn",
     enabled = true,
-    speed = 4,
+    speed = 5,
     bezier = "winIn",
-    style = "popin 80%",
+    style = "popin 90%",
 })
 hl.animation({
     leaf = "windowsOut",
     enabled = true,
     speed = 5,
-    bezier = "winOut",
-    style = "popin 80%",
+    bezier = "winOut", -- dedicated close curve (was reusing winIn)
+    style = "popin 90%",
 })
 hl.animation({
     leaf = "windowsMove",
     enabled = true,
-    speed = 5,
+    speed = 4, -- slower slide so tiling/moving windows glides instead of snaps
     bezier = "wind",
     style = "slide",
 })
 hl.animation({
     leaf = "border",
     enabled = true,
-    speed = 10,
+    speed = 10, -- keep border color change snappy
     bezier = "default",
 })
 hl.animation({
     leaf = "borderangle",
     enabled = true,
-    speed = 30,
+    speed = 20, -- slower gradient rotation loop (was 30) for a calmer shimmer
     bezier = "liner",
     style = "loop",
 })
 hl.animation({
     leaf = "fade",
     enabled = true,
-    speed = 6,
-    bezier = "default",
+    speed = 4,
+    bezier = "smoothIn", -- dedicated ease-in for fades (was default linear-ish)
 })
 hl.animation({
     leaf = "layers",
     enabled = true,
-    speed = 6,
-    bezier = "default",
+    speed = 4,
+    bezier = "smoothOut", -- layered surfaces (bar, launcher) ease out smoothly
     style = "slide",
 })
 hl.animation({
     leaf = "workspaces",
     enabled = true,
-    speed = 6,
+    speed = 4,
     bezier = "overshot",
-    style = "slidefade 5%",
+    style = "slidefade 30%", -- a touch more travel (was 5%) for a richer slide
 })
 
 hl.device({
