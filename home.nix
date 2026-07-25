@@ -14,6 +14,7 @@ let
     hypr = "hypr";
     waybar = "waybar";
     wlogout = "wlogout";
+    sway = "sway";
   };
 in
 
@@ -103,17 +104,9 @@ in
     enableZshIntegration = true;
   };
 
-  services.hyprpaper = {
-    enable = true;
-  };
-
-  # NOTE: hyprpaper config lives in config/hypr/hyprpaper.conf, delivered via the
-  # `hypr` symlink below (alongside hyprland.lua). We deliberately do NOT use
-  # services.hyprpaper here — it would generate its own ~/.config/hypr/hyprpaper.conf
-  # and collide with that symlink (home-manager aborts with "outside $HOME").
-  # hyprpaper is launched directly from hyprland (hl.exec_cmd("hyprpaper")) and the
-  # binary comes from configuration.nix, so the systemd unit from the HM module
-  # isn't needed either.
+  # Wallpaper is set by swaybg, launched from Hyprland on startup
+  # (see config/hypr/hyprland.lua). swaybg ships in configuration.nix, so no
+  # Home Manager service is needed here.
   xdg.configFile = builtins.mapAttrs (name: subpath: {
     source = create_symlink "${dotfiles}/${subpath}";
     recursive = true;

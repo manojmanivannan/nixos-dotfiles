@@ -25,8 +25,9 @@
 
   networking.hostName = "nixos"; # Define your hostname.
 
-  # Configure network connections interactively with nmcli or nmtui.
-  networking.networkmanager.enable = true;
+  # Static networking is configured declaratively below (eno1). NetworkManager
+  # is disabled so it can't conflict with the static interface config.
+  # networking.networkmanager.enable = true;
 
   # Bluetooth — power on the controller automatically at boot.
   # blueman (in environment.systemPackages) provides the GUI applet.
@@ -103,14 +104,13 @@
     nautilus
     waybar
     walker
-    hyprpaper
+    swaybg
     hyprlock
     wlogout
     wofi
     # bar / launcher on-click targets + keybind targets
     pavucontrol
     blueman
-    networkmanagerapplet
     pamixer
     btop
     nvitop
@@ -132,6 +132,21 @@
     nerd-fonts.jetbrains-mono
     cascadia-code
     fira-code
+  ];
+
+  networking.useDHCP = false;
+  networking.interfaces.eno1 = {
+    ipv4.addresses = [
+      {
+        address = "192.168.1.192";
+        prefixLength = 24;
+      }
+    ];
+  };
+  networking.defaultGateway = "192.168.1.1";
+  networking.nameservers = [
+    "1.1.1.1"
+    "8.8.8.8"
   ];
 
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .

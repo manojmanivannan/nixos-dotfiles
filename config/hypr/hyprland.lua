@@ -373,6 +373,7 @@ hl.config({
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("waybar")
-    hl.exec_cmd("hyprpaper")
+    -- swaybg sets the wallpaper (-m fill scales to cover the screen, cropping if needed).
+    hl.exec_cmd("swaybg -i /home/manoj/nixos-dotfiles/wallpaper/samurai-sunset.jpg -m fill")
 end)
 
