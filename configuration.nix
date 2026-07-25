@@ -6,6 +6,19 @@
   ...
 }:
 
+let
+  # The adi1090x rofi themes (vendored under config/rofi) reference two fonts
+  # that aren't packaged in nixpkgs: "feather" (Icomoon-Feather) supplies the
+  # prompt / powermenu glyphs, and "Grape Nuts" is used by the type-5 launcher
+  # styles. Vendor their TTFs from this repo into a font package so fontconfig
+  # — and therefore rofi — can resolve them system-wide.
+  custom-rofi-fonts = pkgs.runCommand "custom-rofi-fonts" { } ''
+    mkdir -p $out/share/fonts/truetype/custom-rofi
+    cp ${./config/rofi/fonts}/Icomoon-Feather.ttf     $out/share/fonts/truetype/custom-rofi/
+    cp ${./config/rofi/fonts}/GrapeNuts-Regular.ttf   $out/share/fonts/truetype/custom-rofi/
+  '';
+in
+
 {
   imports = [
     # Include the results of the hardware scan.
@@ -130,8 +143,10 @@
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
+    nerd-fonts.iosevka # "Iosevka Nerd Font" — used by several adi1090x rofi styles
     cascadia-code
     fira-code
+    custom-rofi-fonts # "feather" (Icomoon-Feather) + "Grape Nuts" for adi1090x rofi themes
   ];
 
   networking.useDHCP = false;

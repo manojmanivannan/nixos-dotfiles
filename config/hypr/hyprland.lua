@@ -19,7 +19,9 @@ hl.monitor({
 local terminal = "alacritty"
 local fileManager = "nautilus"
 local browser = "firefox"
-local menu = "rofi -show drun"
+-- Uses the vendored adi1090x type-2/style-1 launcher theme (tokyonight colors).
+-- Try other styles with: rofi -show drun -theme ~/.config/rofi/launchers/type-N/style-M.rasi
+local menu = "rofi -show drun -theme $HOME/.config/rofi/launchers/type-2/style-1.rasi"
 local reload_waybar = "pkill waybar; waybar &"
 local snip = "grimblast --notify copysave area"
 
