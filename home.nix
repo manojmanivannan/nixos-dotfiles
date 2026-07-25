@@ -103,6 +103,13 @@ in
     enableZshIntegration = true;
   };
 
+  # NOTE: hyprpaper config lives in config/hypr/hyprpaper.conf, delivered via the
+  # `hypr` symlink below (alongside hyprland.lua). We deliberately do NOT use
+  # services.hyprpaper here — it would generate its own ~/.config/hypr/hyprpaper.conf
+  # and collide with that symlink (home-manager aborts with "outside $HOME").
+  # hyprpaper is launched directly from hyprland (hl.exec_cmd("hyprpaper")) and the
+  # binary comes from configuration.nix, so the systemd unit from the HM module
+  # isn't needed either.
   xdg.configFile = builtins.mapAttrs (name: subpath: {
     source = create_symlink "${dotfiles}/${subpath}";
     recursive = true;
