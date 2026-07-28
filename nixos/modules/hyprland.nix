@@ -18,7 +18,7 @@
     hyprcursor
     hyprlock
     hypridle
-    hyprpaper
+    swaybg
     hyprsunset
     hyprpolkitagent
   ];

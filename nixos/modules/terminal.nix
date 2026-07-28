@@ -8,7 +8,7 @@
   programs.zsh.enable = true;
 
   environment.systemPackages = with pkgs; [
-    kitty
+    ghostty
     cool-retro-term
     starship
     ripgrep

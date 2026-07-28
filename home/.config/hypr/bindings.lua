@@ -4,7 +4,7 @@
 
 ---@module 'hl'
 
-local terminal    = "kitty"
+local terminal    = "ghostty"
 local fileManager = "dolphin"
 local menu        = "hyprlauncher"
 local browser     = "firefox"
@@ -18,8 +18,6 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("wlogout --protocol layer-shell"))
-local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
--- closeWindowBind:set_enabled(false)
 
 
 -- Move focus with mainMod + arrow keys
@@ -36,10 +34,8 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
-hl.unbind("SUPER" .. " + C")
-hl.unbind("SUPER" .. " + V")
-
--- Universal COPY/PASTE
+-- Universal COPY/PASTE — forward SUPER+C / SUPER+V as Ctrl+C / Ctrl+V to the
+-- active window. Close window is on SUPER+Q instead, so SUPER+C is free for copy.
 hl.bind("SUPER" .. " + " .. "C", hl.dsp.send_shortcut({ mods = "CTRL", key= "C", window = "activewindow"}))
 hl.bind("SUPER" .. " + " .. "V", hl.dsp.send_shortcut({ mods = "CTRL", key= "V", window = "activewindow"}))
 
@@ -51,7 +47,6 @@ hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("wofi --show drun"))
 hl.bind("SUPER" .. " + " .. "E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
