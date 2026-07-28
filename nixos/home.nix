@@ -6,16 +6,13 @@ let
 
   # Standard .config/directory
   configs = {
-    qtile = "qtile";
-    nvim = "nvim";
     rofi = "rofi";
-    alacritty = "alacritty";
-    picom = "picom";
     hypr = "hypr";
     waybar = "waybar";
     wlogout = "wlogout";
     sway = "sway";
     swaync = "swaync";
+    wofi = "wofi";
   };
 in
 
@@ -94,10 +91,9 @@ in
     # zsh-autosuggestions and zsh-syntax-highlighting have no `.plugin.zsh`
     # in their nixpkgs packages, so they can't live in ZSH_CUSTOM. Home Manager
     # sources them directly (and in the correct order) via these options.
-    autosuggestions.enable = true;
+    autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
   };
-
 
   # Wallpaper is set by swaybg, launched from Hyprland on startup
   # (see config/hypr/hyprland.lua). swaybg ships in configuration.nix, so no
@@ -116,6 +112,7 @@ in
     nodejs
     gcc
     rofi
+    wofi
     xwallpaper
     sublime4
     swaynotificationcenter # ships the `swaync` daemon + `swaync-client`; started from hyprland.start

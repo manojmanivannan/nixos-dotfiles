@@ -7,15 +7,17 @@
 local terminal    = "kitty"
 local fileManager = "dolphin"
 local menu        = "hyprlauncher"
+local browser     = "firefox"
 
 -- Application bindings
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
-local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
+hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("wlogout --protocol layer-shell"))
 local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
 -- closeWindowBind:set_enabled(false)
 
@@ -34,6 +36,16 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
+hl.unbind("SUPER" .. " + C")
+hl.unbind("SUPER" .. " + V")
+
+-- Universal COPY/PASTE
+hl.bind("SUPER" .. " + " .. "C", hl.dsp.send_shortcut({ mods = "CTRL", key= "C", window = "activewindow"}))
+hl.bind("SUPER" .. " + " .. "V", hl.dsp.send_shortcut({ mods = "CTRL", key= "V", window = "activewindow"}))
+
+-- Open App launcher
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("wofi --show drun"))
+
 
 -- hl.bind("SUPER" .. " + " .. "RETURN", hl.dsp.exec_cmd("uwsm app -- $TERMINAL --dir=$(omarchy-cmd-terminal-cwd)"))
 hl.bind("SUPER" .. " + " .. "E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))
@@ -47,6 +59,11 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 -- Example special workspace (scratchpad)
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+
+hl.bind(mainMod .. " + SHIFT + left", hl.dsp.window.move({ direction = "left" }))
+hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
+hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))

@@ -11,8 +11,8 @@
 hl.config({
     general = {
         -- No gaps between windows
-        gaps_in = 1,
-        gaps_out = 6,
+        gaps_in = 4,
+        gaps_out = 8,
         -- Use master layout instead of dwindle
         -- layout = master
         border_size = 2,

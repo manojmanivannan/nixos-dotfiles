@@ -39,7 +39,6 @@
     wtype
     wlrctl
     waybar
-    rofi
     dunst
     avizo
     wlogout
