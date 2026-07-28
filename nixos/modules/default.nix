@@ -11,6 +11,7 @@
     ./gc.nix
     ./home-manager.nix
     ./hyprland.nix
+    ./info-fetchers.nix
     ./internationalisation.nix
     ./keyboard.nix
     ./linux-kernel.nix

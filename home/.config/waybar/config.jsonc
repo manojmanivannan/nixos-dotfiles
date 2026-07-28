@@ -17,6 +17,7 @@
   "modules-right": [
     "group/audio",
     "group/net",
+    "group/mem",
     "group/sys",
     "group/gpu",
     "tray",
@@ -49,9 +50,13 @@
     "orientation": "horizontal",
     "modules": ["network", "bluetooth"]
   },
+  "group/mem": {
+    "orientation": "horizontal",
+    "modules": ["custom/mem"]
+  },
   "group/sys": {
     "orientation": "horizontal",
-    "modules": ["cpu", "memory", "temperature"]
+    "modules": ["custom/cpu", "custom/cpu-temp"]
   },
   "group/gpu": {
     "orientation": "horizontal",
@@ -122,33 +127,35 @@
     "tooltip-format": "{num_connections} device(s) connected",
     "on-click": "blueman-manager"
   },
-  "cpu": {
+  "custom/cpu": {
+    // 1s-average utilization, padded to 3 chars so the pill never shifts.
+    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh cpu",
     "interval": 2,
-    "format": "  {usage}%",
-    "on-click": "alacritty -e btop"
+    "format": "CPU  {}%",
+    "on-click": "ghostty -e btop"
   },
-  "memory": {
-    "interval": 10,
-    "format": "  {percentage}%",
-    "on-click": "alacritty -e btop"
+  "custom/mem": {
+    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh mem",
+    "interval": 5,
+    "format": "MEM  {}%",
+    "on-click": "ghostty -e btop"
   },
-  "temperature": {
-    // AMD k10temp (CPU Tctl). hwmon indices can shift across reboots; if this
-    // module disables itself, re-check `for h in /sys/class/hwmon/hwmon*; do
-    // cat $h/name; done` and point hwmon-path at the k10temp entry.
-    "hwmon-path": "/sys/class/hwmon/hwmon1/temp1_input",
-    "critical-threshold": 80,
-    "format": "  {temperatureC}°C",
-    "format-critical": "  {temperatureC}°C"
+  "custom/cpu-temp": {
+    // k10temp Tctl. The script colors the number red at >=80C via a Pango
+    // span; below that the module CSS color applies. k10temp is found by name
+    // (hwmon indices shift across reboots)
+    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh cputemp",
+    "format": "  {}°C",
+    "interval": 2
   },
   "custom/gpu": {
-    "exec": "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits",
-    "format": "  {}%",
+    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gpu",
+    "format": "GPU  {}%",
     "interval": 2,
-    "on-click": "alacritty -e nvitop"
+    "on-click": "ghostty -e nvitop"
   },
   "custom/gpu-temp": {
-    "exec": "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits",
+    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gputemp",
     "format": "  {}°C",
     "interval": 2
   },

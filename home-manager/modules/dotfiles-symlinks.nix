@@ -12,6 +12,7 @@ let
     swaync = "swaync";
     wofi = "wofi";
     ghostty = "ghostty";
+    eza = "eza"; # auto-loads theme.yml for colors/icons
   };
 in
 

@@ -115,6 +115,7 @@ window#waybar>box {
    widget nesting. */
 #group-audio,
 #group-net,
+#group-mem,
 #group-sys,
 #group-gpu {
     background-color: rgba(54, 58, 79, 0.65);
@@ -125,6 +126,7 @@ window#waybar>box {
 
 #group-audio:hover,
 #group-net:hover,
+#group-mem:hover,
 #group-sys:hover,
 #group-gpu:hover {
     background-color: @surface1;
@@ -135,9 +137,9 @@ window#waybar>box {
 #pulseaudio,
 #network,
 #bluetooth,
-#cpu,
-#memory,
-#temperature,
+#custom-mem,
+#custom-cpu,
+#custom-cpu-temp,
 #custom-gpu,
 #custom-gpu-temp {
     background: transparent;
@@ -146,12 +148,19 @@ window#waybar>box {
     margin: 4px 0;
 }
 
-/* Separator before each non-first module in a group. */
-#bluetooth,
-#memory,
-#temperature,
-#custom-gpu-temp {
+/* Separator before each non-first module in a group. The CPU/GPU pills omit
+   it so usage + temperature read as one continuous label. */
+#bluetooth {
     border-left: 1px solid @surface1;
+}
+
+/* CPU/GPU pills: tighten inter-segment padding so the usage + temperature
+   pair reads as a single label rather than two divided segments. */
+#custom-cpu,
+#custom-cpu-temp,
+#custom-gpu,
+#custom-gpu-temp {
+    padding: 0 5px;
 }
 
 #pulseaudio {
@@ -174,20 +183,16 @@ window#waybar>box {
     color: @sky;
 }
 
-#cpu {
+#custom-cpu {
     color: @green;
 }
 
-#memory {
+#custom-mem {
     color: @mauve;
 }
 
-#temperature {
+#custom-cpu-temp {
     color: @yellow;
-}
-
-#temperature.critical {
-    color: @red;
 }
 
 #custom-gpu {
