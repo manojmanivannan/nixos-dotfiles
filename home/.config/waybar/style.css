@@ -1,33 +1,36 @@
-/* Catppuccin Mocha */
-@define-color base #1e1e2e;
-@define-color mantle #181825;
-@define-color crust #11111b;
-@define-color surface0 #313244;
-@define-color surface1 #45475a;
-@define-color surface2 #585b70;
-@define-color overlay0 #6c7086;
-@define-color text #cdd6f4;
-@define-color subtext #a6adc8;
-@define-color rosewater #f5e0dc;
-@define-color flamingo #f2cdcd;
-@define-color pink #f5c2e7;
-@define-color mauve #cba6f7;
-@define-color red #f38ba8;
-@define-color maroon #eba0ac;
-@define-color peach #fab387;
-@define-color yellow #f9e2af;
-@define-color green #a6e3a1;
-@define-color teal #94e2d5;
-@define-color sky #89dceb;
-@define-color sapphire #74c7ec;
-@define-color blue #89b4fa;
-@define-color lavender #b4befe;
+/* Catppuccin Macchiato (teal accent — matches nixos/modules/theme.nix) */
+@define-color base #24273a;
+@define-color mantle #1e2030;
+@define-color crust #181926;
+@define-color surface0 #363a4f;
+@define-color surface1 #494d64;
+@define-color surface2 #5b6078;
+@define-color overlay0 #6e738d;
+@define-color text #cad3f5;
+@define-color subtext #b8c0e0;
+@define-color rosewater #f4dbd6;
+@define-color flamingo #f0c6c6;
+@define-color pink #f5bde6;
+@define-color mauve #c6a0f6;
+@define-color red #ed8796;
+@define-color maroon #ee99a0;
+@define-color peach #f5a97f;
+@define-color yellow #eed49f;
+@define-color green #a6da95;
+@define-color teal #8bd5ca;
+@define-color sky #91d7e3;
+@define-color sapphire #7dc4e4;
+@define-color blue #8aadf4;
+@define-color lavender #b7bdf8;
 
 * {
     font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
     font-size: 14px;
     font-weight: 600;
     border-radius: 12px;
+    /* Let the bar use its configured `height` instead of GTK's tall natural
+       requisition, so the floating pill stays slim. */
+    min-height: 0;
     /* Smooth color/background transitions on hover/focus for a fluid feel. */
     transition-property: background-color, color, border-color;
     transition-duration: 0.25s;
@@ -42,8 +45,8 @@ window#waybar {
 
 /* Floating, rounded panel sitting in on all sides with a subtle border. */
 window#waybar>box {
-    background-color: rgba(85, 85, 108, 0.45);
-    border: 1px solid rgba(205, 214, 244, 0.46);
+    background-color: rgba(73, 77, 100, 0.45);
+    border: 1px solid rgba(202, 211, 245, 0.30);
     border-radius: 16px;
     margin: 6px 6px;
     padding: 1px 1px;
@@ -51,7 +54,7 @@ window#waybar>box {
 
 /* ---------- workspaces ---------- */
 #workspaces {
-    background-color: rgba(49, 50, 68, 0.5);
+    background-color: rgba(54, 58, 79, 0.5);
     margin: 4px 2px;
     padding: 0 4px;
 }
@@ -66,7 +69,7 @@ window#waybar>box {
 
 #workspaces button.active {
     color: @base;
-    background: linear-gradient(45deg, @mauve, @blue);
+    background: linear-gradient(45deg, @teal, @blue);
     font-weight: 800;
 }
 
@@ -89,7 +92,7 @@ window#waybar>box {
    readable over any wallpaper, with brighter @text instead of dim @subtext. */
 #window {
     color: @text;
-    background-color: rgba(49, 50, 68, 0.65);
+    background-color: rgba(54, 58, 79, 0.65);
     margin: 4px 2px;
     padding: 0 10px;
     font-weight: 700;
@@ -98,17 +101,65 @@ window#waybar>box {
 /* ---------- clock (center, subtle surface pill) ---------- */
 #clock {
     color: @text;
-    background-color: rgba(49, 50, 68, 0.65);
+    background-color: rgba(54, 58, 79, 0.65);
     margin: 4px 2px;
     padding: 0 14px;
     font-weight: 700;
 }
 
-/* ---------- status modules ---------- */
-/* Each module is a rounded pill; text is tinted by its accent color and
-   brightens on hover. */
+/* ---------- grouped status modules ---------- */
+/* Related modules are wrapped in waybar `group` containers (see config.jsonc).
+   Each group is one rounded pill; the child modules are transparent and sit
+   side by side, divided by a thin surface1 separator. Padding is applied to
+   the module IDs directly so it lands regardless of the group's internal
+   widget nesting. */
+#group-audio,
+#group-net,
+#group-sys,
+#group-gpu {
+    background-color: rgba(54, 58, 79, 0.65);
+    border-radius: 12px;
+    margin: 4px 2px;
+    padding: 0 6px;
+}
+
+#group-audio:hover,
+#group-net:hover,
+#group-sys:hover,
+#group-gpu:hover {
+    background-color: @surface1;
+}
+
+/* Child modules: transparent background (the group pill shows through),
+   horizontal padding for spacing, square corners (the group rounds ends). */
+#pulseaudio,
+#network,
+#bluetooth,
+#cpu,
+#memory,
+#temperature,
+#custom-gpu,
+#custom-gpu-temp {
+    background: transparent;
+    border-radius: 0;
+    padding: 0 10px;
+    margin: 4px 0;
+}
+
+/* Separator before each non-first module in a group. */
+#bluetooth,
+#memory,
+#temperature,
+#custom-gpu-temp {
+    border-left: 1px solid @surface1;
+}
+
 #pulseaudio {
     color: @peach;
+}
+
+#pulseaudio.muted {
+    color: @red;
 }
 
 #network {
@@ -147,37 +198,9 @@ window#waybar>box {
     color: @yellow;
 }
 
-#pulseaudio,
-#network,
-#bluetooth,
-#cpu,
-#memory,
-#temperature,
-#custom-gpu,
-#custom-gpu-temp {
-    background-color: rgba(49, 50, 68, 0.5);
-    margin: 4px 2px;
-    padding: 0 10px;
-}
-
-#pulseaudio:hover,
-#network:hover,
-#bluetooth:hover,
-#cpu:hover,
-#memory:hover,
-#temperature:hover,
-#custom-gpu:hover,
-#custom-gpu-temp:hover {
-    background-color: @surface1;
-}
-
-#pulseaudio.muted {
-    color: @red;
-}
-
 /* ---------- tray ---------- */
 #tray {
-    background-color: rgba(49, 50, 68, 0.5);
+    background-color: rgba(54, 58, 79, 0.65);
     margin: 4px 4px 4px 2px;
     padding: 0 8px;
 }

@@ -10,16 +10,17 @@ let
     hypr = "hypr";
     waybar = "waybar";
     wlogout = "wlogout";
-    sway = "sway";
     swaync = "swaync";
     wofi = "wofi";
   };
 in
 
 {
-  # Wallpaper is set by swaybg, launched from Hyprland on startup
-  # (see config/hypr/hyprland.lua). swaybg ships in configuration.nix, so no
-  # Home Manager service is needed here.
+  # Wallpaper is set by hyprpaper, launched from Hyprland on startup
+  # (see config/hypr/hyprland.lua: "waybar & hyprpaper"). hyprpaper reads
+  # config/hypr/hyprpaper.conf (shipped in this symlinked dir) and is
+  # installed via nixos/modules/hyprland.nix, so no Home Manager service is
+  # needed here.
   xdg.configFile = builtins.mapAttrs (name: subpath: {
     source = create_symlink "${dotfiles}/${subpath}";
     recursive = true;

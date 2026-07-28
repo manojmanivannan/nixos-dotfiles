@@ -10,17 +10,19 @@
 
 hl.config({
     general = {
-        -- No gaps between windows
-        gaps_in = 4,
-        gaps_out = 8,
+        -- Modest gaps for breathing room
+        gaps_in = 5,
+        gaps_out = 10,
         -- Use master layout instead of dwindle
         -- layout = master
         border_size = 2,
-        --col.inactive_border = rgba(0,255,38,1) rgba(250,123,5,1) 45deg
-        -- col.active_border = rgba(0,34,255,1) rgba(0,255,38,1)
+        -- Catppuccin Macchiato borders: teal on the active window, dim
+        -- surface2 on the rest. Matches the system teal accent (see
+        -- nixos/modules/theme.nix GTK/cursor theme). Solid color — hyprlua
+        -- does not pass gradient strings through cleanly.
         col = {
-            active_border = "rgba(00ff26ff)",
-            inactive_border = "rgba(000000ff)",
+            active_border = "rgba(8bd5caff)",
+            inactive_border = "rgba(5b607888)",
         },
     },
 })
@@ -29,16 +31,35 @@ hl.config({
 
 hl.config({
     decoration = {
-        -- Use round window corners
-        rounding = 8,
+        -- Subtle rounding
+        rounding = 10,
         rounding_power = 4,
         -- opacity or opaque
         --windowrule = opacity 1, match:class ^(com.mitchellh.ghostty)$
+        -- Light, clean blur (dual_kawase). Restraint over flash: small size,
+        -- two passes, no vibrancy. Applies to popups/layer surfaces so menus
+        -- and notifications get the effect without washing out windows.
         blur = {
-            enabled = false,
+            enabled = true,
+            size = 4,
+            passes = 2,
+            brightness = 1.0,
+            contrast = 1.1,
+            vibrancy = 0.0,
+            special = false,
+            popups = true,
+            popups_ignorealpha = 0.2,
+            new_optimizations = true,
+            xray = false,
+            input_methods = true,
         },
+        -- Soft drop shadow for depth.
         shadow = {
-            enabled = false,
+            enabled = true,
+            range = 16,
+            render_power = 3,
+            color = "rgba(00000055)",
+            scale = 1.0,
         },
     },
 })

@@ -15,14 +15,10 @@
     "clock"
   ],
   "modules-right": [
-    "pulseaudio",
-    "network",
-    "bluetooth",
-    "cpu",
-    "memory",
-    "temperature",
-    "custom/gpu",
-    "custom/gpu-temp",
+    "group/audio",
+    "group/net",
+    "group/sys",
+    "group/gpu",
     "tray",
     "custom/power"
   ],
@@ -43,6 +39,24 @@
     "icon-size": 14,
     "icon": true
   },
+  // Grouped status pills (right side). Each group renders as one rounded
+  // pill with separator-divided children; see style.css `#group-*`.
+  "group/audio": {
+    "orientation": "horizontal",
+    "modules": ["pulseaudio"]
+  },
+  "group/net": {
+    "orientation": "horizontal",
+    "modules": ["network", "bluetooth"]
+  },
+  "group/sys": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "memory", "temperature"]
+  },
+  "group/gpu": {
+    "orientation": "horizontal",
+    "modules": ["custom/gpu", "custom/gpu-temp"]
+  },
   "clock": {
     "format": "  {:%H:%M  %d %b}",
     "format-alt": "  {:%A, %d %B %Y}",
@@ -53,11 +67,11 @@
       "mode-mon-col": 4,
       "on-scroll": 1,
       "format": {
-        "months": "<span color='#cba6f7'><b>{}</b></span>",
-        "days": "<span color='#cdd6f4'><b>{}</b></span>",
-        "weeks": "<span color='#89b4fa'><b>W{}</b></span>",
-        "weekdays": "<span color='#fab387'><b>{}</b></span>",
-        "today": "<span color='#f38ba8'><b><u>{}</u></b></span>"
+        "months": "<span color='#c6a0f6'><b>{}</b></span>",
+        "days": "<span color='#cad3f5'><b>{}</b></span>",
+        "weeks": "<span color='#8aadf4'><b>W{}</b></span>",
+        "weekdays": "<span color='#f5a97f'><b>{}</b></span>",
+        "today": "<span color='#ed8796'><b><u>{}</u></b></span>"
       }
     },
     "actions": {
@@ -119,7 +133,10 @@
     "on-click": "alacritty -e btop"
   },
   "temperature": {
-    "hwmon-path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp1_input",
+    // AMD k10temp (CPU Tctl). hwmon indices can shift across reboots; if this
+    // module disables itself, re-check `for h in /sys/class/hwmon/hwmon*; do
+    // cat $h/name; done` and point hwmon-path at the k10temp entry.
+    "hwmon-path": "/sys/class/hwmon/hwmon1/temp1_input",
     "critical-threshold": 80,
     "format": "  {temperatureC}°C",
     "format-critical": "  {temperatureC}°C"
