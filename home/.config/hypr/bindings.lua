@@ -7,7 +7,7 @@
 local terminal    = "ghostty"
 local fileManager = "dolphin"
 local menu        = "hyprlauncher"
-local browser     = "firefox"
+local browser     = "google-chrome"
 
 -- Application bindings
 
@@ -34,10 +34,21 @@ for i = 1, 10 do
     hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
 end
 
--- Universal COPY/PASTE — forward SUPER+C / SUPER+V as Ctrl+C / Ctrl+V to the
--- active window. Close window is on SUPER+Q instead, so SUPER+C is free for copy.
-hl.bind("SUPER" .. " + " .. "C", hl.dsp.send_shortcut({ mods = "CTRL", key= "C", window = "activewindow"}))
-hl.bind("SUPER" .. " + " .. "V", hl.dsp.send_shortcut({ mods = "CTRL", key= "V", window = "activewindow"}))
+-- Universal COPY/PASTE — forward SUPER+C / SUPER+V as Ctrl+Insert / Shift+Insert
+-- to the focused window. Insert-based combos are the X11 clipboard shortcuts that
+-- work everywhere, *including terminals* (where Ctrl+C is SIGINT, not copy, which
+-- is why the earlier Ctrl+C/Ctrl+V forwarding failed in ghostty/kitty). Close
+-- window is on SUPER+Q, so SUPER+C is free for copy.
+--
+-- `window = "activewindow"` (== hyprland.conf `, active`) is REQUIRED: without an
+-- explicit target, sendshortcut fires into a stale/unsettled focus and the first
+-- paste silently no-ops (you have to press SUPER+V twice). With it, CA::pass
+-- re-acquires keyboard focus on the active surface before synthesizing the key.
+-- Plain `hl.bind` (not `binde`/`release`) — sendshortcut is a special dispatcher
+-- that already re-fires on key release to send the matching key-up; the edge flag
+-- only risks double-firing here.
+hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL",  key = "INSERT", window = "activewindow" }))
+hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "SHIFT", key = "INSERT", window = "activewindow" }))
 
 -- Open App launcher
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("wofi --show drun"))
