@@ -8,8 +8,9 @@
     extraGroups = [ "networkmanager" "input" "wheel" "video" "audio" "tss" "docker" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
-      vscodium
+      vscode
       brave
+      google-chrome
     ];
   };
 

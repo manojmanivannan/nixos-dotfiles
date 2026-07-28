@@ -64,7 +64,9 @@ hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" })
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
 
--- Move/resize windows with mainMod + LMB/RMB and dragging
+-- Move/resize windows with mainMod + LMB/RMB and dragging.
+-- preserve_split (see looknfeel.lua) keeps the dwindle split orientation
+-- stable during resize, so dragging RMB resizes without flipping the layout.
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 

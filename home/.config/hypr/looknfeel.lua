@@ -73,6 +73,16 @@ hl.config({
     },
 })
 
+-- Dwindle is the active layout (master is commented out above). With
+-- preserve_split off (the default), resizing a window lets dwindle auto-flip
+-- the split orientation to "best fit", which visibly rearranges the workspace.
+-- Locking the split keeps the arrangement stable while resizing.
+hl.config({
+    dwindle = {
+        preserve_split = true,
+    },
+})
+
 hl.config({
     animations = {
         -- enabling all options below will make Hyprland look and feel more fluid, but it may cause performance issues on lower-end hardware. You can enable only the ones you like or need.

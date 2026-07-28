@@ -78,9 +78,9 @@
         executable = "${lib.getBin pkgs.qutebrowser}/bin/qutebrowser";
         profile = "${pkgs.firejail}/etc/firejail/qutebrowser.profile";
       };
-      vscodium = {
-        executable = "${lib.getBin pkgs.vscodium}/bin/vscodium";
-        profile = "${pkgs.firejail}/etc/firejail/vscodium.profile";
+      google-chrome = {
+        executable = "${lib.getBin pkgs.google-chrome}/bin/google-chrome-stable";
+        profile = "${pkgs.firejail}/etc/firejail/google-chrome.profile";
       };
     };
   };

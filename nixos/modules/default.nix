@@ -7,7 +7,6 @@
     ./dns.nix
     ./environment-variables.nix
     ./firewall.nix
-    ./firefox.nix
     ./fonts.nix
     ./gc.nix
     ./home-manager.nix
