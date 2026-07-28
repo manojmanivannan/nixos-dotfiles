@@ -53,6 +53,12 @@ hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "SHIFT", key = "INSERT"
 -- Open App launcher
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("wofi --show drun"))
 
+-- Toggle the swaync notification center.
+-- `swaync-client -t` toggles the control-center visibility; `-sw` skips
+-- waiting for the daemon to reload so the panel opens instantly. The daemon
+-- itself is started from hyprland.lua on `hyprland.start`.
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
+
 
 -- hl.bind("SUPER" .. " + " .. "RETURN", hl.dsp.exec_cmd("uwsm app -- $TERMINAL --dir=$(omarchy-cmd-terminal-cwd)"))
 hl.bind("SUPER" .. " + " .. "E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))

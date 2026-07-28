@@ -6,7 +6,6 @@ let
 
   # Standard .config/directory
   configs = {
-    rofi = "rofi";
     hypr = "hypr";
     waybar = "waybar";
     wlogout = "wlogout";

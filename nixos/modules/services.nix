@@ -39,7 +39,6 @@
     wtype
     wlrctl
     waybar
-    dunst
     avizo
     wlogout
     gifsicle

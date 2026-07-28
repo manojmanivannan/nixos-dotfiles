@@ -50,6 +50,7 @@
         "virtualenv"
         "gh"
         "zsh-interactive-cd"
+        "eza" # wraps `ls`/`ll`/`la`/`lT` etc. with eza; package ships in home-packages.nix
         # external, from ZSH_CUSTOM (built in `let`)
       ];
     };
