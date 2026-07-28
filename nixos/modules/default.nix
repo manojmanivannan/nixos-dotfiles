@@ -1,0 +1,41 @@
+{
+  imports = [
+    ./bluetooth.nix
+    ./bootloader.nix
+    ./dev-tools.nix
+    ./display-manager.nix
+    ./dns.nix
+    ./environment-variables.nix
+    ./firewall.nix
+    ./firefox.nix
+    ./fonts.nix
+    ./gc.nix
+    ./home-manager.nix
+    ./hyprland.nix
+    ./internationalisation.nix
+    ./keyboard.nix
+    ./linux-kernel.nix
+    ./lsp.nix
+    ./networking.nix
+    ./nix-settings.nix
+    ./nixpkgs.nix
+    ./nvidia.nix
+    ./power.nix
+    ./programming-languages.nix
+    ./radicle.nix
+    ./rust.nix
+    ./screen.nix
+    ./security-services.nix
+    ./services.nix
+    ./sound.nix
+    ./swap.nix
+    ./terminal.nix
+    ./theme.nix
+    ./time.nix
+    ./usb.nix
+    ./users.nix
+    ./virtualisation.nix
+    ./vpn.nix
+    ./work.nix
+  ];
+}

@@ -1,44 +1,6 @@
-{ config, pkgs, ... }:
-
-let
-  dotfiles = "${config.home.homeDirectory}/nixos-dotfiles/home/.config";
-  create_symlink = path: config.lib.file.mkOutOfStoreSymlink path;
-
-  # Standard .config/directory
-  configs = {
-    rofi = "rofi";
-    hypr = "hypr";
-    waybar = "waybar";
-    wlogout = "wlogout";
-    sway = "sway";
-    swaync = "swaync";
-    wofi = "wofi";
-  };
-in
+{ config, ... }:
 
 {
-  home.username = "manoj";
-  home.homeDirectory = "/home/manoj";
-  programs.git = {
-    enable = true;
-    settings = {
-      user.email = "manojm18@live.in";
-      user.name = "Manoj Manivannan";
-      init.defaultBranch = "main";
-      # Use `gh` as the HTTPS credential helper for GitHub. `~/.config/git/config`
-      # is a read-only Nix-store symlink, so `gh auth setup-git` can't write this
-      # itself — it must live here. The leading `!` makes git run it as a command.
-      credential."https://github.com".helper = "!gh auth git-credential";
-    };
-  };
-  # fzf key bindings + fuzzy completion — replaces the old `source <(fzf --zsh)`.
-  # Required by the fzf-zsh-plugin oh-my-zsh plugin.
-  programs.fzf = {
-    enable = true;
-    enableZshIntegration = true;
-  };
-  home.stateVersion = "26.05";
-
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -98,33 +60,4 @@ in
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
   };
-
-  # Wallpaper is set by swaybg, launched from Hyprland on startup
-  # (see config/hypr/hyprland.lua). swaybg ships in configuration.nix, so no
-  # Home Manager service is needed here.
-  xdg.configFile = builtins.mapAttrs (name: subpath: {
-    source = create_symlink "${dotfiles}/${subpath}";
-    recursive = true;
-  }) configs;
-
-  home.packages = with pkgs; [
-    neovim
-    ripgrep
-    nil
-    nixfmt
-    nixpkgs-fmt
-    nodejs
-    gcc
-    rofi
-    wofi
-    xwallpaper
-    sublime4
-    swaynotificationcenter # ships the `swaync` daemon + `swaync-client`; started from hyprland.start
-    libnotify # provides `notify-send` for testing swaync
-    docker-compose
-    eza # modern ls replacement; the zsh-eza plugin wraps it
-  ];
-
-
-#   wayland.windowManager.hyprland.systemd.enable = false;
 }
