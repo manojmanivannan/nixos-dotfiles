@@ -46,6 +46,7 @@
     shellAliases = {
       btw = "echo i use nixos-btw";
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
+      claude = "nix run 'github:ryoppippi/nix-claude-code#stable' -- ";
       # NOTE: `gcommit` is intentionally not an alias here — the JIRA-aware
       # `gcommit` function in zshrc_addon.zsh handles it (an alias would shadow
       # the function, since shellAliases are emitted after initContent).
