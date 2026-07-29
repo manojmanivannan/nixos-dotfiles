@@ -62,7 +62,14 @@ hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
 
 -- hl.bind("SUPER" .. " + " .. "RETURN", hl.dsp.exec_cmd("uwsm app -- $TERMINAL --dir=$(omarchy-cmd-terminal-cwd)"))
 hl.bind("SUPER" .. " + " .. "E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
+-- Exit the session via `uwsm stop` so systemd tears down the wayland-session
+-- units and cleans up the activation environment. Bypassing this (raw
+-- compositor exit / kill) yanks Hyprland from under clients. A wofi --dmenu
+-- prompt (in exit-prompt.sh) confirms first: only the "Exit" choice runs
+-- `uwsm stop`; Cancel or Esc (empty selection) is a no-op. The shell logic
+-- lives in a script rather than inline so the Lua config avoids long-bracket
+-- quoting fragility.
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("/home/manoj/.config/hypr/scripts/exit-prompt.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())

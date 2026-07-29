@@ -23,7 +23,6 @@
     ./power.nix
     ./programming-languages.nix
     ./radicle.nix
-    ./rust.nix
     ./screen.nix
     ./security-services.nix
     ./services.nix

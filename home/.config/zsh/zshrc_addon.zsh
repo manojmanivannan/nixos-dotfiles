@@ -152,7 +152,7 @@ function fo(){
         while IFS=  read -r -d $'\0'; do
             array+=("$REPLY")
         done < <(f $regex $location "print")
-        ~/.scripts/.venv/bin/py-file-opener "$location" "${array[@]}"
+        py-file-opener "$location" "${array[@]}"
     else
         echo "No files found matching: \"$1\""
     fi
