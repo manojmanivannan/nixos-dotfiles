@@ -20,8 +20,13 @@ hl.on("hyprland.start", function ()
   -- through Hyprland's exec dispatcher (/bin/sh), so $HOME expands — no
   -- hardcoded username needed. -m fill scales to cover each output
   -- (cropping overflow) without distorting aspect ratio.
-  hl.exec_cmd("waybar & swaybg -i $HOME/nixos-dotfiles/home/wallpaper/boat.png -m fill")
+  hl.exec_cmd("waybar & swaybg -i $HOME/nixos-dotfiles/config/wallpaper/boat.png -m fill")
   hl.exec_cmd("swaync")
+  -- Start the GNOME Keyring secrets daemon so credential-aware apps (gh,
+  -- browsers) find an org.freedesktop.secrets provider instead of falling
+  -- back to `pass` at ~/.password-store. The login keyring is unlocked at
+  -- greetd login via pam_gnome_keyring (see nixos/modules/security/keyring.nix).
+  hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
 end)
 
 

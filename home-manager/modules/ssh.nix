@@ -8,18 +8,31 @@
   # terminfo for, so no per-host terminfo install is needed here.
   programs.ssh = {
     enable = true;
-    extraConfig = ''
-      # Specific hosts first — ssh uses first-match-wins per option, so a
-      # named host must appear before the `Host *` defaults below.
-      Host homelab
-          HostName 192.168.1.120
-          User manoj
+    # Home Manager used to inject a `Host *` block of legacy defaults and
+    # warn that it's going away. Carry the ones we want explicitly instead.
+    enableDefaultConfig = false;
 
-      # Defaults applied to every host.
-      Host *
-          ServerAliveInterval 60
-          ServerAliveCountMax 3
-          AddKeysToAgent yes
-    '';
+    # Named hosts. Home Manager always emits the `*` (catch-all) block last,
+    # so first-match-wins keeps these ahead of the defaults below.
+    settings.homelab = {
+      HostName = "192.168.1.120";
+      User = "manoj";
+    };
+
+    # Defaults applied to every host. These are the legacy Home Manager
+    # defaults, with `ServerAliveInterval` and `AddKeysToAgent` set to our
+    # preferred values.
+    settings."*" = {
+      ForwardAgent = false;
+      AddKeysToAgent = "yes";
+      Compression = false;
+      ServerAliveInterval = 60;
+      ServerAliveCountMax = 3;
+      HashKnownHosts = false;
+      UserKnownHostsFile = "~/.ssh/known_hosts";
+      ControlMaster = "no";
+      ControlPath = "~/.ssh/master-%r@%n:%p";
+      ControlPersist = "no";
+    };
   };
 }

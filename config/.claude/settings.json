@@ -1,0 +1,7 @@
+{
+  "apiKeyHelper": "echo '-'",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://192.168.1.120:11434"
+  },
+  "theme": "dark"
+}

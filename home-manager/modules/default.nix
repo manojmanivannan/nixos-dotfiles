@@ -1,5 +1,6 @@
 {
   imports = [
+    ./claude.nix
     ./dotfiles-symlinks.nix
     ./fzf.nix
     ./git.nix

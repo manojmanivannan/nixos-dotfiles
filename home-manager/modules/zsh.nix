@@ -39,13 +39,12 @@
         # Right prompt: [HH:MM:SS]
         RPROMPT='⌚%F{cyan}[%D{%H:%M:%S}]%f'
 
-        source "${config.home.homeDirectory}/nixos-dotfiles/home/.config/zsh/zshrc_addon.zsh"
+        source "${config.home.homeDirectory}/nixos-dotfiles/config/.config/zsh/zshrc_addon.zsh"
       ''
     ];
 
     shellAliases = {
       btw = "echo i use nixos-btw";
-      vim = "nvim";
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
       # NOTE: `gcommit` is intentionally not an alias here — the JIRA-aware
       # `gcommit` function in zshrc_addon.zsh handles it (an alias would shadow

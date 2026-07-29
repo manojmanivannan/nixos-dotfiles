@@ -61,7 +61,7 @@
 | Shell          | Zsh + Oh-My-Zsh (amuse theme), autosuggestions, syntax highlighting    |
 | Browser        | Google Chrome (SUPER+B)                                                |
 | File manager   | Dolphin                                                                |
-| Editor         | Neovim                                                                 |
+| Editor         | Vim                                                                    |
 | Theme          | Catppuccin Macchiato, teal accent                                      |
 | Fonts          | JetBrains Mono + Nerd Fonts, Noto Color Emoji                          |
 | Graphics       | NVIDIA (modesetting, container toolkit) + Mesa / VA-API                |
@@ -101,7 +101,7 @@ nixos-dotfiles/
 │   ├── home-packages.nix     # user-level packages
 │   └── modules/              # git, zsh, fzf, py-file-opener, dotfile symlinks
 │
-└── home/
+└── config/
     ├── .config/              # raw dotfiles (symlinked into ~/.config by Home Manager)
     │   ├── hypr/             #   Hyprland Lua config (monitors, input, bindings, …)
     │   ├── waybar/           #   bar config + style + sysinfo script
@@ -132,7 +132,7 @@ nixos/modules/default.nix  ──►  boot/ hardware/ networking/ … users/
 - **`flake.nix`** defines a `hosts` list and folds it into `nixosConfigurations`.
 - **`hosts/<name>/configuration.nix`** is the only host-specific entrypoint; it pulls in the shared module tree and sets `networking.hostName` from the `hostname` special arg.
 - **`nixos/modules/default.nix`** aggregates the 10 category subdirectories — each of which is itself a `default.nix` that imports its own sub-files. Move a file, not ten imports.
-- **`home-manager/modules/dotfiles-symlinks.nix`** symlinks the raw `home/.config/*` directories into `~/.config` with `mkOutOfStoreSymlink`, so edits to Hyprland/Waybar/etc. take effect without a rebuild.
+- **`home-manager/modules/dotfiles-symlinks.nix`** symlinks the raw `config/.config/*` directories into `~/.config` with `mkOutOfStoreSymlink`, so edits to Hyprland/Waybar/etc. take effect without a rebuild.
 
 ## ✅ Prerequisites
 
@@ -216,7 +216,7 @@ Most feature modules are plain files — comment out a line in the relevant `def
 
 ### Edit the desktop
 
-Hyprland, Waybar, SwayNC, Wofi, Wlogout, Ghostty, and eza configs live as raw files under `home/.config/` and are symlinked into place — just edit them and reload (e.g. `hyprctl reload`); no rebuild needed for most changes. Hyprland itself is configured in **Lua**, split across `home/.config/hypr/`:
+Hyprland, Waybar, SwayNC, Wofi, Wlogout, Ghostty, and eza configs live as raw files under `config/.config/` and are symlinked into place — just edit them and reload (e.g. `hyprctl reload`); no rebuild needed for most changes. Hyprland itself is configured in **Lua**, split across `config/.config/hypr/`:
 
 | File            | Responsibility                                   |
 |-----------------|---------------------------------------------------|
@@ -244,11 +244,11 @@ Hyprland, Waybar, SwayNC, Wofi, Wlogout, Ghostty, and eza configs live as raw fi
 > [!TIP]
 > `SUPER+C`/`SUPER+V` forward to `Ctrl+Insert`/`Shift+Insert` rather than `Ctrl+C`/`Ctrl+V` — the Insert-based combos work in **terminals** too, where `Ctrl+C` is SIGINT, not copy.
 
-See `home/.config/hypr/bindings.lua` for the full set.
+See `config/.config/hypr/bindings.lua` for the full set.
 
 ## 🐚 Shell & CLI Goodies
 
-The Zsh setup (in `home-manager/modules/zsh.nix` + `home/.config/zsh/zshrc_addon.zsh`) packs a few custom conveniences:
+The Zsh setup (in `home-manager/modules/zsh.nix` + `config/.config/zsh/zshrc_addon.zsh`) packs a few custom conveniences:
 
 - **`nrs`** — rebuild & switch the system.
 - **`gcommit`** — a JIRA-aware commit helper.

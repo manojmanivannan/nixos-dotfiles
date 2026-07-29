@@ -57,7 +57,7 @@ in
   #      `home.packages = [ py-file-opener ];` line.
   #   2. Uncomment the activationScripts block below.
   #   3. Add `uv` to home.packages in home-packages.nix.
-  #   4. In home/.config/zsh/zshrc_addon.zsh, revert the `fo()` call back to
+  #   4. In config/.config/zsh/zshrc_addon.zsh, revert the `fo()` call back to
   #      `~/.scripts/.venv/bin/py-file-opener`.
   #
   # home.activationScripts.setupScriptsVenv =

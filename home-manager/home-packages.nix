@@ -1,6 +1,6 @@
 { pkgs, ... }: {
   home.packages = with pkgs; [
-    neovim
+    vim
     nixfmt
     wofi
     eza # modern ls replacement; aliased via the oh-my-zsh `eza` plugin (see zsh.nix)

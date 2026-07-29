@@ -42,7 +42,6 @@
   services.dbus.apparmor = "enabled";
   services.fail2ban.enable = true;
   # security.polkit.enable = true;
-  programs.browserpass.enable = true;
   programs.firejail = {
     enable = true;
     wrappedBinaries = { 
@@ -88,12 +87,5 @@
   environment.systemPackages = with pkgs; [
     gnupg
     openssl
-
-    # passphrase2pgp
-    pass-wayland
-    passExtensions.pass-update
-    passExtensions.pass-otp
-    passExtensions.pass-import
-    passExtensions.pass-audit
   ];
 }

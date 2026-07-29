@@ -1,7 +1,7 @@
 { config, ... }:
 
 let
-  dotfiles = "${config.home.homeDirectory}/nixos-dotfiles/home/.config";
+  dotfiles = "${config.home.homeDirectory}/nixos-dotfiles/config/.config";
   create_symlink = path: config.lib.file.mkOutOfStoreSymlink path;
 
   # Standard .config/directory
@@ -18,7 +18,7 @@ in
 
 {
   # Wallpaper is set by swaybg, launched from Hyprland on startup
-  # (see config/hypr/hyprland.lua). swaybg ships in nixos/modules/desktop/hyprland.nix,
+  # (see config/.config/hypr/hyprland.lua). swaybg ships in nixos/modules/desktop/hyprland.nix,
   # so no Home Manager service is needed here.
   xdg.configFile = builtins.mapAttrs (name: subpath: {
     source = create_symlink "${dotfiles}/${subpath}";
