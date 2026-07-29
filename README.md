@@ -149,19 +149,20 @@ nixos/modules/default.nix  ──►  boot/ hardware/ networking/ … users/
 > [!IMPORTANT]
 > These steps assume you're already booted into a NixOS installer (or a live system with `nixos-generate-config` run). They will overwrite your system config — read them before running.
 
-1. **Clone the repo** to `~/nixos-dotfiles` (the path is baked into several configs):
+1. **Clone the repo** to `~/nixos-dotfiles` (configs reference this location via `$HOME`/`homeDirectory`, so cloning here means zero path edits):
    ```sh
    git clone https://github.com/manojmanivannan/nixos-dotfiles.git ~/nixos-dotfiles
    cd ~/nixos-dotfiles
    ```
 
-2. **Set your hostname** — change exactly one line in `flake.nix`:
+2. **Set your hostname and username** — edit `flake.nix`:
    ```nix
+   user = "your-username";          # flows to the user account, docker group, Home Manager, env vars
    hosts = [
      { name = "nixos"; hostname = "your-hostname"; inherit stateVersion; }
    ];
    ```
-   `name` is the stable identity (the flake attr `.nixos` and the `hosts/<name>/` folder) — leave it as `nixos`. `hostname` is the machine's network name. That's the only edit needed.
+   `name` is the stable identity (the flake attr `.nixos` and the `hosts/<name>/` folder) — leave it as `nixos`. `hostname` is the machine's network name. `user` is your login name. These two lines are the only edits most cloners need.
 
 3. **Drop in your hardware config** — replace `hosts/nixos/hardware-configuration.nix` with the one `nixos-generate-config` produced for your machine.
 
@@ -257,7 +258,8 @@ All theme variables are declared in `nixos/modules/desktop/theme.nix`.
 
 ## 📝 Notes & Caveats
 
-- **Hardcoded paths** — several configs reference `/home/manoj/nixos-dotfiles` and the username `manoj`. If your username differs, change the `user = "manoj";` let-binding in `flake.nix` (it flows into Home Manager and the user account).
+- **Username** — change the `user = "manoj";` let-binding in `flake.nix`. It flows everywhere via a `specialArg`: the user account, docker group, Home Manager, and env vars. No other file hardcodes the username.
+- **Clone path** — the repo assumes it's cloned at `~/nixos-dotfiles`. Nix modules reference it via `${config.home.homeDirectory}/nixos-dotfiles` and the Hyprland Lua configs via `$HOME/nixos-dotfiles` (both expand dynamically). If you clone elsewhere, update those references or just clone at `~/nixos-dotfiles`.
 - **`hardware-configuration.nix`** is machine-specific and must be regenerated per box.
 - **NVIDIA** is assumed; the `nixos/modules/hardware/nvidia.nix` driver config will need adjustment (or replacement with the AMD/Intel equivalents) on other GPUs.
 - **Radicle, virtualisation, Ollama** are defined but disabled — flip them on in `nixos/modules/services/` if you want them.

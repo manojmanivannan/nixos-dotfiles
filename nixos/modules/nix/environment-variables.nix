@@ -1,10 +1,10 @@
-{ config, pkgs, ... }:
+{ config, pkgs, user, ... }:
 
 {
   # Setup Env Variables
   environment.variables.SPOTIFY_PATH = "${pkgs.spotify}/";
   environment.variables.JDK_PATH = "${pkgs.jdk17}/";
   environment.variables.NODEJS_PATH = "${pkgs.nodejs}/";
-  environment.variables.ANDROID_SDK_ROOT = "${config.users.users.manoj.home}/android-sdk";
-  environment.variables.ANDROID_AVD_HOME = "${config.users.users.manoj.home}/.android/avd";
+  environment.variables.ANDROID_SDK_ROOT = "${config.users.users.${user}.home}/android-sdk";
+  environment.variables.ANDROID_AVD_HOME = "${config.users.users.${user}.home}/.android/avd";
 }

@@ -69,7 +69,7 @@ hl.bind("SUPER" .. " + " .. "E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-win
 -- `uwsm stop`; Cancel or Esc (empty selection) is a no-op. The shell logic
 -- lives in a script rather than inline so the Lua config avoids long-bracket
 -- quoting fragility.
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("/home/manoj/.config/hypr/scripts/exit-prompt.sh"))
+hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/exit-prompt.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())

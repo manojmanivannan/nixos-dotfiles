@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, user, ... }:
 
 {
   # Enable Kasm
@@ -37,7 +37,7 @@
     defaultNetwork.settings.dns_enabled = true;
   };
 
-  users.extraGroups.docker.members = [ "manoj" ];
+  users.extraGroups.docker.members = [ user ];
 
   environment.systemPackages = with pkgs; [
     nvidia-docker
