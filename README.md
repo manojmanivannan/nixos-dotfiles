@@ -147,36 +147,51 @@ nixos/modules/default.nix  ──►  boot/ hardware/ networking/ … users/
 ## 🚀 Installation
 
 > [!IMPORTANT]
-> These steps assume you're already booted into a NixOS installer (or a live system with `nixos-generate-config` run). They will overwrite your system config — read them before running.
+> Fresh install or not, these steps overwrite your system config — read them before running.
 
-1. **Clone the repo** to `~/nixos-dotfiles` (configs reference this location via `$HOME`/`homeDirectory`, so cloning here means zero path edits):
+### From a live USB (fresh install)
+
+For partitioning, formatting, and mounting the disk (and generating the initial NixOS config), follow [tony's NixOS-from-scratch guide](https://www.tonybtw.com/tutorial/nixos-from-scratch/) up to the `nixos-generate-config --root /mnt` step. Then, to install **this** repo:
+
+1. **Clone it** onto the target (the flake can live anywhere — `nixos-install` points at it explicitly):
    ```sh
-   git clone https://github.com/manojmanivannan/nixos-dotfiles.git ~/nixos-dotfiles
-   cd ~/nixos-dotfiles
+   git clone https://github.com/manojmanivannan/nixos-dotfiles.git /mnt/etc/nixos-dotfiles
    ```
 
-2. **Set your hostname and username** — edit `flake.nix`:
+2. **Point the flake at your machine** — edit `flake.nix`:
    ```nix
    user = "your-username";          # flows to the user account, docker group, Home Manager, env vars
    hosts = [
      { name = "nixos"; hostname = "your-hostname"; inherit stateVersion; }
    ];
    ```
-   `name` is the stable identity (the flake attr `.nixos` and the `hosts/<name>/` folder) — leave it as `nixos`. `hostname` is the machine's network name. `user` is your login name. These two lines are the only edits most cloners need.
+   `name` is the stable identity (the flake attr `.nixos` and the `hosts/<name>/` folder) — leave it as `nixos`. `hostname` is the machine's network name, `user` is your login name. These two lines are the only edits most cloners need.
 
-3. **Drop in your hardware config** — replace `hosts/nixos/hardware-configuration.nix` with the one `nixos-generate-config` produced for your machine.
-
-4. **Build and switch:**
+3. **Drop in the generated hardware config:**
    ```sh
-   sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos
+   cp /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos-dotfiles/hosts/nixos/
+   ```
+
+4. **Install, set the user password, then reboot:**
+   ```sh
+   nixos-install --flake /mnt/etc/nixos-dotfiles#nixos
+   nixos-enter --root /mnt -c 'passwd your-username'
+   reboot
    ```
    The `#nixos` is the flake attr (the `name` field), **not** your machine's hostname.
 
-There's also a shell alias for the rebuild:
+The copy under `/mnt/etc/nixos-dotfiles` was only needed for the install — after first boot, re-clone to `~/nixos-dotfiles` (see below) for ongoing rebuilds.
+
+### On an already-installed system
+
+Skip partitioning, mounting, and `nixos-install`. Clone to `~/nixos-dotfiles`, run steps 2-3 against that clone, then:
 
 ```sh
-nrs   # → sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos
+sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos   # alias: nrs
 ```
+
+> [!NOTE]
+> The user account is declared with **no password** in the config — deliberately, so no plaintext ever lands in the repo or the Nix store. It's created locked, which is why step 4 sets one via `nixos-enter` before rebooting (essential here: `greetd`/`tuigreet` offer no `root` login, so without it there's no way in on first boot). On an already-running system instead, use `sudo passwd <your-username>`.
 
 ## 🛠 Customization
 
