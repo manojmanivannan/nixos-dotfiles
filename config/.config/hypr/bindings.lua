@@ -88,17 +88,19 @@ hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" 
 hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
 hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
 
--- Relative resize of the active window with SUPER + minus/equal.
--- `resizeactive <dx> <dy>` shifts the active window's size by a pixel delta in
--- both the width (dx) and height (dy) axes — works for floating and tiled
--- windows alike. SUPER + minus/equal adjusts width; add SHIFT to adjust height.
--- `repeating = true` keeps resizing while the key is held, matching the volume
--- keys below. Routed through `hyprctl dispatch` (rather than hl.dsp.window.resize,
--- which is the interactive *mouse* dispatcher) so a concrete delta can be passed.
-hl.bind(mainMod .. " + minus",         hl.dsp.exec_cmd("hyprctl dispatch resizeactive -20 0"), { repeating = true })
-hl.bind(mainMod .. " + equal",         hl.dsp.exec_cmd("hyprctl dispatch resizeactive 20 0"),  { repeating = true })
-hl.bind(mainMod .. " + SHIFT + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 -20"), { repeating = true })
-hl.bind(mainMod .. " + SHIFT + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 20"),  { repeating = true })
+-- Relative resize of the active window with SUPER + Minus/Equal.
+-- `hl.dsp.window.resize` is the Lua equivalent of the `resizeactive` dispatcher:
+-- `{ x = dx, y = dy, relative = true }` shifts the active window's size by a
+-- pixel delta (width = x, height = y), for both floating and tiled windows.
+-- `relative = true` is REQUIRED — without it negative deltas (shrink) are
+-- rejected. SUPER + Minus/Equal adjusts width; add SHIFT to adjust height.
+-- `repeating = true` keeps resizing while the key is held, like the volume keys.
+-- (Spawning `hyprctl dispatch resizeactive -20 0` instead does NOT work: hyprctl
+-- parses the leading `-20` as a CLI flag and drops it.)
+hl.bind(mainMod .. " + Minus",         hl.dsp.window.resize({ x = -20, y = 0,   relative = true }), { repeating = true })
+hl.bind(mainMod .. " + Equal",         hl.dsp.window.resize({ x =  20, y = 0,   relative = true }), { repeating = true })
+hl.bind(mainMod .. " + SHIFT + Minus", hl.dsp.window.resize({ x = 0,   y = -20, relative = true }), { repeating = true })
+hl.bind(mainMod .. " + SHIFT + Equal", hl.dsp.window.resize({ x = 0,   y =  20, relative = true }), { repeating = true })
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
