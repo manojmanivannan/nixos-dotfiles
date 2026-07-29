@@ -15,25 +15,29 @@
     system = "x86_64-linux";
     stateVersion = "26.05";
     user = "manoj";
+    # `name` is the stable identity of the host config: it keys the flake
+    # output (nixosConfigurations.${name}, i.e. `.#nixos`) and the
+    # hosts/${name}/ folder. `hostname` is the machine's network hostname
+    # (networking.hostName) — a cloner only needs to change this one field.
     hosts = [
-      { hostname = "nixos"; inherit stateVersion; }
+      { name = "nixos"; hostname = "nixos"; inherit stateVersion; }
     ];
 
-    makeSystem = { hostname, stateVersion }: nixpkgs.lib.nixosSystem {
+    makeSystem = { name, hostname, stateVersion }: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
         inherit inputs stateVersion hostname user;
       };
       modules = [
-        ./hosts/${hostname}/configuration.nix
+        ./hosts/${name}/configuration.nix
       ];
     };
 
   in {
     nixosConfigurations = nixpkgs.lib.foldl' (configs: host:
       configs // {
-        "${host.hostname}" = makeSystem {
-          inherit (host) hostname stateVersion;
+        "${host.name}" = makeSystem {
+          inherit (host) name hostname stateVersion;
         };
       }) {} hosts;
   };

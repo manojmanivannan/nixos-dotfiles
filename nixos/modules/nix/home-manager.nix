@@ -6,5 +6,5 @@
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = { inherit user stateVersion; };
 
-  home-manager.users.${user} = import ../../home-manager/home.nix;
+  home-manager.users.${user} = import ../../../home-manager/home.nix;
 }

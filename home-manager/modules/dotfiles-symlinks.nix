@@ -18,7 +18,7 @@ in
 
 {
   # Wallpaper is set by swaybg, launched from Hyprland on startup
-  # (see config/hypr/hyprland.lua). swaybg ships in nixos/modules/hyprland.nix,
+  # (see config/hypr/hyprland.lua). swaybg ships in nixos/modules/desktop/hyprland.nix,
   # so no Home Manager service is needed here.
   xdg.configFile = builtins.mapAttrs (name: subpath: {
     source = create_symlink "${dotfiles}/${subpath}";

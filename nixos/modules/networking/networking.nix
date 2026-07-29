@@ -2,7 +2,9 @@
 
 {
   # Enable networking
-  networking.hostName = "nixos"; # Define your hostname.
+  # networking.hostName is set in hosts/<name>/configuration.nix from the
+  # `hostname` specialArg, so the machine's name is driven by the flake's
+  # `hosts` list rather than hardcoded here.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   # networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
