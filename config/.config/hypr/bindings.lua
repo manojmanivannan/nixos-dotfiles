@@ -72,6 +72,10 @@ hl.bind("SUPER" .. " + " .. "E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-win
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/exit-prompt.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
+-- Reload the Hyprland (Lua) config so edits to this directory apply live,
+-- without a full session restart. SUPER+R is the launcher above, so SHIFT
+-- reuses the same key for the (less frequent) reload.
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
@@ -83,6 +87,18 @@ hl.bind(mainMod .. " + SHIFT + left", hl.dsp.window.move({ direction = "left" })
 hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
 hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
 hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
+
+-- Relative resize of the active window with SUPER + minus/equal.
+-- `resizeactive <dx> <dy>` shifts the active window's size by a pixel delta in
+-- both the width (dx) and height (dy) axes — works for floating and tiled
+-- windows alike. SUPER + minus/equal adjusts width; add SHIFT to adjust height.
+-- `repeating = true` keeps resizing while the key is held, matching the volume
+-- keys below. Routed through `hyprctl dispatch` (rather than hl.dsp.window.resize,
+-- which is the interactive *mouse* dispatcher) so a concrete delta can be passed.
+hl.bind(mainMod .. " + minus",         hl.dsp.exec_cmd("hyprctl dispatch resizeactive -20 0"), { repeating = true })
+hl.bind(mainMod .. " + equal",         hl.dsp.exec_cmd("hyprctl dispatch resizeactive 20 0"),  { repeating = true })
+hl.bind(mainMod .. " + SHIFT + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 -20"), { repeating = true })
+hl.bind(mainMod .. " + SHIFT + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 20"),  { repeating = true })
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
