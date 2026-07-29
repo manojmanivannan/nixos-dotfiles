@@ -36,10 +36,7 @@
     wl-clip-persist
     cliphist
     xdg-utils
-    wtype
-    wlrctl
     waybar
-    avizo
     wlogout
     libfido2
   ];

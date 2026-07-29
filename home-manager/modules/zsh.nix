@@ -61,8 +61,6 @@
         "colored-man-pages"
         "colorize"
         "command-not-found"
-        "web-search"
-        "kubectl"
         "z"
         "virtualenv"
         "gh"
