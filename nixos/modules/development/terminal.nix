@@ -9,7 +9,6 @@
 
   environment.systemPackages = with pkgs; [
     ghostty
-    cool-retro-term
     starship
     ripgrep
     yt-dlp

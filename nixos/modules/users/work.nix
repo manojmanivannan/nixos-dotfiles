@@ -6,7 +6,6 @@
   };
 
   environment.systemPackages = with pkgs; [
-    ssm-session-manager-plugin
     gnumake
     cmake
   ];

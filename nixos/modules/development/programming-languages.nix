@@ -25,9 +25,7 @@
 
   environment.systemPackages = with pkgs; [
     uv
-    nodejs
-    pnpm
+    nodejs # runtime for several kept LSPs (yaml/bash/dockerfile/docker-compose/jsonnet)
     bun
-    lua
   ];
 }

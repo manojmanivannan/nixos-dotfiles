@@ -41,13 +41,11 @@
 
   environment.systemPackages = with pkgs; [
     nvidia-docker
-    nerdctl
 
     # firecracker
     # firectl
     # flintlock
 
-    distrobox
     qemu
     lima
     lima-additional-guestagents
