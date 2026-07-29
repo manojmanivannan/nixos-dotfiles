@@ -20,7 +20,7 @@
     # (networking.hostName), and `ipv4Address`/`defaultGateway` are its
     # static network config — a cloner only needs to change these fields.
     hosts = [
-      { name = "nixos"; hostname = "nixos"; ipv4Address = "192.168.1.192"; defaultGateway = "192.168.1.1"; inherit stateVersion; }
+      { name = "nixos"; hostname = "linux-machine"; ipv4Address = "192.168.1.192"; defaultGateway = "192.168.1.1"; inherit stateVersion; }
     ];
 
     makeSystem = { name, hostname, ipv4Address, defaultGateway, stateVersion }: nixpkgs.lib.nixosSystem {

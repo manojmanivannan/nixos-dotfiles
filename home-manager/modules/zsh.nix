@@ -45,6 +45,7 @@
 
     shellAliases = {
       btw = "echo i use nixos-btw";
+      vim = "nvim";
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
       # NOTE: `gcommit` is intentionally not an alias here — the JIRA-aware
       # `gcommit` function in zshrc_addon.zsh handles it (an alias would shadow

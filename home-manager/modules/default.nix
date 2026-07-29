@@ -4,6 +4,7 @@
     ./fzf.nix
     ./git.nix
     ./py-file-opener.nix
+    ./ssh.nix
     ./zsh.nix
   ];
 }

@@ -2,10 +2,20 @@
 # Replaces the previous kitty setup. Catppuccin Macchiato palette mirrored
 # from home/.config/kitty/kitty.conf (Catppuccin Macchiato theme).
 
-font-family      = JetBrains Mono
-font-family-bold = JetBrains Mono Bold
-font-family-italic = JetBrains Mono Italic
-font-family-bold-italic = JetBrains Mono Bold Italic
+# Advertise a universally-recognized TERM so remote hosts (Debian, etc.)
+# have the terminfo entry built in — SSH forwards TERM, and an unknown
+# xterm-ghostty on the remote breaks zsh's line editor (doubled keystrokes,
+# garbled prompt). Trade-off: loses a few Ghostty-specific terminfo
+# capabilities locally (undercurl, styled underlines).
+term = xterm-256color
+
+# JetBrainsMono Nerd Font (installed via nixos/modules/desktop/fonts.nix)
+# carries the Powerline/Nerd glyphs, so remote prompts (e.g. oh-my-zsh) no
+# longer render triangle separators as "?".
+font-family            = JetBrainsMono Nerd Font
+font-family-bold       = JetBrainsMono Nerd Font
+font-family-italic     = JetBrainsMono Nerd Font
+font-family-bold-italic = JetBrainsMono Nerd Font
 font-size = 14.0
 
 # Catppuccin Macchiato
