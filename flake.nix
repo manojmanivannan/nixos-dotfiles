@@ -17,15 +17,16 @@
     # `name` is the stable identity of the host config: it keys the flake
     # output (nixosConfigurations.${name}, i.e. `.#nixos`) and the
     # hosts/${name}/ folder. `hostname` is the machine's network hostname
-    # (networking.hostName) — a cloner only needs to change this one field.
+    # (networking.hostName), and `ipv4Address`/`defaultGateway` are its
+    # static network config — a cloner only needs to change these fields.
     hosts = [
-      { name = "nixos"; hostname = "nixos"; inherit stateVersion; }
+      { name = "nixos"; hostname = "nixos"; ipv4Address = "192.168.1.192"; defaultGateway = "192.168.1.1"; inherit stateVersion; }
     ];
 
-    makeSystem = { name, hostname, stateVersion }: nixpkgs.lib.nixosSystem {
+    makeSystem = { name, hostname, ipv4Address, defaultGateway, stateVersion }: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs stateVersion hostname user;
+        inherit inputs stateVersion hostname user ipv4Address defaultGateway;
       };
       modules = [
         ./hosts/${name}/configuration.nix
@@ -36,7 +37,7 @@
     nixosConfigurations = nixpkgs.lib.foldl' (configs: host:
       configs // {
         "${host.name}" = makeSystem {
-          inherit (host) name hostname stateVersion;
+          inherit (host) name hostname ipv4Address defaultGateway stateVersion;
         };
       }) {} hosts;
   };
