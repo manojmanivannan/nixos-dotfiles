@@ -21,19 +21,15 @@ let
   # config/.config/gtk-{3,4}.0/gtk.css and theme GTK3 via adw-gtk3-dark
   # (see nixos/modules/desktop/theme.nix and home-manager/modules/gtk.nix).
   #
-  # systemd/user and rsync are deliberately here rather than in `configs`:
-  #   - systemd: the whole `~/.config/systemd` dir must NOT be symlinked, since
-  #     Home Manager's own systemd module writes `user/tray.target` there.
-  #     Symlinking just the unit files leaves tray.target (and anything else
-  #     HM/systemd drops in) untouched.
-  #   - rsync: the dir holds `dxp_pass`, a secret that must stay a real local
-  #     file (see seedRsyncPassword below), so only the non-secret files are
-  #     symlinked.
+  # rsync is deliberately here rather than in `configs`: the dir holds
+  # `dxp_pass`, a secret that must stay a real local file (see
+  # seedRsyncPassword below), so only the non-secret files are symlinked.
+  # The nas-backup systemd units are NOT symlinked — they are defined in Nix
+  # (home-manager/modules/nas-backup.nix) so HM can enable the timer
+  # declaratively. The backup script itself is the symlinked file below.
   files = {
     "gtk-4.0/gtk.css" = "gtk-4.0/gtk.css";
     "gtk-3.0/gtk.css" = "gtk-3.0/gtk.css";
-    "systemd/user/nas-backup.service" = "systemd/user/nas-backup.service";
-    "systemd/user/nas-backup.timer" = "systemd/user/nas-backup.timer";
     "rsync/archive_to_nas.sh" = "rsync/archive_to_nas.sh";
     "rsync/ignore" = "rsync/ignore";
   };

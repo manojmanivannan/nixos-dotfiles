@@ -10,6 +10,17 @@ if [ ! -s "$HOME/.config/rsync/dxp_pass" ]; then
   exit 1
 fi
 
+if [ ! -d "$HOME/Apps" ]; then
+  echo "RSYNC: Source directory $HOME/Apps does not exist. Please check the source directory."
+  echo "Recommend to run below command to pull from Remote to Local:"
+  echo
+  echo "rsync -avz --timeout=600 --no-o --no-g --no-p --chmod=ugo=rwX \\"
+  echo "    --password-file=\"$HOME/.config/rsync/dxp_pass\" \\"
+  echo "    rsync://manoj@dxp2800-nas-mm.local:/home/Backup/linux-backup/Apps \\"
+  echo "$HOME/\""
+  exit 1
+fi
+
 # Rsync service to backup to NAS
 echo "RSYNC: Running rsync"
 rsync -avz --timeout=600 --delete --delete-excluded --no-o --no-g --no-p --chmod=ugo=rwX\
