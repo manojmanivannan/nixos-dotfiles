@@ -10,7 +10,7 @@
 {
   systemd.user.services.nas-backup = {
     Unit = {
-      Description = "Backup linux-machine directories to NAS, as defined in config/.config/rsync/archive_to_nas.sh";
+      Description = "Backup linux-machine directories to NAS, as defined in ${config.home.homeDirectory}/.config/rsync/archive_to_nas.sh";
       After = [ "network-online.target" ];
       Wants = [ "network-online.target" ];
     };

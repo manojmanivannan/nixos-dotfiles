@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #echo "Running backup_shortcut"
 #/home/manoj/.scripts/backup_shortcut.sh
