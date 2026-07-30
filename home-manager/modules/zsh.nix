@@ -71,6 +71,24 @@
       ];
     };
 
+    # Print system info on SSH login only. `$SSH_CONNECTION` is set by sshd
+    # (never in local Hyprland terminals or tmux panes), and `loginShellInit`
+    # runs only for login shells — sshd starts one by default, while tmux panes
+    # spawn non-login interactive shells. Together this fires fastfetch exactly
+    # once at the top of an SSH session and nowhere else. fastfetch ships as a
+    # system package (nixos/modules/development/info-fetchers.nix).
+    # `loginExtra` is written to ~/.zlogin, sourced only for login shells.
+    # sshd starts a login shell by default, while local Hyprland terminals and
+    # tmux panes spawn non-login shells — so this fires once at the top of an
+    # SSH session and nowhere else. The `$SSH_CONNECTION` guard additionally
+    # excludes any local login shell (e.g. a VT/console login). fastfetch ships
+    # as a system package (nixos/modules/development/info-fetchers.nix).
+    loginExtra = ''
+      if [[ -n "$SSH_CONNECTION" && -o interactive ]]; then
+        fastfetch
+      fi
+    '';
+
     # zsh-autosuggestions and zsh-syntax-highlighting have no `.plugin.zsh`
     # in their nixpkgs packages, so they can't live in ZSH_CUSTOM. Home Manager
     # sources them directly (and in the correct order) via these options.

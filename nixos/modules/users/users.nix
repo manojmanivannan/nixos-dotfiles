@@ -31,7 +31,12 @@
     ];
   };
 
-  # Change runtime directory size
+  # Cap for the per-user XDG_RUNTIME_DIR tmpfs (/run/user/<uid>) that
+  # systemd-logind mounts for the session — sockets, pipes, caches live here.
+  # systemd default is min(RAM/2, 4G); this raises it to 8G so large runtimes
+  # (Flatpak sandboxes, Steam/Proton, GPU buffer staging) don't hit ENOSPC.
+  # Remove if usage stays well under the default — it only sets a ceiling,
+  # it does not reserve RAM.
   services.logind.settings.Login = {
     RuntimeDirectorySize="8G";
   };
