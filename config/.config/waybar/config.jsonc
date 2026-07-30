@@ -191,7 +191,13 @@
       "",
       ""
     ],
-    "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+    // Tooltip consolidates IP + live throughput here (formerly a separate
+    // custom/netspeed pill next to the clock). {ip} and {bandwidth*Bits} are
+    // native network-module tokens, so no extra script is needed; the tooltip
+    // refreshes with `interval` while hovered.
+    "tooltip-format-ethernet": "{ifname}  {ipaddr}\n↓ {bandwidthDownBits}  ↑ {bandwidthUpBits}",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)  {ipaddr}\n↓ {bandwidthDownBits}  ↑ {bandwidthUpBits}",
+    "tooltip-format-disconnected": "Offline",
     "interval": 3,
     "on-click": "nm-connection-editor"
   },
