@@ -20,11 +20,12 @@ font-family-bold-italic = JetBrainsMono Nerd Font
 font-size = 14.0
 
 # Warm-metal theme: brushed gold / copper / bronze on warm espresso
-# backgrounds. Mirrored in the linux console colors
-# (nixos/modules/desktop/theme.nix) and the waybar panel (waybar/style.css).
+# backgrounds, slightly darkened. Mirrored in the linux console colors
+# (nixos/modules/desktop/theme.nix), the waybar panel (waybar/style.css), and
+# GTK/libadwaita (config/.config/gtk-{3,4}.0/gtk.css).
 foreground = #f0e6d2
-background = #3d3329
-selection-foreground = #3d3329
+background = #322a21
+selection-foreground = #322a21
 selection-background = #e8c272
 cursor-color = #e8c272
 cursor-text = #3d3329

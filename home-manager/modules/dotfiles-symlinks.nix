@@ -14,6 +14,16 @@ let
     ghostty = "ghostty";
     eza = "eza"; # auto-loads theme.yml for colors/icons
   };
+
+  # Single-file config symlinks — manage just the file, not the whole
+  # directory, so app-generated siblings (e.g. gtk-4.0/settings.ini,
+  # gtk-4.0/assets/) are left untouched. The warm-metal GTK overrides live in
+  # config/.config/gtk-{3,4}.0/gtk.css and theme GTK3 via adw-gtk3-dark
+  # (see nixos/modules/desktop/theme.nix and home-manager/modules/gtk.nix).
+  files = {
+    "gtk-4.0/gtk.css" = "gtk-4.0/gtk.css";
+    "gtk-3.0/gtk.css" = "gtk-3.0/gtk.css";
+  };
 in
 
 {
@@ -23,5 +33,7 @@ in
   xdg.configFile = builtins.mapAttrs (name: subpath: {
     source = create_symlink "${dotfiles}/${subpath}";
     recursive = true;
-  }) configs;
+  }) configs // builtins.mapAttrs (name: subpath: {
+    source = create_symlink "${dotfiles}/${subpath}";
+  }) files;
 }

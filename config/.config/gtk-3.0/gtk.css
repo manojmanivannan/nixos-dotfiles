@@ -1,0 +1,50 @@
+/*
+ * Warm-metal GTK3 theme (slightly darker variant).
+ *
+ * Applies the same warm-metal recoloring as config/.config/gtk-4.0/gtk.css to
+ * GTK3 apps, on top of the adw-gtk3-dark theme (a GTK3 port of libadwaita that
+ * uses the same named colors). Selected via the GTK_THEME env var and
+ * org.gnome.desktop.interface gtk-theme=adw-gtk3-dark
+ * (see nixos/modules/desktop/theme.nix and home-manager/modules/gtk.nix).
+ */
+
+@define-color window_bg_color #322a21;
+@define-color window_fg_color #f0e6d2;
+@define-color view_bg_color #3a3127;
+@define-color view_fg_color #f0e6d2;
+@define-color headerbar_bg_color #281f17;
+@define-color headerbar_fg_color #f0e6d2;
+@define-color headerbar_border_color rgba(240, 230, 210, 0.08);
+@define-color headerbar_back_color #281f17;
+@define-color sidebar_bg_color #2b231b;
+@define-color sidebar_fg_color #f0e6d2;
+@define-color sidebar_border_color rgba(240, 230, 210, 0.08);
+@define-color sidebar_back_color #2b231b;
+@define-color card_bg_color #3a3127;
+@define-color card_fg_color #f0e6d2;
+@define-color popover_bg_color #332a21;
+@define-color popover_fg_color #f0e6d2;
+@define-color dialog_bg_color #332a21;
+@define-color dialog_fg_color #f0e6d2;
+@define-color thumbnails_bg_color #322a21;
+@define-color thumbnails_fg_color #f0e6d2;
+
+@define-color accent_bg_color #c9963a;
+@define-color accent_fg_color #1f1810;
+@define-color accent_color #e8c272;
+
+@define-color destructive_bg_color #b3462e;
+@define-color destructive_fg_color #f0e6d2;
+@define-color destructive_color #e5805f;
+@define-color success_bg_color #6f7d4f;
+@define-color success_fg_color #f0e6d2;
+@define-color success_color #b3bf80;
+@define-color warning_bg_color #b8923a;
+@define-color warning_fg_color #f0e6d2;
+@define-color warning_color #e6c25a;
+@define-color error_bg_color #a83a25;
+@define-color error_fg_color #f0e6d2;
+@define-color error_color #c96b4a;
+
+@define-color shade_color rgba(0, 0, 0, 0.36);
+@define-color scrollbar_outline_color rgba(0, 0, 0, 0.5);

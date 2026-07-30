@@ -1,0 +1,60 @@
+/*
+ * Warm-metal libadwaita theme (slightly darker variant).
+ *
+ * Recolors GTK4/libadwaita apps — e.g. Nautilus — by overriding the named
+ * colors libadwaita exposes. This is the same recoloring technique Gradience
+ * used to apply (Gradience was archived upstream and removed from nixpkgs in
+ * 2025-09), authored declaratively here so the warm-metal palette defined in
+ * nixos/modules/desktop/theme.nix (linux console) and
+ * config/.config/ghostty/config extends to GTK apps.
+ *
+ * GTK3 apps pick up the same overrides via config/.config/gtk-3.0/gtk.css on
+ * top of the adw-gtk3-dark theme. Dark mode is enabled by
+ * org.gnome.desktop.interface color-scheme=prefer-dark
+ * (see home-manager/modules/gtk.nix), so GTK4 loads this file's dark variant.
+ *
+ * Palette (mirrors ghostty/waybar, nudged one step darker):
+ *   base/window  #322a21   view/card   #3a3127   headerbar/sidebar #281f17
+ *   text         #f0e6d2   accent gold #e8c272   accent bg #c9963a
+ */
+
+@define-color window_bg_color #322a21;
+@define-color window_fg_color #f0e6d2;
+@define-color view_bg_color #3a3127;
+@define-color view_fg_color #f0e6d2;
+@define-color headerbar_bg_color #281f17;
+@define-color headerbar_fg_color #f0e6d2;
+@define-color headerbar_border_color rgba(240, 230, 210, 0.08);
+@define-color headerbar_back_color #281f17;
+@define-color sidebar_bg_color #2b231b;
+@define-color sidebar_fg_color #f0e6d2;
+@define-color sidebar_border_color rgba(240, 230, 210, 0.08);
+@define-color sidebar_back_color #2b231b;
+@define-color card_bg_color #3a3127;
+@define-color card_fg_color #f0e6d2;
+@define-color popover_bg_color #332a21;
+@define-color popover_fg_color #f0e6d2;
+@define-color dialog_bg_color #332a21;
+@define-color dialog_fg_color #f0e6d2;
+@define-color thumbnails_bg_color #322a21;
+@define-color thumbnails_fg_color #f0e6d2;
+
+@define-color accent_bg_color #c9963a;
+@define-color accent_fg_color #1f1810;
+@define-color accent_color #e8c272;
+
+@define-color destructive_bg_color #b3462e;
+@define-color destructive_fg_color #f0e6d2;
+@define-color destructive_color #e5805f;
+@define-color success_bg_color #6f7d4f;
+@define-color success_fg_color #f0e6d2;
+@define-color success_color #b3bf80;
+@define-color warning_bg_color #b8923a;
+@define-color warning_fg_color #f0e6d2;
+@define-color warning_color #e6c25a;
+@define-color error_bg_color #a83a25;
+@define-color error_fg_color #f0e6d2;
+@define-color error_color #c96b4a;
+
+@define-color shade_color rgba(0, 0, 0, 0.36);
+@define-color scrollbar_outline_color rgba(0, 0, 0, 0.5);

@@ -2,7 +2,11 @@
 
 {
   # Enable Theme
-  environment.variables.GTK_THEME = "catppuccin-macchiato-teal-standard";
+  # GTK3 theme — adw-gtk3-dark (a GTK3 port of libadwaita), recolored warm-metal
+  # by config/.config/gtk-3.0/gtk.css. libadwaita (GTK4) apps like Nautilus are
+  # recolored by config/.config/gtk-4.0/gtk.css instead; they ignore GTK_THEME.
+  # Dark mode for libadwaita is set via dconf in home-manager/modules/gtk.nix.
+  environment.variables.GTK_THEME = "adw-gtk3-dark";
   environment.variables.XCURSOR_THEME = "Catppuccin-Macchiato-Teal";
   environment.variables.XCURSOR_SIZE = "24";
   environment.variables.HYPRCURSOR_THEME = "Catppuccin-Macchiato-Teal";
@@ -12,12 +16,13 @@
   qt.style = "gtk2";
   console = {
     earlySetup = true;
-    # Warm-metal palette — mirrors the ghostty 16-color palette
-    # (config/.config/ghostty/config) so the TTY matches the terminal.
-    # GTK/cursor themes below stay Catppuccin-teal until a warm GTK theme is
-    # adopted; the terminal/desktop chrome are themed independently.
+    # Warm-metal palette for the linux console. Color 0 is the TTY background,
+    # set to the warm-metal base (slightly darker, matching ghostty's
+    # `background` and waybar's `base`); the rest are warm-metal accents that
+    # mirror the ghostty 16-color palette (config/.config/ghostty/config).
+    # Cursors/icons below stay Catppuccin-teal until warm variants are adopted.
     colors = [
-      "5c4d3d"
+      "322a21"
       "e5805f"
       "b3bf80"
       "e6c25a"
@@ -25,7 +30,7 @@
       "d99a9a"
       "84baa7"
       "f0e6d2"
-      "6f5d49"
+      "4a3e31"
       "e8906a"
       "c2cc94"
       "eed27a"
@@ -39,11 +44,6 @@
   # Override packages
   nixpkgs.config.packageOverrides = pkgs: {
     colloid-icon-theme = pkgs.colloid-icon-theme.override { colorVariants = ["teal"]; };
-    catppuccin-gtk = pkgs.catppuccin-gtk.override {
-      accents = [ "teal" ]; # You can specify multiple accents here to output multiple themes 
-      size = "standard";
-      variant = "macchiato";
-    };
     discord = pkgs.discord.override {
       withOpenASAR = true;
       withTTS = true;
@@ -52,8 +52,7 @@
 
   environment.systemPackages = with pkgs; [
     colloid-icon-theme
-    catppuccin-gtk
-    catppuccin-kvantum
+    adw-gtk3 # GTK3 port of libadwaita; warm-tinted via ~/.config/gtk-3.0/gtk.css
     catppuccin-cursors.macchiatoTeal
 
     # gnome.gnome-tweaks

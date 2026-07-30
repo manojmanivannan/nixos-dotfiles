@@ -22,7 +22,7 @@ hl.config({
         -- not pass gradient strings through cleanly.
         col = {
             active_border = "rgba(e8c272ff)",
-            inactive_border = "rgba(6f5d4988)",
+            inactive_border = "rgba(62523f88)",
         },
     },
 })

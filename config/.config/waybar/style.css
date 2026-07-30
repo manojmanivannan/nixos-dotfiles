@@ -1,12 +1,12 @@
 /* Warm-metal theme: brushed gold / copper / bronze accents on warm espresso
  * backgrounds. Mirrors the ghostty palette and hyprland borders
  * (config/.config/ghostty/config, config/.config/hypr/looknfeel.lua). */
-@define-color base #3d3329;
-@define-color mantle #322a21;
-@define-color crust #281f17;
-@define-color surface0 #4a3e31;
-@define-color surface1 #5c4d3d;
-@define-color surface2 #6f5d49;
+@define-color base #322a21;
+@define-color mantle #2b241b;
+@define-color crust #221b14;
+@define-color surface0 #423627;
+@define-color surface1 #4f4332;
+@define-color surface2 #62523f;
 @define-color overlay0 #937c63;
 @define-color text #f0e6d2;
 @define-color subtext #d8c9ac;
@@ -44,7 +44,7 @@ window#waybar {
 
 /* Floating, rounded panel sitting in on all sides with a subtle border. */
 window#waybar>box {
-    background-color: rgba(92, 77, 61, 0.45);
+    background-color: rgba(79, 67, 50, 0.45);
     border: 1px solid rgba(240, 230, 210, 0.28);
     border-radius: 16px;
     margin: 6px 6px;
@@ -53,7 +53,7 @@ window#waybar>box {
 
 /* ---------- workspaces ---------- */
 #workspaces {
-    background-color: rgba(74, 62, 49, 0.5);
+    background-color: rgba(66, 54, 39, 0.5);
     margin: 4px 2px;
     padding: 0 4px;
 }
@@ -91,7 +91,7 @@ window#waybar>box {
    readable over any wallpaper, with brighter @text instead of dim @subtext. */
 #window {
     color: @text;
-    background-color: rgba(74, 62, 49, 0.65);
+    background-color: rgba(66, 54, 39, 0.65);
     margin: 4px 2px;
     padding: 0 10px;
     font-weight: 700;
@@ -100,7 +100,7 @@ window#waybar>box {
 /* ---------- clock (center, subtle surface pill) ---------- */
 #clock {
     color: @text;
-    background-color: rgba(74, 62, 49, 0.65);
+    background-color: rgba(66, 54, 39, 0.65);
     margin: 4px 2px;
     padding: 0 14px;
     font-weight: 700;
@@ -117,7 +117,7 @@ window#waybar>box {
 
 #custom-weather {
     color: @text;
-    background-color: rgba(74, 62, 49, 0.65);
+    background-color: rgba(66, 54, 39, 0.65);
     margin: 4px 2px;
     padding: 0 12px;
     font-weight: 700;
@@ -130,7 +130,7 @@ window#waybar>box {
 /* ---------- media player (left, after window title) ---------- */
 #mpris {
     color: @palegold;
-    background-color: rgba(74, 62, 49, 0.65);
+    background-color: rgba(66, 54, 39, 0.65);
     margin: 4px 2px;
     padding: 0 12px;
     font-weight: 600;
@@ -154,7 +154,7 @@ window#waybar>box {
    pulseaudio pill (@copper) since it's the same audio family. */
 #custom-cava {
     color: @copper;
-    background-color: rgba(74, 62, 49, 0.65);
+    background-color: rgba(66, 54, 39, 0.65);
     margin: 4px 2px;
     padding: 0 10px;
     font-weight: 700;
@@ -171,7 +171,7 @@ window#waybar>box {
 /* ---------- swaync notification bell ---------- */
 #custom-notification {
     color: @text;
-    background-color: rgba(74, 62, 49, 0.65);
+    background-color: rgba(66, 54, 39, 0.65);
     margin: 4px 2px;
     padding: 0 12px;
     font-weight: 700;
@@ -206,7 +206,7 @@ window#waybar>box {
 #group-sys,
 #group-gpu,
 #group-disk {
-    background-color: rgba(74, 62, 49, 0.65);
+    background-color: rgba(66, 54, 39, 0.65);
     border-radius: 12px;
     margin: 4px 2px;
     padding: 0 6px;
@@ -301,7 +301,7 @@ window#waybar>box {
    gets its own pill like #clock / #custom-weather (the group is transparent). */
 #custom-netspeed {
     color: @bronze;
-    background-color: rgba(74, 62, 49, 0.65);
+    background-color: rgba(66, 54, 39, 0.65);
     margin: 4px 2px;
     padding: 0 12px;
     font-weight: 700;
@@ -361,7 +361,7 @@ window#waybar>box {
 }
 
 #tray:hover {
-    background-color: rgba(74, 62, 49, 0.9);
+    background-color: rgba(66, 54, 39, 0.9);
     padding: 0 10px;
 }
 
