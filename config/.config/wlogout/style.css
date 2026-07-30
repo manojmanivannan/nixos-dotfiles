@@ -1,28 +1,47 @@
+/* Warm-metal theme: brushed gold / copper / bronze accents on warm espresso
+ * backgrounds. Mirrors the ghostty palette, waybar bar, and hyprland borders
+ * (config/.config/ghostty/config, config/.config/waybar/style.css,
+ *  config/.config/hypr/looknfeel.lua). */
+@define-color base #3d3329;
+@define-color mantle #322a21;
+@define-color surface0 #4a3e31;
+@define-color surface1 #5c4d3d;
+@define-color text #f0e6d2;
+@define-color subtext #d8c9ac;
+@define-color gold #e8c272;
+@define-color copper #d99069;
+@define-color bronze #c08a4f;
+
 * {
   background-image: none;
 }
 
 window {
-  background-color: rgba(36, 39, 58, 0.7);
+  background-color: rgba(61, 51, 41, 0.7);
 }
 
 button {
   margin: 8px;
-  color: #cad3f5;
-  background-color: #363a4f;
+  color: @text;
+  background-color: @surface0;
   border-radius: 20px;
   border-style: solid;
   border-width: 2px;
+  border-color: @surface1;
   background-repeat: no-repeat;
   background-position: center;
   background-size: 25%;
+  transition-property: background-color, color, border-color;
+  transition-duration: 0.25s;
+  transition-timing-function: ease;
 }
 
 button:active,
 button:focus,
 button:hover {
-  color: #8bd5ca;
-  background-color: #24273a;
+  color: @gold;
+  background-color: @mantle;
+  border-color: @bronze;
   outline-style: none;
 }
 

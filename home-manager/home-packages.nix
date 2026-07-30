@@ -4,5 +4,6 @@
     wofi
     eza # modern ls replacement; aliased via the oh-my-zsh `eza` plugin (see zsh.nix)
     swaynotificationcenter # ships the `swaync` daemon + `swaync-client`; started from hyprland.start
+    nautilus # GNOME file manager; launched on Super+E via the `fileManager` bind in hypr/bindings.lua
   ];
 }

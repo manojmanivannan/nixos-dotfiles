@@ -5,7 +5,7 @@
 ---@module 'hl'
 
 local terminal    = "ghostty"
-local fileManager = "dolphin"
+local fileManager = "nautilus --new-window"
 local menu        = "hyprlauncher"
 local browser     = "google-chrome"
 
@@ -61,7 +61,6 @@ hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
 
 
 -- hl.bind("SUPER" .. " + " .. "RETURN", hl.dsp.exec_cmd("uwsm app -- $TERMINAL --dir=$(omarchy-cmd-terminal-cwd)"))
-hl.bind("SUPER" .. " + " .. "E", hl.dsp.exec_cmd("uwsm app -- nautilus --new-window"))
 -- Exit the session via `uwsm stop` so systemd tears down the wayland-session
 -- units and cleans up the activation environment. Bypassing this (raw
 -- compositor exit / kill) yanks Hyprland from under clients. A wofi --dmenu
