@@ -7,3 +7,6 @@ result-*
 *.swp
 *~
 .claude
+
+# Secrets — seeded locally, never tracked
+config/.config/rsync/dxp_pass

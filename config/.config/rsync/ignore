@@ -1,0 +1,23 @@
+# Version Control
+.git/
+
+# cache
+.cache/
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+
+# Python Bytecode and Caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE settings (Optional, but recommended to save space)
+.vscode/
+.idea/
+
+# Jupyter Notebook checkpoints (If you use them)
+.ipynb_checkpoints/
