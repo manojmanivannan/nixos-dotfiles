@@ -14,6 +14,21 @@
       brave
       google-chrome
     ];
+
+    # Public keys authorised to log into this account over SSH. Password auth
+    # is disabled (openssh.nix), so this list is the *only* way in — keep at
+    # least one working key here before rebuilding, or you'll lock yourself out.
+    #
+    # To add a laptop: run `cat ~/.ssh/id_ed25519.pub` on it and paste the
+    # whole printed line below. Removing a key here + rebuilding revokes it.
+    # Pubkeys aren't secret, but listing them in the repo does reveal which
+    # keys are valid on this host — fine for a home machine.
+    openssh.authorizedKeys.keys = [
+      # laptop-1 — TODO: replace with `cat ~/.ssh/id_ed25519.pub` from laptop 1
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI-REPLACE-WITH-LAPTOP-1-PUBKEY manoj@laptop-1"
+      # laptop-2 — TODO: replace with `cat ~/.ssh/id_ed25519.pub` from laptop 2
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI-REPLACE-WITH-LAPTOP-2-PUBKEY manoj@laptop-2"
+    ];
   };
 
   # Change runtime directory size
