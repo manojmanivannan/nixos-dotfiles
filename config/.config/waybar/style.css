@@ -107,6 +107,75 @@ window#waybar>box {
     font-weight: 700;
 }
 
+/* ---------- center group + weather ---------- */
+/* group/center is transparent: weather and clock each render as their own
+   pill, sitting as a pair in the middle of the bar. */
+#group-center {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+#custom-weather {
+    color: @text;
+    background-color: rgba(54, 58, 79, 0.65);
+    margin: 4px 2px;
+    padding: 0 12px;
+    font-weight: 700;
+}
+
+#custom-weather:hover {
+    background-color: @surface1;
+}
+
+/* ---------- media player (left, after window title) ---------- */
+#mpris {
+    color: @lavender;
+    background-color: rgba(54, 58, 79, 0.65);
+    margin: 4px 2px;
+    padding: 0 12px;
+    font-weight: 600;
+}
+
+#mpris:hover {
+    background-color: @surface1;
+    color: @text;
+}
+
+#mpris.empty {
+    /* nothing playing: collapse the pill so it leaves no gap. */
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+/* ---------- swaync notification bell ---------- */
+#custom-notification {
+    color: @text;
+    background-color: rgba(54, 58, 79, 0.65);
+    margin: 4px 2px;
+    padding: 0 12px;
+    font-weight: 700;
+}
+
+#custom-notification:hover {
+    background-color: @surface1;
+}
+
+/* swaync sets the module `class` to the current state. */
+#custom-notification.notification {
+    color: @peach;
+}
+
+#custom-notification.dnd {
+    color: @mauve;
+}
+
+#custom-notification.none {
+    color: @subtext;
+}
+
 /* ---------- grouped status modules ---------- */
 /* Related modules are wrapped in waybar `group` containers (see config.jsonc).
    Each group is one rounded pill; the child modules are transparent and sit
@@ -203,11 +272,38 @@ window#waybar>box {
     color: @yellow;
 }
 
-/* ---------- tray ---------- */
+/* ---------- tray (reveal on hover) ---------- */
+/* Tray icons are faded out (opacity 0) while the pointer is elsewhere, so the
+   resting bar reads as a clean gap; hovering the tray fades the icons back in
+   and drops in a surface pill. Waybar tags each tray item with one of
+   .active / .passive / .needs-attention (this file already used the latter
+   two), so we target all three to hide every icon. Note: GTK3 CSS can't zero
+   a widget's natural width via min-width/overflow (those are minimums / not
+   supported), so the tray's footprint is constant and only the icons fade —
+   the documented, reliable reveal mechanism. */
 #tray {
-    background-color: rgba(54, 58, 79, 0.65);
+    background-color: transparent;
     margin: 4px 4px 4px 2px;
-    padding: 0 8px;
+    padding: 0 4px;
+    transition: background-color 0.25s ease, padding 0.3s ease;
+}
+
+#tray>.active,
+#tray>.passive,
+#tray>.needs-attention {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+#tray:hover {
+    background-color: rgba(54, 58, 79, 0.9);
+    padding: 0 10px;
+}
+
+#tray:hover>.active,
+#tray:hover>.passive,
+#tray:hover>.needs-attention {
+    opacity: 1;
 }
 
 #tray>.passive {

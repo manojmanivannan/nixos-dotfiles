@@ -9,10 +9,11 @@
   "margin-right": 6,
   "modules-left": [
     "hyprland/workspaces",
-    "hyprland/window"
+    "hyprland/window",
+    "mpris"
   ],
   "modules-center": [
-    "clock"
+    "group/center"
   ],
   "modules-right": [
     "group/audio",
@@ -20,9 +21,14 @@
     "group/mem",
     "group/sys",
     "group/gpu",
+    "custom/notification",
     "tray",
     "custom/power"
   ],
+  "group/center": {
+    "orientation": "horizontal",
+    "modules": ["custom/weather", "clock"]
+  },
   "hyprland/workspaces": {
     "on-click": "activate",
     "format": "{name}",
@@ -39,6 +45,24 @@
     "separate-outputs": true,
     "icon-size": 14,
     "icon": true
+  },
+  // Now-playing pill (left, after window title). Auto-discovers any
+  // MPRIS-capable player via playerctl — no script needed.
+  "mpris": {
+    "format": "{status_icon} {artist} - {title}",
+    "format-paused": "{status_icon} {artist} - {title}",
+    "format-stopped": "",
+    "status-icons": {
+      "playing": "",
+      "paused": "",
+      "stopped": ""
+    },
+    "max-length": 50,
+    "ignored": "",
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl next",
+    "on-scroll-up": "playerctl volume 0.05+",
+    "on-scroll-down": "playerctl volume 0.05-"
   },
   // Grouped status pills (right side). Each group renders as one rounded
   // pill with separator-divided children; see style.css `#group-*`.
@@ -61,6 +85,35 @@
   "group/gpu": {
     "orientation": "horizontal",
     "modules": ["custom/gpu", "custom/gpu-temp"]
+  },
+  // Notification bell — swaync bridge. `swaync-client -swb` subscribes and
+  // emits waybar JSON on every add/close, so the count updates instantly
+  // with no polling. Emitted shape: {text:"<count>",alt/class:"<state>"}
+  // where state ∈ {notification, none, dnd}. `text` is the count ("" when 0).
+  "custom/notification": {
+    "exec": "swaync-client -swb",
+    "return-type": "json",
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "",
+      "none": "",
+      "dnd": ""
+    },
+    "tooltip": false,
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw"
+  },
+  // Weather pill, grouped with the clock in the center (group/center).
+  // wttr.in geo-locates by IP — no key, no location config. Cached + fault
+  // tolerant (see scripts/weather.sh). Slow interval: weather barely changes.
+  "custom/weather": {
+    "exec": "$HOME/.config/waybar/scripts/weather.sh",
+    "interval": 600,
+    "return-type": "json",
+    "format": "{}",
+    "tooltip": true,
+    "on-click": "xdg-open https://wttr.in",
+    "on-click-right": "$HOME/.config/waybar/scripts/weather.sh"
   },
   "clock": {
     "format": "  {:%H:%M  %d %b}",
@@ -131,13 +184,13 @@
     // 1s-average utilization, padded to 3 chars so the pill never shifts.
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh cpu",
     "interval": 2,
-    "format": "CPU  {}%",
+    "format": "CPU {}%",
     "on-click": "ghostty -e btop"
   },
   "custom/mem": {
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh mem",
     "interval": 5,
-    "format": "MEM  {}%",
+    "format": "MEM {}%",
     "on-click": "ghostty -e btop"
   },
   "custom/cpu-temp": {
@@ -145,18 +198,18 @@
     // span; below that the module CSS color applies. k10temp is found by name
     // (hwmon indices shift across reboots)
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh cputemp",
-    "format": "  {}°C",
+    "format": "{}°C  ",
     "interval": 2
   },
   "custom/gpu": {
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gpu",
-    "format": "GPU  {}%",
+    "format": "GPU {}%",
     "interval": 2,
     "on-click": "ghostty -e nvitop"
   },
   "custom/gpu-temp": {
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gputemp",
-    "format": "  {}°C",
+    "format": "{}°C ",
     "interval": 2
   },
   "tray": {
