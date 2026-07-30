@@ -142,56 +142,67 @@ nixos/modules/default.nix  ──►  boot/ hardware/ networking/ … users/
   sh <(curl -L https://nixos.org/nix/install) --daemon
   mkdir -p ~/.config/nix && echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
   ```
-- For a fresh NixOS install, you'll need a generated `hardware-configuration.nix` for your disks — the one in this repo is machine-specific.
 
 ## 🚀 Installation
 
 > [!IMPORTANT]
-> Fresh install or not, these steps overwrite your system config — read them before running.
+> These steps overwrite your system config — read them before running.
 
-### From a live USB (fresh install)
+> [!WARNING]
+> Do **not** try to build this repo from a manual/guix-style from-scratch install (partition → format → mount → `nixos-install --flake`). That path does not produce a working boot here. The only verified route is the **NixOS graphical installer** below — install a minimal base first, then layer this flake on top with `nixos-rebuild`.
 
-For partitioning, formatting, and mounting the disk (and generating the initial NixOS config), follow [tony's NixOS-from-scratch guide](https://www.tonybtw.com/tutorial/nixos-from-scratch/) up to the `nixos-generate-config --root /mnt` step. Then, to install **this** repo:
+### 1. Install a minimal NixOS base with the graphical ISO
 
-1. **Clone it** onto the target (the flake can live anywhere — `nixos-install` points at it explicitly):
+1. Flash the **NixOS graphical installer ISO** to a USB stick and boot it.
+2. Run the installer, but **do not select a desktop environment / display manager** — choose a minimal install (no DE). This gives you a clean, bootable NixOS base with a generated `hardware-configuration.nix` already in place at `/etc/nixos/`.
+3. Finish the installer and reboot into the fresh minimal system. Log in and enable flakes if needed:
    ```sh
-   git clone https://github.com/manojmanivannan/nixos-dotfiles.git /mnt/etc/nixos-dotfiles
+   mkdir -p ~/.config/nix && echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
    ```
 
-2. **Point the flake at your machine** — edit `flake.nix`:
-   ```nix
-   user = "your-username";          # flows to the user account, docker group, Home Manager, env vars
-   hosts = [
-     { name = "nixos"; hostname = "your-hostname"; inherit stateVersion; }
-   ];
-   ```
-   `name` is the stable identity (the flake attr `.nixos` and the `hosts/<name>/` folder) — leave it as `nixos`. `hostname` is the machine's network name, `user` is your login name. These two lines are the only edits most cloners need.
+### 2. Clone this repo
 
-3. **Drop in the generated hardware config:**
-   ```sh
-   cp /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos-dotfiles/hosts/nixos/
-   ```
+```sh
+git clone https://github.com/manojmanivannan/nixos-dotfiles.git ~/nixos-dotfiles
+```
 
-4. **Install, set the user password, then reboot:**
-   ```sh
-   nixos-install --flake /mnt/etc/nixos-dotfiles#nixos
-   nixos-enter --root /mnt -c 'passwd your-username'
-   reboot
-   ```
-   The `#nixos` is the flake attr (the `name` field), **not** your machine's hostname.
+The repo assumes it's cloned at `~/nixos-dotfiles` (see [Notes & Caveats](#-notes--caveats)).
 
-The copy under `/mnt/etc/nixos-dotfiles` was only needed for the install — after first boot, re-clone to `~/nixos-dotfiles` (see below) for ongoing rebuilds.
+### 3. Point the flake at your machine
 
-### On an already-installed system
+Edit `flake.nix`:
 
-Skip partitioning, mounting, and `nixos-install`. Clone to `~/nixos-dotfiles`, run steps 2-3 against that clone, then:
+```nix
+user = "your-username";          # flows to the user account, docker group, Home Manager, env vars
+hosts = [
+  { name = "nixos"; hostname = "your-hostname"; inherit stateVersion; }
+];
+```
+
+`name` is the stable identity (the flake attr `.nixos` and the `hosts/<name>/` folder) — leave it as `nixos`. `hostname` is the machine's network name, `user` is your login name. These two lines are the only edits most cloners need.
+
+### 4. Drop in your generated hardware config
+
+The installer already generated one for your disks — copy it into the repo, overwriting the machine-specific copy that ships here:
+
+```sh
+cp /etc/nixos/hardware-configuration.nix ~/nixos-dotfiles/hosts/nixos/
+```
+
+### 5. Rebuild and switch
 
 ```sh
 sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos   # alias: nrs
 ```
 
+The `#nixos` is the flake attr (the `name` field), **not** your machine's hostname. Reboot after the first switch so `greetd`/`tuigreet` take over as the display manager.
+
 > [!NOTE]
-> The user account is declared with **no password** in the config — deliberately, so no plaintext ever lands in the repo or the Nix store. It's created locked, which is why step 4 sets one via `nixos-enter` before rebooting (essential here: `greetd`/`tuigreet` offer no `root` login, so without it there's no way in on first boot). On an already-running system instead, use `sudo passwd <your-username>`.
+> The user account is declared with **no password** in the config — deliberately, so no plaintext ever lands in the repo or the Nix store. On the minimal base you installed above, your installer-created account already has a password and remains usable; this repo's account is created locked, so set one if you're relying on it:
+> ```sh
+> sudo passwd <your-username>
+> ```
+> This matters here because `greetd`/`tuigreet` offer no `root` login, so a locked account with no password means no way in.
 
 ## 🛠 Customization
 
