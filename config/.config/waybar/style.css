@@ -1,27 +1,26 @@
-/* Catppuccin Macchiato (teal accent — matches nixos/modules/theme.nix) */
-@define-color base #24273a;
-@define-color mantle #1e2030;
-@define-color crust #181926;
-@define-color surface0 #363a4f;
-@define-color surface1 #494d64;
-@define-color surface2 #5b6078;
-@define-color overlay0 #6e738d;
-@define-color text #cad3f5;
-@define-color subtext #b8c0e0;
-@define-color rosewater #f4dbd6;
-@define-color flamingo #f0c6c6;
-@define-color pink #f5bde6;
-@define-color mauve #c6a0f6;
-@define-color red #ed8796;
-@define-color maroon #ee99a0;
-@define-color peach #f5a97f;
-@define-color yellow #eed49f;
-@define-color green #a6da95;
-@define-color teal #8bd5ca;
-@define-color sky #91d7e3;
-@define-color sapphire #7dc4e4;
-@define-color blue #8aadf4;
-@define-color lavender #b7bdf8;
+/* Warm-metal theme: brushed gold / copper / bronze accents on warm espresso
+ * backgrounds. Mirrors the ghostty palette and hyprland borders
+ * (config/.config/ghostty/config, config/.config/hypr/looknfeel.lua). */
+@define-color base #3d3329;
+@define-color mantle #322a21;
+@define-color crust #281f17;
+@define-color surface0 #4a3e31;
+@define-color surface1 #5c4d3d;
+@define-color surface2 #6f5d49;
+@define-color overlay0 #937c63;
+@define-color text #f0e6d2;
+@define-color subtext #d8c9ac;
+@define-color gold #e8c272;
+@define-color copper #d99069;
+@define-color bronze #c08a4f;
+@define-color palegold #f0dca0;
+@define-color amber #e6c25a;
+@define-color terracotta #e5805f;
+@define-color rust #c96b4a;
+@define-color olive #b3bf80;
+@define-color patina #84baa7;
+@define-color dustyrose #d99a9a;
+@define-color steel #94a6ba;
 
 * {
     font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
@@ -45,8 +44,8 @@ window#waybar {
 
 /* Floating, rounded panel sitting in on all sides with a subtle border. */
 window#waybar>box {
-    background-color: rgba(73, 77, 100, 0.45);
-    border: 1px solid rgba(202, 211, 245, 0.30);
+    background-color: rgba(92, 77, 61, 0.45);
+    border: 1px solid rgba(240, 230, 210, 0.28);
     border-radius: 16px;
     margin: 6px 6px;
     padding: 1px 1px;
@@ -54,7 +53,7 @@ window#waybar>box {
 
 /* ---------- workspaces ---------- */
 #workspaces {
-    background-color: rgba(54, 58, 79, 0.5);
+    background-color: rgba(74, 62, 49, 0.5);
     margin: 4px 2px;
     padding: 0 4px;
 }
@@ -69,7 +68,7 @@ window#waybar>box {
 
 #workspaces button.active {
     color: @base;
-    background: linear-gradient(45deg, @teal, @blue);
+    background: linear-gradient(45deg, @gold, @copper);
     font-weight: 800;
 }
 
@@ -79,7 +78,7 @@ window#waybar>box {
 
 #workspaces button.urgent {
     color: @base;
-    background: @red;
+    background: @terracotta;
 }
 
 #workspaces button:hover {
@@ -92,7 +91,7 @@ window#waybar>box {
    readable over any wallpaper, with brighter @text instead of dim @subtext. */
 #window {
     color: @text;
-    background-color: rgba(54, 58, 79, 0.65);
+    background-color: rgba(74, 62, 49, 0.65);
     margin: 4px 2px;
     padding: 0 10px;
     font-weight: 700;
@@ -101,7 +100,7 @@ window#waybar>box {
 /* ---------- clock (center, subtle surface pill) ---------- */
 #clock {
     color: @text;
-    background-color: rgba(54, 58, 79, 0.65);
+    background-color: rgba(74, 62, 49, 0.65);
     margin: 4px 2px;
     padding: 0 14px;
     font-weight: 700;
@@ -118,7 +117,7 @@ window#waybar>box {
 
 #custom-weather {
     color: @text;
-    background-color: rgba(54, 58, 79, 0.65);
+    background-color: rgba(74, 62, 49, 0.65);
     margin: 4px 2px;
     padding: 0 12px;
     font-weight: 700;
@@ -130,8 +129,8 @@ window#waybar>box {
 
 /* ---------- media player (left, after window title) ---------- */
 #mpris {
-    color: @lavender;
-    background-color: rgba(54, 58, 79, 0.65);
+    color: @palegold;
+    background-color: rgba(74, 62, 49, 0.65);
     margin: 4px 2px;
     padding: 0 12px;
     font-weight: 600;
@@ -150,10 +149,29 @@ window#waybar>box {
     min-width: 0;
 }
 
+/* ---------- cava spectrum (left, after the now-playing track) ---------- */
+/* Streaming block-character bars from scripts/cava.sh. Colored like the
+   pulseaudio pill (@copper) since it's the same audio family. */
+#custom-cava {
+    color: @copper;
+    background-color: rgba(74, 62, 49, 0.65);
+    margin: 4px 2px;
+    padding: 0 10px;
+    font-weight: 700;
+}
+
+#custom-cava.silent {
+    /* nothing playing: collapse exactly like #mpris.empty. */
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
+
 /* ---------- swaync notification bell ---------- */
 #custom-notification {
     color: @text;
-    background-color: rgba(54, 58, 79, 0.65);
+    background-color: rgba(74, 62, 49, 0.65);
     margin: 4px 2px;
     padding: 0 12px;
     font-weight: 700;
@@ -165,11 +183,11 @@ window#waybar>box {
 
 /* swaync sets the module `class` to the current state. */
 #custom-notification.notification {
-    color: @peach;
+    color: @amber;
 }
 
 #custom-notification.dnd {
-    color: @mauve;
+    color: @rust;
 }
 
 #custom-notification.none {
@@ -186,8 +204,9 @@ window#waybar>box {
 #group-net,
 #group-mem,
 #group-sys,
-#group-gpu {
-    background-color: rgba(54, 58, 79, 0.65);
+#group-gpu,
+#group-disk {
+    background-color: rgba(74, 62, 49, 0.65);
     border-radius: 12px;
     margin: 4px 2px;
     padding: 0 6px;
@@ -197,7 +216,8 @@ window#waybar>box {
 #group-net:hover,
 #group-mem:hover,
 #group-sys:hover,
-#group-gpu:hover {
+#group-gpu:hover,
+#group-disk:hover {
     background-color: @surface1;
 }
 
@@ -210,7 +230,8 @@ window#waybar>box {
 #custom-cpu,
 #custom-cpu-temp,
 #custom-gpu,
-#custom-gpu-temp {
+#custom-gpu-temp,
+#custom-disk {
     background: transparent;
     border-radius: 0;
     padding: 0 10px;
@@ -233,43 +254,63 @@ window#waybar>box {
 }
 
 #pulseaudio {
-    color: @peach;
+    color: @copper;
 }
 
 #pulseaudio.muted {
-    color: @red;
+    color: @terracotta;
 }
 
 #network {
-    color: @blue;
+    color: @steel;
 }
 
 #network.disconnected {
-    color: @red;
+    color: @terracotta;
 }
 
 #bluetooth {
-    color: @sky;
+    color: @patina;
+}
+
+/* Live throughput — sits in the center group to the right of the clock, so it
+   gets its own pill like #clock / #custom-weather (the group is transparent). */
+#custom-netspeed {
+    color: @bronze;
+    background-color: rgba(74, 62, 49, 0.65);
+    margin: 4px 2px;
+    padding: 0 12px;
+    font-weight: 700;
+}
+
+#custom-netspeed:hover {
+    background-color: @surface1;
+}
+
+/* Root filesystem — storage resource, the gold accent ties it to the active
+   workspace gradient. */
+#custom-disk {
+    color: @gold;
 }
 
 #custom-cpu {
-    color: @green;
+    color: @olive;
 }
 
 #custom-mem {
-    color: @mauve;
+    color: @dustyrose;
 }
 
 #custom-cpu-temp {
-    color: @yellow;
+    color: @amber;
 }
 
 #custom-gpu {
-    color: @green;
+    color: @olive;
 }
 
 #custom-gpu-temp {
-    color: @yellow;
+    color: @amber;
 }
 
 /* ---------- tray (reveal on hover) ---------- */
@@ -296,7 +337,7 @@ window#waybar>box {
 }
 
 #tray:hover {
-    background-color: rgba(54, 58, 79, 0.9);
+    background-color: rgba(74, 62, 49, 0.9);
     padding: 0 10px;
 }
 
@@ -312,13 +353,13 @@ window#waybar>box {
 
 #tray>.needs-attention {
     -gtk-icon-effect: highlight;
-    background-color: @red;
+    background-color: @terracotta;
 }
 
 /* ---------- power button (right edge) ---------- */
 #custom-power {
     color: @base;
-    background: linear-gradient(45deg, @red, @maroon);
+    background: linear-gradient(45deg, @terracotta, @rust);
     margin: 4px 6px 4px 2px;
     padding: 0 10px;
     font-size: 15px;
@@ -326,6 +367,6 @@ window#waybar>box {
 }
 
 #custom-power:hover {
-    color: @red;
+    color: @terracotta;
     background: @surface1;
 }

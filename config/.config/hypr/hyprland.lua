@@ -21,6 +21,13 @@ hl.on("hyprland.start", function ()
   -- hardcoded username needed. -m fill scales to cover each output
   -- (cropping overflow) without distorting aspect ratio.
   hl.exec_cmd("waybar & swaybg -i $HOME/nixos-dotfiles/config/wallpaper/boat.png -m fill")
+  -- Hot-reload waybar on save: inotifywait watches the waybar config dir and
+  -- sends waybar SIGUSR2 on any close_write of config.jsonc or a *.sh script.
+  -- style.css is left to config.jsonc's `reload_style_on_change`. See
+  -- scripts/waybar-autoreload.sh; inotify-tools ships in
+  -- nixos/modules/services/services.nix. Backgrounded (&) since it loops
+  -- forever (inotifywait -m never exits).
+  hl.exec_cmd("$HOME/.config/waybar/scripts/waybar-autoreload.sh &")
   hl.exec_cmd("swaync")
   -- Start the GNOME Keyring secrets daemon so credential-aware apps (gh,
   -- browsers) find an org.freedesktop.secrets provider instead of falling

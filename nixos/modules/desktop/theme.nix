@@ -12,23 +12,27 @@
   qt.style = "gtk2";
   console = {
     earlySetup = true;
+    # Warm-metal palette — mirrors the ghostty 16-color palette
+    # (config/.config/ghostty/config) so the TTY matches the terminal.
+    # GTK/cursor themes below stay Catppuccin-teal until a warm GTK theme is
+    # adopted; the terminal/desktop chrome are themed independently.
     colors = [
-      "24273a"
-      "ed8796"
-      "a6da95"
-      "eed49f"
-      "8aadf4"
-      "f5bde6"
-      "8bd5ca"
-      "cad3f5"
-      "5b6078"
-      "ed8796"
-      "a6da95"
-      "eed49f"
-      "8aadf4"
-      "f5bde6"
-      "8bd5ca"
-      "a5adcb"
+      "5c4d3d"
+      "e5805f"
+      "b3bf80"
+      "e6c25a"
+      "94a6ba"
+      "d99a9a"
+      "84baa7"
+      "f0e6d2"
+      "6f5d49"
+      "e8906a"
+      "c2cc94"
+      "eed27a"
+      "a4b4c8"
+      "e6aaaa"
+      "97c8b6"
+      "f6eed8"
     ];
   };
 

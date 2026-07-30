@@ -37,6 +37,8 @@
     cliphist
     xdg-utils
     waybar
+    cava # spectrum visualizer for the waybar `custom/cava` pill
+    inotify-tools # inotifywait for waybar config/style hot-reload on save
     wlogout
     libfido2
   ];

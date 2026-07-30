@@ -16,13 +16,13 @@ hl.config({
         -- Use master layout instead of dwindle
         -- layout = master
         border_size = 2,
-        -- Catppuccin Macchiato borders: teal on the active window, dim
-        -- surface2 on the rest. Matches the system teal accent (see
-        -- nixos/modules/theme.nix GTK/cursor theme). Solid color — hyprlua
-        -- does not pass gradient strings through cleanly.
+        -- Warm-metal borders: brushed gold on the active window, dim bronze
+        -- surface on the rest. Matches the gold accent in the ghostty palette
+        -- and the waybar panel (waybar/style.css). Solid color — hyprlua does
+        -- not pass gradient strings through cleanly.
         col = {
-            active_border = "rgba(8bd5caff)",
-            inactive_border = "rgba(5b607888)",
+            active_border = "rgba(e8c272ff)",
+            inactive_border = "rgba(6f5d4988)",
         },
     },
 })

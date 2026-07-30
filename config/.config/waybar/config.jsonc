@@ -10,7 +10,8 @@
   "modules-left": [
     "hyprland/workspaces",
     "hyprland/window",
-    "mpris"
+    "mpris",
+    "custom/cava"
   ],
   "modules-center": [
     "group/center"
@@ -21,13 +22,14 @@
     "group/mem",
     "group/sys",
     "group/gpu",
+    "group/disk",
     "custom/notification",
     "tray",
     "custom/power"
   ],
   "group/center": {
     "orientation": "horizontal",
-    "modules": ["custom/weather", "clock"]
+    "modules": ["custom/weather", "clock", "custom/netspeed"]
   },
   "hyprland/workspaces": {
     "on-click": "activate",
@@ -64,6 +66,16 @@
     "on-scroll-up": "playerctl volume 0.05+",
     "on-scroll-down": "playerctl volume 0.05-"
   },
+  // Cava audio spectrum (left, after the now-playing track). scripts/cava.sh
+  // streams Nerd Font block-character bars at ~30fps as a long-running exec
+  // (read continuously like the swaync bell). Auto-collapses with class
+  // "silent" when nothing is playing — see style.css `#custom-cava.silent`.
+  "custom/cava": {
+    "exec": "$HOME/.config/waybar/scripts/cava.sh",
+    "return-type": "json",
+    "format": "{}",
+    "tooltip": false
+  },
   // Grouped status pills (right side). Each group renders as one rounded
   // pill with separator-divided children; see style.css `#group-*`.
   "group/audio": {
@@ -85,6 +97,12 @@
   "group/gpu": {
     "orientation": "horizontal",
     "modules": ["custom/gpu", "custom/gpu-temp"]
+  },
+  // Root filesystem usage — its own pill in the right resource cluster, after
+  // the GPU group. See style.css `#group-disk`.
+  "group/disk": {
+    "orientation": "horizontal",
+    "modules": ["custom/disk"]
   },
   // Notification bell — swaync bridge. `swaync-client -swb` subscribes and
   // emits waybar JSON on every add/close, so the count updates instantly
@@ -125,11 +143,11 @@
       "mode-mon-col": 4,
       "on-scroll": 1,
       "format": {
-        "months": "<span color='#c6a0f6'><b>{}</b></span>",
-        "days": "<span color='#cad3f5'><b>{}</b></span>",
-        "weeks": "<span color='#8aadf4'><b>W{}</b></span>",
-        "weekdays": "<span color='#f5a97f'><b>{}</b></span>",
-        "today": "<span color='#ed8796'><b><u>{}</u></b></span>"
+        "months": "<span color='#e8c272'><b>{}</b></span>",
+        "days": "<span color='#f0e6d2'><b>{}</b></span>",
+        "weeks": "<span color='#c08a4f'><b>W{}</b></span>",
+        "weekdays": "<span color='#d99069'><b>{}</b></span>",
+        "today": "<span color='#e5805f'><b><u>{}</u></b></span>"
       }
     },
     "actions": {
@@ -180,6 +198,16 @@
     "tooltip-format": "{num_connections} device(s) connected",
     "on-click": "blueman-manager"
   },
+  // Live network throughput, grouped with the clock in the center (to its
+  // right). scripts/netspeed.sh keeps a state file so each run is instant;
+  // interval=1 gives ~1s updates with no in-script sleep.
+  "custom/netspeed": {
+    "exec": "$HOME/.config/waybar/scripts/netspeed.sh",
+    "return-type": "json",
+    "format": "{}",
+    "interval": 1,
+    "tooltip": true
+  },
   "custom/cpu": {
     // 1s-average utilization, padded to 3 chars so the pill never shifts.
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh cpu",
@@ -211,6 +239,17 @@
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gputemp",
     "format": "{}°C ",
     "interval": 2
+  },
+  // Root filesystem usage, wrapped in group/disk (right, after the GPU
+  // group). Slow interval — disk usage barely moves. scripts/disk.sh emits
+  // the percent for the pill (the `format` adds the "DISK" label, matching
+  // the CPU/MEM/GPU pills) and a used/total/free breakdown for the tooltip.
+  "custom/disk": {
+    "exec": "$HOME/.config/waybar/scripts/disk.sh",
+    "return-type": "json",
+    "format": "DISK {}",
+    "interval": 300,
+    "tooltip": true
   },
   "tray": {
     "icon-size": 16,
