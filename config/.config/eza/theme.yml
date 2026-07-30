@@ -19,6 +19,11 @@ filenames:
       glyph: 
       style:
         foreground: "#f0c674"
+  "nixos-dotfiles":
+    icon:
+      glyph: 
+      style:
+        foreground: "#ffa500"
   "Github":
     icon:
       glyph: 
