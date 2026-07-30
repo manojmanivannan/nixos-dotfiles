@@ -24,8 +24,8 @@
     # Pubkeys aren't secret, but listing them in the repo does reveal which
     # keys are valid on this host — fine for a home machine.
     openssh.authorizedKeys.keys = [
-      # laptop-1 — TODO: replace with `cat ~/.ssh/id_ed25519.pub` from laptop 1
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI-REPLACE-WITH-LAPTOP-1-PUBKEY manoj@laptop-1"
+      # Macbook Air Pub Key
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKe4ST8GjQ3h/6WYzu19+Mi1sXFmIEOqPedQ4oRriI6b manojm18@live.in"
       # laptop-2 — TODO: replace with `cat ~/.ssh/id_ed25519.pub` from laptop 2
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI-REPLACE-WITH-LAPTOP-2-PUBKEY manoj@laptop-2"
     ];
