@@ -3,7 +3,7 @@
   "layer": "top",
   "position": "top",
   "spacing": 0,
-  "height": 38,
+  "height": 50,
   "margin-top": 6,
   "margin-left": 6,
   "margin-right": 6,
@@ -29,7 +29,11 @@
   ],
   "group/center": {
     "orientation": "horizontal",
-    "modules": ["custom/weather", "clock", "custom/netspeed"]
+    "modules": [
+      "custom/weather",
+      "clock",
+      "custom/netspeed"
+    ]
   },
   "hyprland/workspaces": {
     "on-click": "activate",
@@ -80,29 +84,45 @@
   // pill with separator-divided children; see style.css `#group-*`.
   "group/audio": {
     "orientation": "horizontal",
-    "modules": ["pulseaudio"]
+    "modules": [
+      "pulseaudio"
+    ]
   },
   "group/net": {
     "orientation": "horizontal",
-    "modules": ["network", "bluetooth"]
+    "modules": [
+      "network",
+      "bluetooth",
+      "custom/tailscale"
+    ]
   },
   "group/mem": {
     "orientation": "horizontal",
-    "modules": ["custom/mem"]
+    "modules": [
+      "custom/mem"
+    ]
   },
   "group/sys": {
     "orientation": "horizontal",
-    "modules": ["custom/cpu", "custom/cpu-temp"]
+    "modules": [
+      "custom/cpu",
+      "custom/cpu-temp"
+    ]
   },
   "group/gpu": {
     "orientation": "horizontal",
-    "modules": ["custom/gpu", "custom/gpu-temp"]
+    "modules": [
+      "custom/gpu",
+      "custom/gpu-temp"
+    ]
   },
   // Root filesystem usage — its own pill in the right resource cluster, after
   // the GPU group. See style.css `#group-disk`.
   "group/disk": {
     "orientation": "horizontal",
-    "modules": ["custom/disk"]
+    "modules": [
+      "custom/disk"
+    ]
   },
   // Notification bell — swaync bridge. `swaync-client -swb` subscribes and
   // emits waybar JSON on every add/close, so the count updates instantly
@@ -112,11 +132,6 @@
     "exec": "swaync-client -swb",
     "return-type": "json",
     "format": "{icon}",
-    "format-icons": {
-      "notification": "",
-      "none": "",
-      "dnd": ""
-    },
     "tooltip": false,
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw"
@@ -159,15 +174,6 @@
   "pulseaudio": {
     "format": "{icon} {volume}%",
     "format-muted": " Muted",
-    "format-icons": {
-      "headphone": "",
-      "headset": "",
-      "default": [
-        "",
-        "",
-        ""
-      ]
-    },
     "scroll-step": 5,
     "on-click": "pavucontrol",
     "on-click-right": "pamixer -t",
@@ -197,6 +203,28 @@
     "format-no-controller": "",
     "tooltip-format": "{num_connections} device(s) connected",
     "on-click": "blueman-manager"
+  },
+  // Tailscale pill (last segment of group/net): the tailscale logo as a CSS
+  // background-image (on/off PNG by class — see style.css `#custom-tailscale`).
+  // Left-click toggles up/down; right-click switches between the two accounts
+  // in PROFILES; middle-click opens a wofi menu to pick an exit node (or None).
+  // exec-on-event refreshes the icon instantly on click instead of waiting
+  // for `interval`. No sudo — the user is the tailscale operator (set in
+  // nixos/modules/networking/vpn.nix). Inspired by
+  // federicovolponi/waybar-tailscale; adapted to this warm-metal bar.
+  "custom/tailscale": {
+    "exec": "$HOME/.config/waybar/scripts/tailscale.sh --status",
+    "return-type": "json",
+    "format": "    {icon}",
+    "format-icons": {
+      "connected": "󱠾 󰕥 ",
+      "stopped": "󱠾  "
+    },
+    "interval": 5,
+    "tooltip": true,
+    "exec-on-event": true,
+    "on-click": "$HOME/.config/waybar/scripts/tailscale.sh --toggle",
+    "on-click-right": "$HOME/.config/waybar/scripts/tailscale.sh --switch-profile"
   },
   // Live network throughput, grouped with the clock in the center (to its
   // right). scripts/netspeed.sh keeps a state file so each run is instant;

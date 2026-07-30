@@ -39,6 +39,7 @@
     waybar
     cava # spectrum visualizer for the waybar `custom/cava` pill
     inotify-tools # inotifywait for waybar config/style hot-reload on save
+    libnotify # notify-send: feedback from the waybar tailscale exit-node picker (shown via swaync)
     wlogout
     libfido2
   ];

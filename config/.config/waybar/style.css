@@ -231,6 +231,7 @@ window#waybar>box {
 #custom-cpu-temp,
 #custom-gpu,
 #custom-gpu-temp,
+#custom-tailscale,
 #custom-disk {
     background: transparent;
     border-radius: 0;
@@ -240,7 +241,8 @@ window#waybar>box {
 
 /* Separator before each non-first module in a group. The CPU/GPU pills omit
    it so usage + temperature read as one continuous label. */
-#bluetooth {
+#bluetooth,
+#custom-tailscale {
     border-left: 1px solid @surface1;
 }
 
@@ -271,6 +273,28 @@ window#waybar>box {
 
 #bluetooth {
     color: @patina;
+}
+
+/* Tailscale VPN toggle — last segment of group/net. The tailscale logo is
+   rendered as a CSS background-image (PNG) swapped by the class the script
+   emits: tailscale_on.png when connected, tailscale_off.png when down. This
+   mirrors federicovolponi/waybar-tailscale; the script returns empty text, so
+   min-width + background-size:contain give the image its space. url() resolves
+   relative to this stylesheet's real path (the repo via the ~/.config symlink),
+   landing in waybar-tailscale/icon/. */
+#custom-tailscale {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    min-width: 24px;
+}
+
+#custom-tailscale.connected {
+    background-image: url("waybar-tailscale/icon/tailscale_on.png");
+}
+
+#custom-tailscale.disconnected {
+    background-image: url("waybar-tailscale/icon/tailscale_off.png");
 }
 
 /* Live throughput — sits in the center group to the right of the clock, so it
