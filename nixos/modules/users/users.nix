@@ -7,7 +7,7 @@
   users.users.${user} = {
     isNormalUser = true;
     description = user;
-    extraGroups = [ "networkmanager" "input" "wheel" "video" "audio" "tss" "docker" ];
+    extraGroups = [ "input" "wheel" "video" "audio" "tss" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vscode
