@@ -76,6 +76,7 @@ hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 -- reuses the same key for the (less frequent) reload.
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
+hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Example special workspace (scratchpad)
