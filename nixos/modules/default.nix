@@ -10,6 +10,7 @@
     ./nix
     ./security
     ./services
+    ./programs
     ./development
     ./users
   ];
