@@ -113,7 +113,7 @@ hl.curve("easeInOutCubic", { type = "bezier", points = { { 0.65, 0 }, { 0.35, 1 
 hl.animation({ leaf = "global", enabled = true, speed = 10, bezier = "default" })
 hl.animation({ leaf = "windows", enabled = true, speed = 3.79, bezier = "easeOutQuint" })
 hl.animation({ leaf = "windowsIn", enabled = true, speed = 4.1, bezier = "easeOutQuint", style = "popin 87%" })
-hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "easeInOutCubic", style = "slidefade 8%" })
+hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "easeOutCirc", style = "slidefade 10%" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 3.4, bezier = "easeInOutCubic", style = "slidefade" })
 hl.animation({ leaf = "border", enabled = true, speed = 1.6, bezier = "liner" })
 hl.animation({ leaf = "borderangle", enabled = true, speed = 100, bezier = "liner", style = "loop" })
