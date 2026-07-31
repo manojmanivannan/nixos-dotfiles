@@ -17,6 +17,7 @@
     "group/center"
   ],
   "modules-right": [
+    "tray",
     "group/audio",
     "group/net",
     "group/mem",
@@ -24,7 +25,6 @@
     "group/gpu",
     "group/disk",
     "custom/notification",
-    "tray",
     "custom/power"
   ],
   "group/center": {
@@ -32,7 +32,7 @@
     "modules": [
       "custom/weather",
       "clock"
-//      "custom/netspeed"
+      //      "custom/netspeed"
     ]
   },
   "hyprland/workspaces": {
@@ -92,7 +92,7 @@
     "orientation": "horizontal",
     "modules": [
       "network",
-      "bluetooth",
+      // "bluetooth",
       "custom/tailscale"
     ]
   },
@@ -201,15 +201,15 @@
     "interval": 3,
     "on-click": "nm-connection-editor"
   },
-  "bluetooth": {
-    "format": "",
-    "format-disabled": "",
-    "format-off": "",
-    "format-connected": "  {num_connections}",
-    "format-no-controller": "",
-    "tooltip-format": "{num_connections} device(s) connected",
-    "on-click": "blueman-manager"
-  },
+  // "bluetooth": {
+  //   "format": "",
+  //   "format-disabled": "",
+  //   "format-off": "",
+  //   "format-connected": "  {num_connections}",
+  //   "format-no-controller": "",
+  //   "tooltip-format": "{num_connections} device(s) connected",
+  //   "on-click": "blueman-manager"
+  // },
   // Tailscale pill (last segment of group/net): the tailscale logo as a CSS
   // background-image (on/off PNG by class — see style.css `#custom-tailscale`).
   // Left-click toggles up/down; right-click switches between the two accounts

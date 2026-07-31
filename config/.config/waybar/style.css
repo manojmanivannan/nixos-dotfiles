@@ -338,15 +338,12 @@ window#waybar>box {
     color: @amber;
 }
 
-/* ---------- tray (reveal on hover) ---------- */
-/* Tray icons are faded out (opacity 0) while the pointer is elsewhere, so the
-   resting bar reads as a clean gap; hovering the tray fades the icons back in
-   and drops in a surface pill. Waybar tags each tray item with one of
-   .active / .passive / .needs-attention (this file already used the latter
-   two), so we target all three to hide every icon. Note: GTK3 CSS can't zero
-   a widget's natural width via min-width/overflow (those are minimums / not
-   supported), so the tray's footprint is constant and only the icons fade —
-   the documented, reliable reveal mechanism. */
+/* ---------- tray ---------- */
+/* Tray icons are always visible so status indicators (e.g. Handy's
+   idle/recording/transcribing state, blueman, nm-applet) are readable at a
+   glance. Waybar tags each item with .active / .passive / .needs-attention;
+   .passive is dimmed and .needs-attention gets a terracotta pill. Hovering
+   the tray still drops in a surface pill for affordance. */
 #tray {
     background-color: transparent;
     margin: 4px 4px 4px 2px;
@@ -354,22 +351,9 @@ window#waybar>box {
     transition: background-color 0.25s ease, padding 0.3s ease;
 }
 
-#tray>.active,
-#tray>.passive,
-#tray>.needs-attention {
-    opacity: 0;
-    transition: opacity 0.25s ease;
-}
-
 #tray:hover {
     background-color: rgba(66, 54, 39, 0.9);
     padding: 0 10px;
-}
-
-#tray:hover>.active,
-#tray:hover>.passive,
-#tray:hover>.needs-attention {
-    opacity: 1;
 }
 
 #tray>.passive {
