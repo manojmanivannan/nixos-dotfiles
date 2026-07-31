@@ -267,12 +267,13 @@
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gpu",
     "format": "GPU {}%",
     "interval": 2,
-    "on-click": "ghostty -e nvitop"
+    "on-click": "ghostty -e nvtop"
   },
   "custom/gpu-temp": {
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gputemp",
     "format": "{}°C ",
-    "interval": 2
+    "interval": 2,
+    "on-click": "ghostty -e nvtop"
   },
   // Root filesystem usage, wrapped in group/disk (right, after the GPU
   // group). Slow interval — disk usage barely moves. scripts/disk.sh emits
