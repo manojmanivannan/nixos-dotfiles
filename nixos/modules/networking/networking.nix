@@ -1,4 +1,9 @@
-{ pkgs, ipv4Address, defaultGateway, ... }:
+{
+  pkgs,
+  ipv4Address,
+  defaultGateway,
+  ...
+}:
 
 {
   # Enable networking
@@ -13,7 +18,7 @@
   # networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
   # networking.networkmanager.wifi.backend = "iwd";
 
- networking.useDHCP = false;
+  networking.useDHCP = false;
   networking.interfaces.eno1 = {
     wakeOnLan.enable = true;
     ipv4.addresses = [
@@ -23,12 +28,25 @@
       }
     ];
   };
+
+  # Wake-on-LAN persistence for the Intel I226-V (igc driver).
+  systemd.services.eno1-wol = {
+    description = "Force Wake-on-LAN magic packet on eno1";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.ethtool}/bin/ethtool -s eno1 wol g"; # TODO: hardcoded the interface name here because systemd doesn't expand $IFACE in ExecStart
+      RemainAfterExit = true;
+    };
+  };
+
   networking.defaultGateway = defaultGateway;
   networking.nameservers = [
     "1.1.1.1"
     "8.8.8.8"
   ];
-  
+
   # networking.wireless.iwd = {
   #   enable = true;
   #   settings = {
@@ -51,5 +69,6 @@
   environment.systemPackages = with pkgs; [
     iwgtk
     impala
+    ethtool
   ];
 }
