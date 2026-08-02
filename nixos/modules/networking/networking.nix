@@ -15,6 +15,7 @@
 
  networking.useDHCP = false;
   networking.interfaces.eno1 = {
+    wakeOnLan.enable = true;
     ipv4.addresses = [
       {
         address = ipv4Address;
