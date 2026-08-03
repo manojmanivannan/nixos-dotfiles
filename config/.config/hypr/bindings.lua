@@ -26,6 +26,18 @@ hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 
+-- Cycle focus across windows on the CURRENT workspace with ALT + TAB.
+-- `cycle_next` is the Lua binding for Hyprland's `cyclenext` dispatcher: each
+-- press moves focus to the next window on the active workspace (both tiled and
+-- floating, since tiled/floating default to -1 = "any"). SHIFT reverses the
+-- direction (`next = false`). `repeating = true` lets a held TAB keep cycling.
+-- Unlike a desktop-environment Alt+Tab switcher, there is no preview popup and
+-- no "release ALT to confirm" gesture — focus moves on each key press, which
+-- is what was requested. Cross-workspace cycling isn't included; use
+-- mainMod + scroll / mainMod + [0-9] for that (see below).
+hl.bind("ALT + TAB",         hl.dsp.window.cycle_next({ next = true }),  { repeating = true })
+hl.bind("ALT + SHIFT + TAB", hl.dsp.window.cycle_next({ next = false }), { repeating = true })
+
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
 for i = 1, 10 do
