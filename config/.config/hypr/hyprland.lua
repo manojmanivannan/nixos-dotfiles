@@ -20,7 +20,7 @@ hl.on("hyprland.start", function ()
   -- through Hyprland's exec dispatcher (/bin/sh), so $HOME expands — no
   -- hardcoded username needed. -m fill scales to cover each output
   -- (cropping overflow) without distorting aspect ratio.
-  hl.exec_cmd("waybar & swaybg -i $HOME/nixos-dotfiles/config/wallpaper/boat.png -m fill")
+  hl.exec_cmd("waybar & swaybg -i $HOME/nixos-dotfiles/config/wallpaper/lonely-train.jpg -m fill")
   -- Hot-reload waybar on save: inotifywait watches the waybar config dir and
   -- sends waybar SIGUSR2 on any close_write of config.jsonc or a *.sh script.
   -- style.css is left to config.jsonc's `reload_style_on_change`. See
