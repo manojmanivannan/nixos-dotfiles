@@ -13,6 +13,9 @@ let
     wofi = "wofi";
     ghostty = "ghostty";
     eza = "eza"; # auto-loads theme.yml for colors/icons
+    zsh = "zsh"; # ~/.config/zsh holds the sourced zshrc_addon.zsh loader
+                 # and its zshrc.d/ snippets (functions, git, aliases, exports).
+                 # Sourced from programs.zsh.initContent in home-manager/modules/zsh.nix.
   };
 
   # Single-file config symlinks — manage just the file, not the whole
@@ -32,6 +35,11 @@ let
     "gtk-3.0/gtk.css" = "gtk-3.0/gtk.css";
     "rsync/archive_to_nas.sh" = "rsync/archive_to_nas.sh";
     "rsync/ignore" = "rsync/ignore";
+    # Starship prompt config (nerd-font glyphs). starship itself ships as a
+    # system package (nixos/modules/development/terminal.nix); we call
+    # `starship init zsh` from programs.zsh.initContent instead of using HM's
+    # programs.starship, so HM never manages this file — the symlink wins.
+    "starship.toml" = "starship.toml";
   };
 in
 

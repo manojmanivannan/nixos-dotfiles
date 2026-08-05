@@ -16,30 +16,27 @@
     #     --icons=auto so the theme.yml glyphs render; `dirs-first` sorts
     #     directories ahead of files.
     #
-    #  2. The custom prompt, at default ordering so it runs AFTER oh-my-zsh
-    #     loads the amuse theme and overrides its PROMPT/RPROMPT.
-    #     git_prompt_info comes from the `git` oh-my-zsh plugin;
-    #     virtualenv_prompt_info from the `virtualenv` plugin. The
-    #     ZSH_THEME_*_PROMPT vars mirror the amuse theme so the venv segment
-    #     matches the original Arch setup.
+    #  2. The zsh addon loader + Starship init, at default ordering so they run
+    #     AFTER `source $ZSH/oh-my-zsh.sh`. The addon (functions/aliases/exports)
+    #     lives under ~/.config/zsh, symlinked from the repo by
+    #     dotfiles-symlinks.nix. `starship init zsh` must come after oh-my-zsh
+    #     so Starship's PROMPT wins over any theme; oh-my-zsh.theme is left
+    #     empty below so no theme sets a competing prompt. Starship's config
+    #     (~/.config/starship.toml) is also symlinked from the repo; the
+    #     binary ships as a system package (nixos/modules/development/terminal.nix).
     initContent = lib.mkMerge [
       (lib.mkBefore ''
         zstyle ':omz:plugins:eza' 'icons' yes
         zstyle ':omz:plugins:eza' 'dirs-first' yes
       '')
       ''
-        VIRTUAL_ENV_DISABLE_PROMPT=0
-        ZSH_THEME_VIRTUAL_ENV_PROMPT_PREFIX=" %F{cyan}🐍 ("
-        ZSH_THEME_VIRTUAL_ENV_PROMPT_SUFFIX=")%f"
-        ZSH_THEME_VIRTUALENV_PREFIX=$ZSH_THEME_VIRTUAL_ENV_PROMPT_PREFIX
-        ZSH_THEME_VIRTUALENV_SUFFIX=$ZSH_THEME_VIRTUAL_ENV_PROMPT_SUFFIX
+        # Load the XDG-organized zsh snippets (functions, git, aliases, exports).
+        # zshrc_addon.zsh is a thin glob-sorted loader over zshrc.d/*.zsh.
+        source "$HOME/.config/zsh/zshrc_addon.zsh"
 
-        # Left prompt:  <path> <git> <venv> <exit-code on failure> ↪
-        PROMPT='%F{blue}%~%f $(git_prompt_info)$(virtualenv_prompt_info)%F{red}%(?.. [%?])%f %F{yellow}$%f '
-        # Right prompt: [HH:MM:SS]
-        RPROMPT='⌚%F{cyan}[%D{%H:%M:%S}]%f'
-
-        source "${config.home.homeDirectory}/nixos-dotfiles/config/.config/zsh/zshrc_addon.zsh"
+        # Fancy prompt — Starship (nerd-font segments: dir, git, nix_shell,
+        # python/venv, cmd_duration, time, ...). See ~/.config/starship.toml.
+        eval "$(starship init zsh)"
       ''
     ];
 
@@ -48,14 +45,19 @@
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
       claude = "nix run 'github:ryoppippi/nix-claude-code#stable' -- ";
       # NOTE: `gcommit` is intentionally not an alias here — the JIRA-aware
-      # `gcommit` function in zshrc_addon.zsh handles it (an alias would shadow
-      # the function, since shellAliases are emitted after initContent).
+      # `gcommit` function in zshrc.d/20-git.zsh handles it (an alias would
+      # shadow the function, since shellAliases are emitted after initContent).
     };
 
-    # oh-my-zsh manages the prompt/theme (matches the old Arch setup: amuse).
+    # oh-my-zsh is kept for its plugins only. The prompt is owned by Starship
+    # (init'd above), so theme is left empty — no theme sets a competing
+    # PROMPT/RPROMPT. `virtualenv` was dropped: it only provided
+    # virtualenv_prompt_info for the old hand-written prompt, and Starship's
+    # python segment now shows the active venv. `git` stays — the user's git
+    # functions (gcb/gco/gfo in zshrc.d/20-git.zsh) rely on its aliases.
     oh-my-zsh = {
       enable = true;
-      theme = "amuse";
+      theme = "";
       plugins = [
         # built-in
         "git"
@@ -63,7 +65,6 @@
         "colorize"
         "command-not-found"
         "z"
-        "virtualenv"
         "gh"
         "zsh-interactive-cd"
         "eza" # wraps `ls`/`ll`/`la`/`lT` etc. with eza; package ships in home-packages.nix
