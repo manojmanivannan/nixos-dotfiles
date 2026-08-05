@@ -261,8 +261,11 @@ function size_of() {
 
 # https://github.com/junegunn/fzf/wiki/Examples
 
-# fd - cd to selected directory
-function fd() {
+# fcd - cd to a fuzzy-selected subdirectory.
+# Renamed from `fd` so it no longer shadows the `fd` (modern find) binary,
+# which is installed as a system package (nixos/modules/development/terminal.nix)
+# and backs the fzf file/dir widgets (home-manager/modules/fzf.nix).
+function fcd() {
   local dir
   dir=$(find ${1:-.} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) &&
   cd "$dir"

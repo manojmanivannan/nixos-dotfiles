@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   programs.zsh = {
@@ -34,6 +34,26 @@
         # zshrc_addon.zsh is a thin glob-sorted loader over zshrc.d/*.zsh.
         source "$HOME/.config/zsh/zshrc_addon.zsh"
 
+        # Shell behaviour setopts (the history options are set above via
+        # programs.zsh.history; these are the non-history ones from the
+        # "Perfect Zsh 2026" setup).
+        setopt AUTO_CD           # type a bare dir name to cd into it
+        setopt NO_BEEP           # silence the terminal bell
+        setopt NUMERIC_GLOB_SORT # 1..10 not 1,10,2 (lexical glob sort)
+
+        # fzf-tab — replaces the tab-completion menu with an fzf-powered one.
+        # Must load AFTER compinit (which ran in the addon above and via
+        # programs.zsh.enableCompletion). Previews use eza (dirs) and bat
+        # (files) — both already installed. Loaded before autosuggestions,
+        # which HM sources after initContent.
+        source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+        zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --color=always --icons $realpath'
+        zstyle ':fzf-tab:complete:*:*' fzf-preview 'bat --style=numbers --color=always $realpath 2>/dev/null || eza --tree --color=always --icons $realpath'
+
+        # zsh-abbr — fish-style inline abbreviations that expand on space.
+        # Add your own with: abbr -a <name> <expansion>
+        source ${pkgs.zsh-abbr}/share/zsh/zsh-abbr/zsh-abbr.plugin.zsh
+
         # Fancy prompt — Starship (nerd-font segments: dir, git, nix_shell,
         # python/venv, cmd_duration, time, ...). See ~/.config/starship.toml.
         eval "$(starship init zsh)"
@@ -49,22 +69,43 @@
       # shadow the function, since shellAliases are emitted after initContent).
     };
 
+    # History tuning — matches the "Perfect Zsh 2026" setup: large shared
+    # history, no duplicates, timestamps, dups expire first. `path` is left
+    # to HM's default (~/.zsh_history) to avoid needing an XDG-state dir.
+    # HM translates these to the corresponding HIST* / setopt options.
+    history = {
+      size = 100000;
+      save = 100000;
+      ignoreDups = true;
+      ignoreSpace = true;        # leading-space commands stay out of history
+      expireDuplicatesFirst = true;
+      share = true;              # SHARE_HISTORY: sync across live shells
+      extended = true;           # EXTENDED_HISTORY: record timestamps
+    };
+
+    # Up/Down filter history to lines matching the current line prefix.
+    # HM binds the keys and sources it in the correct order relative to
+    # autosuggestions, so the two cooperate.
+    historySubstringSearch.enable = true;
+
     # oh-my-zsh is kept for its plugins only. The prompt is owned by Starship
     # (init'd above), so theme is left empty — no theme sets a competing
     # PROMPT/RPROMPT. `virtualenv` was dropped: it only provided
     # virtualenv_prompt_info for the old hand-written prompt, and Starship's
     # python segment now shows the active venv. `git` stays — the user's git
     # functions (gcb/gco/gfo in zshrc.d/20-git.zsh) rely on its aliases.
+    # `z` removed — replaced by zoxide's `z`/`zi` (home-manager/modules/zoxide.nix);
+    # the two `z` commands would otherwise collide. `colored-man-pages`
+    # removed — bat is now the manpager (home-manager/modules/bat.nix), which
+    # is richer and what `man` actually invokes via $MANPAGER.
     oh-my-zsh = {
       enable = true;
       theme = "";
       plugins = [
         # built-in
         "git"
-        "colored-man-pages"
         "colorize"
         "command-not-found"
-        "z"
         "gh"
         "zsh-interactive-cd"
         "eza" # wraps `ls`/`ll`/`la`/`lT` etc. with eza; package ships in home-packages.nix

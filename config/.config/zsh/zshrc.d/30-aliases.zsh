@@ -8,7 +8,6 @@
 
 alias gitzip="git archive HEAD -o ${PWD##*/}.zip"
 alias sz='source ~/.zshrc'
-alias gdiff='ydiff -s -w0'
 alias grecent=gcorecent
 alias gclean='git clean -fd && git checkout -- .'
 alias glast-tag='git describe --tags --abbrev=0'

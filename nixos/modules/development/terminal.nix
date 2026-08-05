@@ -16,5 +16,6 @@
     fzf
     bat
     cmatrix
+    fd # modern `find`; backs fzf's file/dir widgets (fzf.nix). No HM programs.* module.
   ];
 }

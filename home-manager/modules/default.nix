@@ -11,5 +11,10 @@
     ./scripts.nix
     ./vim.nix
     ./zsh.nix
+    # CLI/shell tools (one module per tool, mirroring fzf.nix)
+    ./zoxide.nix
+    ./bat.nix
+    ./lazygit.nix
+    ./yazi.nix
   ];
 }

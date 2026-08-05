@@ -10,5 +10,20 @@
       # itself — it must live here. The leading `!` makes git run it as a command.
       credential."https://github.com".helper = "!gh auth git-credential";
     };
+
+    # delta — syntax-highlighted, side-by-side diff pager. HM wires
+    # core.pager + interactive.diffFilter automatically (so `git diff`, `git
+    # show`, `git log -p`, and `git add -p` all use it). `navigate` lets n/N
+    # jump between hunks. The `git-delta` package is added by HM, so no
+    # terminal.nix entry needed. Supersedes the `gdiff='ydiff ...'` alias in
+    # zshrc.d/30-aliases.zsh (left in place — harmless).
+    delta = {
+      enable = true;
+      options = {
+        line-numbers = true;
+        side-by-side = true;
+        navigate = true;
+      };
+    };
   };
 }
