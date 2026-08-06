@@ -103,6 +103,25 @@ let
       patch -p1 --fuzz=0 < ${./caelestia-overrides/0001-statusicons-tailscale.patch}
       patch -p1 --fuzz=0 < ${./caelestia-overrides/0002-content-tailscale.patch}
       patch -p1 --fuzz=0 < ${./caelestia-overrides/0003-barconfig-showTailscale.patch}
+
+      # WF-14 — password-only lock PAM. Caelestia's lock can authenticate three
+      # ways: `passwd` (password), `fprint` (pam_fprintd.so), and `howdy`
+      # (pam_howdy.so) — see modules/lock/Pam.qml. The build spec (WF-8 Solution:
+      # Lock screen) drops fingerprint/face/Yubikey at the lock screen. Two
+      # layers make that hold:
+      #   1. `lock.enableFprint`/`enableHowdy` = false in `settings` below stops
+      #      the ManualPamContexts from ever starting (their `canAttempt` gate
+      #      is `available && enabled && ...`, and `enabled` binds to these).
+      #   2. This rewrite drops the `pam_fprintd.so` / `pam_howdy.so` auth lines
+      #      from the vendored PAM files themselves — the "build-phase PAM
+      #      rewrite of the same shape caelestia's derivation already does" the
+      #      spec calls for (upstream's prePatch only rewrites the .so *paths*;
+      #      we remove the lines). Defense in depth: even if a future `enable*`
+      #      flip re-arms a context, the PAM file has no module to load.
+      # The files keep their `%PAM-1.0` header so they remain valid PAM files;
+      # they're simply inert (no auth lines) and unreferenced once disabled.
+      printf '%s\n' '#%PAM-1.0' > assets/pam.d/fprint
+      printf '%s\n' '#%PAM-1.0' > assets/pam.d/howdy
     '';
   });
 in
@@ -170,6 +189,52 @@ in
         wallpaperEnabled = false;
       };
 
+      # WF-14 — lock screen: password-only. Caelestia's lock can use password
+      # (`passwd`), fingerprint (`fprint`, pam_fprintd.so), and face (`howdy`,
+      # pam_howdy.so); the build spec (WF-8 Solution: Lock screen) drops
+      # fingerprint/face/Yubikey at the lock screen. These are GLOBAL config
+      # properties (CONFIG_GLOBAL_PROPERTY in lockconfig.hpp), so they sit
+      # under the top-level `lock` key. Disabling them here stops the
+      # ManualPamContexts in modules/lock/Pam.qml from starting (their
+      # `canAttempt` gate is `available && enabled && …`); the PAM-file rewrite
+      # in the package postPatch above is the defense-in-depth second layer.
+      # `triggerHowdyOnWake` is moot once howdy is disabled, but set false too
+      # so no `howdy.start()` is ever attempted on resume.
+      lock = {
+        enableFprint = false;
+        enableHowdy = false;
+        triggerHowdyOnWake = false;
+      };
+
+      # WF-14 — hypridle is the sole idle daemon. The build spec (WF-8
+      # Solution: Idle) assumed "Caelestia ships no idle module"; v2.2.0 in
+      # fact ships `modules/IdleMonitors.qml` (Quickshell `IdleMonitor`s) with
+      # DEFAULT timeouts that lock at 180s, dpms-off at 300s, and
+      # suspend-then-hibernate at 600s (generalconfig.hpp `GeneralIdle.timeouts`).
+      # Left active, those race the WF-14 hypridle listener — the 180s lock
+      # would fire before the 600s auto-lock (user story #13 wants ~10 min, not
+      # 3), and the 600s suspend-then-hibernate would suspend the box right when
+      # hypridle locks it. Clearing `timeouts` (lists replace, per the WF-12
+      # merge note) disables every caelestia IdleMonitor so hypridle alone
+      # drives idle→lock at 600s, exactly as WF-14 mandates. `lockBeforeSleep`
+      # (default true) is left untouched — it fires on logind `PrepareForSleep`
+      # independent of `timeouts`, so a manual suspend still locks first.
+      general.idle.timeouts = [ ];
+
+      # WF-14 — power-menu logout tears down the systemd Wayland session
+      # cleanly via `uwsm stop` (user story #10), not logind's raw `Terminate`
+      # that caelestia's `SessionManager::logout()` would call for the default
+      # `["logout"]` command (sessionmanager.cpp). `SessionManager.exec` only
+      # maps a fixed set of words (logout/suspend/hibernate/poweroff/reboot) to
+      # DBus calls; `uwsm` isn't one, so `exec` returns false and the
+      # SessionButton falls back to `Quickshell.execDetached(command)`
+      # (modules/session/Content.qml) — i.e. it runs `uwsm stop` directly.
+      # `uwsm` ships from `programs.hyprland.withUWSM = true`
+      # (nixos/modules/desktop/hyprland.nix). The session menu's action set is
+      # otherwise caelestia's default (logout/shutdown/hibernate/reboot —
+      # suspend already absent, per the spec), so only `logout` is overridden.
+      session.commands.logout = [ "uwsm" "stop" ];
+
       # WF-12: the launcher actions minus every scheme-regenerating one.
       # Dropped: `>scheme` / `>variant` / `>wallpaper` (autocomplete →
       # Schemes.qml / M3Variants.qml / the wallpaper grid, all of which
@@ -209,13 +274,23 @@ in
           name = "Logout";
           icon = "exit_to_app";
           description = "Log out of the current session";
-          command = [ "logout" ];
+          # WF-14 — `uwsm stop`, matching the power-menu logout above (clean
+          # systemd Wayland-session teardown). `SessionManager.exec` returns
+          # false for `uwsm` for the same reason as `session.commands.logout`
+          # above, so this likewise falls through to `Quickshell.execDetached`.
+          command = [ "uwsm" "stop" ];
           dangerous = true;
         }
         {
           name = "Lock";
           icon = "lock";
           description = "Lock the current session";
+          # WF-14 — targets caelestia's `Lock` module (no rerouting). With
+          # hyprlock retired, `loginctl lock-session`'s logind `Lock` signal is
+          # bridged exclusively by caelestia's SessionManager ->
+          # `WlSessionLock.locked` (plugin/src/Caelestia/Services/
+          # sessionmanager.cpp + modules/IdleMonitors.qml `onLockRequested`),
+          # so this surfaces the caelestia lock screen, not a hyprlock one.
           command = [ "loginctl" "lock-session" ];
         }
         {

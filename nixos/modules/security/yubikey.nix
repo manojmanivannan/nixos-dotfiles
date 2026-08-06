@@ -15,7 +15,9 @@
   security.pam.services = {
     greetd.u2fAuth = true;
     sudo-rs.u2fAuth = true;
-    hyprlock.u2fAuth = true;
+    # WF-14 — hyprlock retired; its PAM service is gone. The lock screen is
+    # caelestia's `Lock` module (password-only PAM patched in
+    # home-manager/modules/caelestia.nix), not a logind/hyprlock PAM service.
   };
 
   environment.systemPackages = with pkgs; [
