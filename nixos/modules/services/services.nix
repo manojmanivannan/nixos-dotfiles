@@ -36,11 +36,10 @@
     wl-clip-persist
     cliphist
     xdg-utils
-    waybar
-    cava # spectrum visualizer for the waybar `custom/cava` pill
-    inotify-tools # inotifywait for waybar config/style hot-reload on save
-    libnotify # notify-send: feedback from the waybar tailscale exit-node picker (shown via swaync)
-    wlogout
+    # notify-send: caelestia toasts (dashboard/Wrapper.qml profile-picture,
+    # areapicker/Picker.qml screenshot) + the ported tailscale.sh picker. WF-16
+    # kept libnotify after confirming caelestia shells out to it (WF-15).
+    libnotify
     libfido2
   ];
 }

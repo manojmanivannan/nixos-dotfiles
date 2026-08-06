@@ -2,10 +2,10 @@
 id: WF-16
 title: Retirement — atomic merge to main + full removal
 label: wayfinder:build
-status: open
+status: cleanup done (merge deferred)
 assignee:
 blocked-by: [WF-12, WF-13, WF-14, WF-15]
-triage: ready-for-agent
+triage: merge deferred per user — removals landed on quickshell, merge to main not yet taken
 ---
 
 Parent map: [Replace waybar with a quickshell full shell](../MAP.md)
@@ -40,20 +40,37 @@ positioning, workspace animations, global shortcuts firing).
 
 ## Acceptance criteria
 
-- [ ] The manual validation gate (four surfaces + lock/autolock + tailscale/tray
+- [x] The manual validation gate (four surfaces + lock/autolock + tailscale/tray
       + no Qt glitches) has passed on `quickshell` before the merge.
+      (Confirmed by the user 2026-08-06.)
 - [ ] `quickshell` is merged to `main` in a single atomic merge.
-- [ ] The merge removes the old autostart lines + keybinds, the
+      (**Deferred per user request 2026-08-06** — only cleanup was requested.)
+- [x] The removal of the old autostart lines + keybinds (WF-11), the
       `waybar`/`swaync`/`wofi`/`wlogout` symlink entries, and the old config
-      directories.
-- [ ] The merge removes the retired packages: `waybar`, `swaync`, `wofi`,
-      `wlogout`, `hyprlock`, `inotify-tools`.
-- [ ] `cava` and `libnotify` are dropped iff WF-15 confirmed them unused;
-      otherwise left installed. `hypridle` and `qt6.qtwayland` are kept.
+      directories is done on `quickshell` (this slice; the merge itself is the
+      deferred step above).
+- [x] The retired packages are removed from `quickshell`: `waybar`, `swaync`,
+      `wofi`, `wlogout`, `inotify-tools`. `hyprlock` was already retired in
+      WF-14.
+- [x] `cava` is dropped (WF-15 confirmed caelestia's Cava is a native
+      `CavaProvider`, no `cava` binary); `libnotify` is kept (caelestia's
+      Wrapper.qml/Picker.qml + tailscale.sh call `notify-send`).
+      `hypridle` and `qt6.qtwayland` are kept.
 - [ ] `main` builds caelestia-only with no leftover dead config; the WF-9
-      build-seam check is green on `main`.
-- [ ] No permanent dual-shell runtime toggle is introduced (git history is the
+      build-seam check is green on `main`. (Pending the merge; the WF-9
+      build-seam check IS green on `quickshell` after cleanup — `nix build
+      .#nixos` exits 0.)
+- [x] No permanent dual-shell runtime toggle is introduced (git history is the
       recovery net).
+
+## Status — 2026-08-06
+
+The full removal landed on `quickshell` (commit below); the WF-9 build-seam
+stays green on `quickshell` post-removal. The one-way merge to `main` was
+**not** taken — the user asked for cleanup only. `main` still carries the
+old waybar stack as the fallback branch. Reopen by merging `quickshell` →
+`main` in a single atomic merge (fast-forward or `--no-ff` merge commit) and
+confirming the WF-9 build-seam is green on `main`.
 
 ## Blocked by
 

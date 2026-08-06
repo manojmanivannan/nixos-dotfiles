@@ -2,10 +2,10 @@
 id: WF-15
 title: Retire custom scripts into caelestia built-ins
 label: wayfinder:build
-status: implemented (live gate pending)
+status: implemented (live gate complete)
 assignee:
 blocked-by: [WF-11]
-triage: implemented (live gate pending)
+triage: implemented (live gate complete)
 ---
 
 Parent map: [Replace waybar with a quickshell full shell](../MAP.md)
@@ -46,7 +46,7 @@ installed until then.
 - [x] The waybar `mpris` module is gone (Media tab covers MPRIS).
 - [x] The old waybar scripts directory is removed once the tailscale script is
       relocated (coordinated with WF-13).
-- [ ] Live: cava audio-spectrum, CPU/GPU/mem/temp monitoring, disk usage,
+- [x] Live: cava audio-spectrum, CPU/GPU/mem/temp monitoring, disk usage,
       weather, and media controls all appear in the caelestia dashboard.
 - [x] Build-time confirm recorded: whether caelestia's Cava shells out to the
       `cava` binary, and whether any remaining surface calls `notify-send`.

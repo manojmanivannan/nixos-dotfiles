@@ -8,10 +8,6 @@ let
   # fine — the key is just the xdg.configFile target name.
   configs = {
     hypr = "hypr";
-    waybar = "waybar";
-    wlogout = "wlogout";
-    swaync = "swaync";
-    wofi = "wofi";
     ghostty = "ghostty";
     eza = "eza"; # auto-loads theme.yml for colors/icons
     zsh = "zsh"; # ~/.config/zsh holds the sourced zshrc_addon.zsh loader
