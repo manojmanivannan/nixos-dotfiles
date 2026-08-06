@@ -54,6 +54,22 @@ let
       # The now-unused import of the wallandstyle page components.
       sed -i '/^import qs\.modules\.nexus\.pages\.wallandstyle$/d' modules/nexus/PageCompRegistry.qml
 
+      # WF-12: shell.json is a read-only Nix-store symlink (the HM
+      # `programs.caelestia` module writes it via `xdg.configFile.*.text`,
+      # which HM always symlinks into the store). The shell's RootConfig
+      # auto-saves to it on every property change after load
+      # (plugin/src/Caelestia/Config/rootconfig.cpp:106-114); the write hits
+      # EROFS and emits `saveFailed`, which ConfigToasts.qml renders as the
+      # "Failed to save config" Error toast on every launch. The read-only
+      # failure is *expected* here — the file is pinned by Nix on purpose
+      # (the pin is the WF-12 design; runtime saves are intentionally
+      # dropped, the WARN log below still records them). Gate only this
+      # case so genuine save failures (disk full, permissions, …) still
+      # surface as toasts. `file.errorString()` is "Read-only file system"
+      # for EROFS; the substituted line is unique in the file (verified).
+      sed -i 's|emit saveFailed(err, m_screen);|if (!file.errorString().contains("Read-only file system")) emit saveFailed(err, m_screen);|' \
+        plugin/src/Caelestia/Config/rootconfig.cpp
+
       # WF-13 — the tailscale custom module (the one ported module). Ships the
       # new QML + brand asset into the source tree and patches the existing
       # StatusIcons / Content / barconfig.hpp to wire them in. The new files
