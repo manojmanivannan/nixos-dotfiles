@@ -64,6 +64,25 @@ hl.config({
     },
 })
 
+-- Caelestia layer-shell surfaces (WF-11). The fork's StyledWindow.qml gives
+-- every quickshell surface the namespace `caelestia-<name>` (caelestia-bar,
+-- caelestia-drawers, caelestia-osd, …) — NOT the generic `quickshell:*` the
+-- spec anticipated, so this rule targets the real `^caelestia-` pattern.
+-- `blur` + `ignore_alpha` here mirror the `popups` / `popups_ignorealpha`
+-- blur set above (stated explicitly so the shell integration is
+-- self-documenting in the look-and-feel config). The shell itself toggles
+-- blur on `caelestia-drawers` at runtime from its transparency setting
+-- (services/Colours.qml), appending a rule that overrides this default for
+-- the drawers — so this rule mainly covers the persistent surfaces (bar /
+-- osd) the shell does not self-manage, and provides a default for the
+-- drawers before the shell's runtime rule fires.
+hl.layer_rule({
+    name  = "caelestia-blur",
+    match = { namespace = "^caelestia-" },
+    blur = true,
+    ignore_alpha = 0.2,
+})
+
 -- https://wiki.hypr.land/Configuring/Variables/#layout
 
 hl.config({
