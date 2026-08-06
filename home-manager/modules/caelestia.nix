@@ -81,6 +81,66 @@ let
       # references the `hibernate` id, not the removed item.
       sed -i '/^    AnimatedImage {/,/^    }$/d' modules/session/Content.qml
 
+      # Lock-screen resource widgets (modules/lock/Resources.qml). Three
+      # `Resource {}` blocks render CPU / Memory / Disk, each with `colour`
+      # (the percentage number), `shapeColour` (the shape backdrop the number
+      # sits on), and `fillColour` (the wavy fill bar). Upstream paints each
+      # in a different token family — CPU gold/amber (m3primary /
+      # m3primaryContainer), Memory teal-on-dark (m3tertiary / m3onTertiary),
+      # Disk terracotta/amber (m3secondary / m3secondaryContainer) — and the
+      # percentage text used the same warm token as its shape (gold-on-amber,
+      # terracotta-on-amber), which is low-contrast and hard to read on the
+      # espresso lock screen.
+      #
+      # Two fixes in one pass:
+      #  1. Unify all three widgets on the gold/amber scheme — shape backdrop
+      #     `m3primaryContainer` (#c08a4f amber), fill bar `m3primary @ 0.3`
+      #     (#e8c272 gold) — so the widgets read as one family.
+      #  2. Make the text clearer. The percentage number renders on top of the
+      #     amber shape, so use `m3onPrimaryContainer` (#f0dca0 pale cream) —
+      #     the Material "on primaryContainer" token, the high-contrast text
+      #     colour designed for content on the amber container, still in the
+      #     gold/cream family. The widget icons are recolored to the same pale
+      #     cream (upstream hard-coded them to m3secondary / #d99069 terracotta,
+      #     which read pinkish and muddy on the amber shape).
+      # The CPU temperature badge originally sat on m3secondaryContainer
+      # (#c08a4f amber) — the *same* value as m3primaryContainer here, so the
+      # circle was indistinguishable from the pentagon behind it. Its
+      # normal-state backdrop is shifted to m3primary (#e8c272 gold) for a
+      # subtle in-family differentiation, and its label to m3onPrimary
+      # (#322a21 dark brown) for contrast on the brighter gold. The >90C hot
+      # state stays m3errorContainer / m3onErrorContainer (already clear).
+      # Widget shapes (Pentagon / Slanted / Gem) are left alone.
+      #
+      # Every target line is globally unique in this file — the per-widget
+      # token (m3tertiary / m3primary / m3secondary) and the 0.3 / 0.4 alpha
+      # variants disambiguate the fill lines, and the British `colour:` /
+      # `shapeColour:` spelling keeps these distinct from the temperature
+      # badge's American `color:` ternary lines — so content matches are exact
+      # and survive upstream line drift.
+      # Memory widget (teal-on-dark -> gold/amber + clear text).
+      sed -i 's|colour: Colours.palette.m3tertiary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
+      sed -i 's|shapeColour: Colours.palette.m3onTertiary$|shapeColour: Colours.palette.m3primaryContainer|' modules/lock/Resources.qml
+      sed -i 's|fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
+      # CPU widget (already gold/amber shape; clearer text + gold fill).
+      sed -i 's|colour: Colours.palette.m3primary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
+      sed -i 's|fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
+      # Disk widget (terracotta/amber -> gold/amber + clear text).
+      sed -i 's|colour: Colours.palette.m3secondary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
+      sed -i 's|shapeColour: Colours.palette.m3secondaryContainer$|shapeColour: Colours.palette.m3primaryContainer|' modules/lock/Resources.qml
+      sed -i 's|fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
+      # Widget icons (terracotta -> pale cream). American `color:` + the bare
+      # `m3secondary` token + `$` anchor matches only the shared icon line, not
+      # the disk widget's British `colour:` number or the temp-label ternary.
+      sed -i 's|color: Colours.palette.m3secondary$|color: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
+      # CPU temperature badge backdrop, normal state (amber -> gold to
+      # differentiate from the amber widget shape). Hot (>90C) branch stays
+      # m3errorContainer.
+      sed -i 's|color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer$|color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3primary|' modules/lock/Resources.qml
+      # CPU temperature label, normal state (terracotta -> dark brown, for
+      # contrast on the new gold badge). Hot (>90C) branch stays m3onErrorContainer.
+      sed -i 's|m3onErrorContainer : Colours.palette.m3secondary$|m3onErrorContainer : Colours.palette.m3onPrimary|' modules/lock/Resources.qml
+
       # WF-13 — the tailscale custom module (the one ported module). Ships the
       # new QML + brand asset into the source tree and patches the existing
       # StatusIcons / Content / barconfig.hpp to wire them in. The new files
