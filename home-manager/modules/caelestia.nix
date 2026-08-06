@@ -53,6 +53,37 @@ let
       sed -i '/\/\/ Appearance/,/^        },$/d' modules/nexus/PageCompRegistry.qml
       # The now-unused import of the wallandstyle page components.
       sed -i '/^import qs\.modules\.nexus\.pages\.wallandstyle$/d' modules/nexus/PageCompRegistry.qml
+
+      # WF-13 — the tailscale custom module (the one ported module). Ships the
+      # new QML + brand asset into the source tree and patches the existing
+      # StatusIcons / Content / barconfig.hpp to wire them in. The new files
+      # live in home-manager/modules/caelestia-overrides/ as real repo files
+      # (reviewable, lintable by eye); the path interpolations below copy them
+      # into this nix-store build tree (the caelestia-shell flake input's
+      # derivation can't see this repo directly — only paths interpolated into
+      # the postPatch string). See docs/wayfinder/tickets/
+      # tailscale-custom-module.md.
+      #
+      # services/Tailscale.qml        — Process-wrapped singleton (status poll
+      #                                  + toggle/switch/set-exit-node). Auto-
+      #                                  registered as a singleton by the
+      #                                  quickshell config-loader's qmldir
+      #                                  generation (no qmldir in the source).
+      # modules/bar/popouts/TailscalePopout.qml — the hover popout. Referenced
+      #                                  from Content.qml as `TailscalePopout`
+      #                                  (same-dir implicit import, like the
+      #                                  Network/Battery popouts).
+      # assets/tailscale.svg          — monochrome brand mark; ColouredIcon's
+      #                                  Colouriser (MultiEffect colorization:1)
+      #                                  recolors it m3success/m3outline.
+      cp ${./caelestia-overrides/Tailscale.qml} services/Tailscale.qml
+      cp ${./caelestia-overrides/TailscalePopout.qml} modules/bar/popouts/TailscalePopout.qml
+      cp ${./caelestia-overrides/tailscale.svg} assets/tailscale.svg
+      # --fuzz=0: the patches are exact against the pinned v2.2.0 source; fail
+      # cleanly (build red) rather than fuzz-applying if upstream drifts.
+      patch -p1 --fuzz=0 < ${./caelestia-overrides/0001-statusicons-tailscale.patch}
+      patch -p1 --fuzz=0 < ${./caelestia-overrides/0002-content-tailscale.patch}
+      patch -p1 --fuzz=0 < ${./caelestia-overrides/0003-barconfig-showTailscale.patch}
     '';
   });
 in
