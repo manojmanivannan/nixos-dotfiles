@@ -6,7 +6,6 @@ import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.components.controls
-import qs.components.effects
 import qs.services
 import qs.utils
 
@@ -34,10 +33,15 @@ ColumnLayout {
         Layout.rightMargin: Tokens.padding.extraSmall
         spacing: Tokens.spacing.small
 
-        ColouredIcon {
-            implicitSize: Math.round(Tokens.font.body.large.pointSize * 1.1)
-            source: Quickshell.shellPath("assets/tailscale.svg")
-            colour: Tailscale.up ? Colours.palette.m3success : Colours.palette.m3outline
+        Image {
+            Layout.preferredWidth: Math.round(Tokens.font.body.large.pointSize * 1.1)
+            Layout.preferredHeight: Math.round(Tokens.font.body.large.pointSize * 1.1)
+            fillMode: Image.PreserveAspectFit
+            mipmap: true
+            smooth: true
+            source: Tailscale.up
+                ? Quickshell.shellPath("assets/tailscale_on.png")
+                : Quickshell.shellPath("assets/tailscale_off.png")
         }
 
         StyledText {

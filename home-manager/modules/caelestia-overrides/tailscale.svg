@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <!-- Tailscale brand mark (WF-13). Monochrome — the shell's ColouredIcon
-       Colouriser (MultiEffect colorization: 1) recolors the opaque pixels to
-       m3success (up) / m3outline (down), preserving this alpha. Three rounded
-       squares in an L is the recognizable tailscale "nodes" mark. -->
-  <rect x="1.5" y="1.5" width="9" height="9" rx="2.4" fill="#ffffff"/>
-  <rect x="13.5" y="1.5" width="9" height="9" rx="2.4" fill="#ffffff"/>
-  <rect x="1.5" y="13.5" width="9" height="9" rx="2.4" fill="#ffffff"/>
-</svg>

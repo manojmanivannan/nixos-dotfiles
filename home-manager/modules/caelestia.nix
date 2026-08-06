@@ -89,12 +89,15 @@ let
       #                                  from Content.qml as `TailscalePopout`
       #                                  (same-dir implicit import, like the
       #                                  Network/Battery popouts).
-      # assets/tailscale.svg          — monochrome brand mark; ColouredIcon's
-      #                                  Colouriser (MultiEffect colorization:1)
-      #                                  recolors it m3success/m3outline.
+      # assets/tailscale_{on,off}.png — brand marks; the bar icon (an Image in
+      #                                  the StatusIcons patch) swaps between
+      #                                  them on Tailscale.up, so the colour
+      #                                  (green/grey) is baked into the PNGs
+      #                                  rather than applied at runtime.
       cp ${./caelestia-overrides/Tailscale.qml} services/Tailscale.qml
       cp ${./caelestia-overrides/TailscalePopout.qml} modules/bar/popouts/TailscalePopout.qml
-      cp ${./caelestia-overrides/tailscale.svg} assets/tailscale.svg
+      cp ${./caelestia-overrides/tailscale_on.png} assets/tailscale_on.png
+      cp ${./caelestia-overrides/tailscale_off.png} assets/tailscale_off.png
       # --fuzz=0: the patches are exact against the pinned v2.2.0 source; fail
       # cleanly (build red) rather than fuzz-applying if upstream drifts.
       patch -p1 --fuzz=0 < ${./caelestia-overrides/0001-statusicons-tailscale.patch}
