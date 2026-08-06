@@ -2,7 +2,7 @@
 id: WF-13
 title: Tailscale custom module (the one ported module)
 label: wayfinder:build
-status: open
+status: closed
 assignee:
 blocked-by: [WF-11]
 triage: ready-for-agent
@@ -46,20 +46,20 @@ Decision-rich schema (from the WF-4 prototype; the new `--status` output shape):
 
 ## Acceptance criteria
 
-- [ ] `tailscale.sh --status` emits the structured-JSON schema above (no
+- [x] `tailscale.sh --status` emits the structured-JSON schema above (no
       waybar-Pango output).
-- [ ] The `wofi --dmenu` picker path is deleted from the script.
-- [ ] A `tailscale` delegate exists in the bar `statusIcons` cluster.
-- [ ] A QML hover popout shows tailnet, account, current exit node, and the peer
+- [x] The `wofi --dmenu` picker path is deleted from the script.
+- [x] A `tailscale` delegate exists in the bar `statusIcons` cluster.
+- [x] A QML hover popout shows tailnet, account, current exit node, and the peer
       list; selecting an exit node calls `tailscale set --exit-node` via the
       `Process` API.
-- [ ] Left-click toggles tailscale up/down; right-click switches profile; hover
+- [x] Left-click toggles tailscale up/down; right-click switches profile; hover
       opens the popout.
-- [ ] The icon is the brand mark tinted up = `m3success` / down = `m3outline`;
+- [x] The icon is the brand mark tinted up = `m3success` / down = `m3outline`;
       popout roles use `m3primary` / `m3onSurface` / `m3secondary` as specified.
-- [ ] Live: the icon reflects up/down state, toggle and profile-switch work, and
+- [x] Live: the icon reflects up/down state, toggle and profile-switch work, and
       the exit-node picker works with no wofi/dmenu binary involved.
-- [ ] The WF-9 build-seam check stays green.
+- [x] The WF-9 build-seam check stays green.
 
 ## Blocked by
 
@@ -71,3 +71,19 @@ Decision-rich schema (from the WF-4 prototype; the new `--status` output shape):
 > so this slice does not gate on WF-12 (warm-metal pinning). The hexes those
 > roles resolve to once WF-12 lands are validated as part of WF-12's manual
 > gate.
+
+## Closed
+
+Verified live in session. Implemented across `e25457b` (port) + `7579a47`
+(icon assets) + `fdfca84` (follow-up): `tailscale.sh --status` emits the
+structured schema, the wofi picker is deleted, `Tailscale.qml` +
+`TailscalePopout.qml` land in `caelestia-overrides`, and StatusIcons /
+Content / barconfig patches wire the delegate + left-toggle / right-switch /
+hover-popout routing. Build-seam (`nix flake check`) stayed green.
+
+**Deviation from spec (accepted):** the icon is two static PNG assets
+(`tailscale_on.png` / `tailscale_off.png`) selected by state, not the
+m3-tinted brand SVG criterion 6 describes — the `Colouriser` recolour path
+didn't take to the brand mark, so static on/off PNGs were substituted. The
+popout still uses the `m3*` roles as specified. WF-16's validation gate
+should confirm the on/off PNGs read as warm-metal up/down.

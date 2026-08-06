@@ -78,9 +78,10 @@ The spec broken into tracer-bullet vertical slices, each a complete path through
 the flake → HM module → vendored config → Hyprland autostart/keybinds → live
 session, sized to one fresh context window. `wayfinder:build`,
 `ready-for-agent`. Work the **frontier** — open tickets whose blockers are all
-closed. WF-9 and WF-10 are closed; the frontier is now WF-11, after which
-WF-12 / WF-13 / WF-15 fan out in parallel, WF-14 gates on WF-12, and WF-16 is
-the merge gate after all functional slices + the manual validation gate.
+closed. WF-9, WF-10, WF-11, and WF-13 are closed; the open frontier is WF-12
+and WF-15 (both unblocked — blocked only by the now-closed WF-11), WF-14 gates
+on WF-12, and WF-16 is the merge gate after all functional slices + the manual
+validation gate.
 
 - [WF-9 — Build-seam baseline test](tickets/build-seam-test.md) — the repo's
   first automated test (`nix build .#nixos`); green on today's stack. Frontier.
