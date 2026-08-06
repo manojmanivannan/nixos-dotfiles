@@ -4,7 +4,8 @@ let
   dotfiles = "${config.home.homeDirectory}/nixos-dotfiles/config/.config";
   create_symlink = path: config.lib.file.mkOutOfStoreSymlink path;
 
-  # Standard .config/directory
+  # Standard .config/directory (recursive symlinks). Nested paths are
+  # fine — the key is just the xdg.configFile target name.
   configs = {
     hypr = "hypr";
     waybar = "waybar";
@@ -16,6 +17,13 @@ let
     zsh = "zsh"; # ~/.config/zsh holds the sourced zshrc_addon.zsh loader
                  # and its zshrc.d/ snippets (functions, git, aliases, exports).
                  # Sourced from programs.zsh.initContent in home-manager/modules/zsh.nix.
+    # Caelestia `scheme/` tree (WF-10) — recursive, like the entries above.
+    # Scoped to just the scheme dir (not a whole `caelestia` entry) so it
+    # never collides with the HM-generated ~/.config/caelestia/shell.json
+    # (the `programs.caelestia` module writes that when `settings` is
+    # non-empty — see home-manager/modules/caelestia.nix). WF-12 authors
+    # the vendored warm-metal scheme.json here.
+    "caelestia/scheme" = "caelestia/scheme";
   };
 
   # Single-file config symlinks — manage just the file, not the whole
@@ -40,6 +48,16 @@ let
     # `starship init zsh` from programs.zsh.initContent instead of using HM's
     # programs.starship, so HM never manages this file — the symlink wins.
     "starship.toml" = "starship.toml";
+    # Caelestia runtime config (WF-10). The two flat files the shell
+    # reads but the HM module does NOT manage. Kept as single-file
+    # entries (not a recursive entry) so they do NOT collide with the
+    # HM-generated ~/.config/caelestia/shell.json — the `programs.caelestia`
+    # module writes shell.json when `settings` is non-empty (see
+    # home-manager/modules/caelestia.nix). The `scheme/` tree is a
+    # directory, so it lives in the recursive `configs` map above. WF-12
+    # fills in the real warm-metal payload; these are placeholders for now.
+    "caelestia/shell-tokens.json" = "caelestia/shell-tokens.json";
+    "caelestia/hypr-user.conf" = "caelestia/hypr-user.conf";
   };
 in
 

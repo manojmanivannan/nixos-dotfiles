@@ -1,5 +1,6 @@
 {
   imports = [
+    ./caelestia.nix
     ./claude.nix
     ./dotfiles-symlinks.nix
     ./nas-backup.nix

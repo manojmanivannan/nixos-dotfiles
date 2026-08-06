@@ -7,6 +7,22 @@
     hyprland.url = "github:hyprwm/Hyprland";
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    # WF-10 — the quickshell full shell. Fork `caelestia-dots/shell` @
+    # v2.2.0 (Hyprland-native, full-shell, ships its own Nix flake + HM
+    # module `programs.caelestia`). Pointed at upstream until the
+    # snapshot-and-diverge fork exists (WF-1); the URL is the only thing
+    # that changes then.
+    #
+    # Deliberately NO `inputs.nixpkgs.follows`: caelestia targets
+    # `nixos-unstable` and its C++/CMake plugin builds against its own
+    # `quickshell` + Qt6. Forcing this repo's `nixos-26.05` nixpkgs via
+    # `follows` would make the plugin compile against 26.05's Qt6 while
+    # quickshell ships its own — a Qt ABI mismatch risk (the spec's
+    # riskiest build-phase item). Dropping `follows` lets caelestia pull
+    # its own nixpkgs (larger closure, but the toolchain upstream tests
+    # against). Confirm the build stays green — WF-10 build-phase risk #1.
+    caelestia-shell.url = "github:caelestia-dots/shell/v2.2.0";
   };
 
   outputs = { nixpkgs, home-manager, ... }@inputs:
