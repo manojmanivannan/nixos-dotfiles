@@ -1,4 +1,15 @@
 {
+  // WF-15 — the custom waybar scripts (cava/sysinfo/disk/weather/netspeed/
+  // autoreload + the waybar tailscale copy, relocated to caelestia/scripts/ in
+  // WF-13) are retired: caelestia's dashboard built-ins now cover cava (native
+  // CavaProvider), CPU/GPU/mem/temp (Performance tab), disk (Storage card),
+  // weather (Weather tab + widget), and media (Media tab, so the waybar `mpris`
+  // module is gone too). The tailscale status icon is caelestia's ported module
+  // (WF-13), not this bar. The custom/* modules and now-empty groups that
+  // referenced those scripts are removed so nothing here points at deleted
+  // files. This config is the main-branch fallback bar; on the `quickshell`
+  // branch caelestia.service is the shell and waybar is not launched, and the
+  // whole waybar dir is removed in WF-16.
   "reload_style_on_change": true,
   "layer": "top",
   "position": "top",
@@ -10,8 +21,6 @@
   "modules-left": [
     "hyprland/workspaces",
     "hyprland/window",
-    "mpris",
-    "custom/cava"
   ],
   "modules-center": [
     "group/center"
@@ -20,19 +29,13 @@
     "tray",
     "group/audio",
     "group/net",
-    "group/mem",
-    "group/sys",
-    "group/gpu",
-    "group/disk",
     "custom/notification",
     "custom/power"
   ],
   "group/center": {
     "orientation": "horizontal",
     "modules": [
-      "custom/weather",
       "clock"
-      //      "custom/netspeed"
     ]
   },
   "hyprland/workspaces": {
@@ -52,34 +55,6 @@
     "icon-size": 14,
     "icon": true
   },
-  // Now-playing pill (left, after window title). Auto-discovers any
-  // MPRIS-capable player via playerctl — no script needed.
-  "mpris": {
-    "format": "{status_icon} {artist} - {title}",
-    "format-paused": "{status_icon} {artist} - {title}",
-    "format-stopped": "",
-    "status-icons": {
-      "playing": "",
-      "paused": "",
-      "stopped": ""
-    },
-    "max-length": 50,
-    "ignored": "",
-    "on-click": "playerctl play-pause",
-    "on-click-right": "playerctl next",
-    "on-scroll-up": "playerctl volume 0.05+",
-    "on-scroll-down": "playerctl volume 0.05-"
-  },
-  // Cava audio spectrum (left, after the now-playing track). scripts/cava.sh
-  // streams Nerd Font block-character bars at ~30fps as a long-running exec
-  // (read continuously like the swaync bell). Auto-collapses with class
-  // "silent" when nothing is playing — see style.css `#custom-cava.silent`.
-  "custom/cava": {
-    "exec": "$HOME/.config/waybar/scripts/cava.sh",
-    "return-type": "json",
-    "format": "{}",
-    "tooltip": false
-  },
   // Grouped status pills (right side). Each group renders as one rounded
   // pill with separator-divided children; see style.css `#group-*`.
   "group/audio": {
@@ -93,35 +68,6 @@
     "modules": [
       "network",
       // "bluetooth",
-      "custom/tailscale"
-    ]
-  },
-  "group/mem": {
-    "orientation": "horizontal",
-    "modules": [
-      "custom/mem"
-    ]
-  },
-  "group/sys": {
-    "orientation": "horizontal",
-    "modules": [
-      "custom/cpu",
-      "custom/cpu-temp"
-    ]
-  },
-  "group/gpu": {
-    "orientation": "horizontal",
-    "modules": [
-      "custom/gpu",
-      "custom/gpu-temp"
-    ]
-  },
-  // Root filesystem usage — its own pill in the right resource cluster, after
-  // the GPU group. See style.css `#group-disk`.
-  "group/disk": {
-    "orientation": "horizontal",
-    "modules": [
-      "custom/disk"
     ]
   },
   // Notification bell — swaync bridge. `swaync-client -swb` subscribes and
@@ -135,18 +81,6 @@
     "tooltip": false,
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw"
-  },
-  // Weather pill, grouped with the clock in the center (group/center).
-  // wttr.in geo-locates by IP — no key, no location config. Cached + fault
-  // tolerant (see scripts/weather.sh). Slow interval: weather barely changes.
-  "custom/weather": {
-    "exec": "$HOME/.config/waybar/scripts/weather.sh",
-    "interval": 600,
-    "return-type": "json",
-    "format": "{}",
-    "tooltip": true,
-    "on-click": "xdg-open https://wttr.in",
-    "on-click-right": "$HOME/.config/waybar/scripts/weather.sh"
   },
   "clock": {
     "format": "  {:%H:%M  %d %b}",
@@ -200,91 +134,6 @@
     "tooltip-format-disconnected": "Offline",
     "interval": 3,
     "on-click": "nm-connection-editor"
-  },
-  // "bluetooth": {
-  //   "format": "",
-  //   "format-disabled": "",
-  //   "format-off": "",
-  //   "format-connected": "  {num_connections}",
-  //   "format-no-controller": "",
-  //   "tooltip-format": "{num_connections} device(s) connected",
-  //   "on-click": "blueman-manager"
-  // },
-  // Tailscale pill (last segment of group/net): the tailscale logo as a CSS
-  // background-image (on/off PNG by class — see style.css `#custom-tailscale`).
-  // Left-click toggles up/down; right-click switches between the two accounts
-  // in PROFILES; middle-click opens a wofi menu to pick an exit node (or None).
-  // exec-on-event refreshes the icon instantly on click instead of waiting
-  // for `interval`. No sudo — the user is the tailscale operator (set in
-  // nixos/modules/networking/vpn.nix). Inspired by
-  // federicovolponi/waybar-tailscale; adapted to this warm-metal bar.
-  "custom/tailscale": {
-    "exec": "$HOME/.config/waybar/scripts/tailscale.sh --status",
-    "return-type": "json",
-    "format": "    {icon}",
-    "format-icons": {
-      "connected": "󱠾 󰕥 ",
-      "stopped": "󱠾  "
-    },
-    "interval": 5,
-    "tooltip": true,
-    "exec-on-event": true,
-    "on-click": "$HOME/.config/waybar/scripts/tailscale.sh --toggle",
-    "on-click-right": "$HOME/.config/waybar/scripts/tailscale.sh --switch-profile"
-  },
-  // Live network throughput, grouped with the clock in the center (to its
-  // right). scripts/netspeed.sh keeps a state file so each run is instant;
-  // interval=1 gives ~1s updates with no in-script sleep.
-  "custom/netspeed": {
-    "exec": "$HOME/.config/waybar/scripts/netspeed.sh",
-    "return-type": "json",
-    "format": "{}",
-    "interval": 1,
-    "tooltip": true
-  },
-  "custom/cpu": {
-    // 1s-average utilization, padded to 3 chars so the pill never shifts.
-    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh cpu",
-    "interval": 2,
-    "format": "CPU {}%",
-    "on-click": "ghostty -e btop"
-  },
-  "custom/mem": {
-    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh mem",
-    "interval": 5,
-    "format": "MEM {}%",
-    "on-click": "ghostty -e btop"
-  },
-  "custom/cpu-temp": {
-    // k10temp Tctl. The script colors the number red at >=80C via a Pango
-    // span; below that the module CSS color applies. k10temp is found by name
-    // (hwmon indices shift across reboots)
-    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh cputemp",
-    "format": "{}°C  ",
-    "interval": 2
-  },
-  "custom/gpu": {
-    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gpu",
-    "format": "GPU {}%",
-    "interval": 2,
-    "on-click": "ghostty -e nvtop"
-  },
-  "custom/gpu-temp": {
-    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh gputemp",
-    "format": "{}°C ",
-    "interval": 2,
-    "on-click": "ghostty -e nvtop"
-  },
-  // Root filesystem usage, wrapped in group/disk (right, after the GPU
-  // group). Slow interval — disk usage barely moves. scripts/disk.sh emits
-  // the percent for the pill (the `format` adds the "DISK" label, matching
-  // the CPU/MEM/GPU pills) and a used/total/free breakdown for the tooltip.
-  "custom/disk": {
-    "exec": "$HOME/.config/waybar/scripts/disk.sh",
-    "return-type": "json",
-    "format": "DISK {}",
-    "interval": 300,
-    "tooltip": true
   },
   "tray": {
     "icon-size": 16,

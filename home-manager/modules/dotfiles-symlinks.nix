@@ -68,11 +68,10 @@ let
     # singleton (home-manager/modules/caelestia-overrides/Tailscale.qml) shells
     # out to it via Quickshell's Process API at
     # ~/.config/caelestia/scripts/tailscale.sh (Paths.config + "/scripts/").
-    # Out-of-store symlink so edits reload on shell restart. The waybar copy at
-    # config/.config/waybar/scripts/tailscale.sh stays as the main-branch
-    # fallback bar's module (removed with the waybar dir in WF-16). Executable
-    # bit is set in the repo; the QML invokes it via `bash` so the symlink need
-    # not carry the exec bit.
+    # Out-of-store symlink so edits reload on shell restart. This is the sole
+    # copy: WF-15 removed the now-dead waybar scripts directory (the old waybar
+    # tailscale copy went with it). Executable bit is set in the repo; the QML
+    # invokes it via `bash` so the symlink need not carry the exec bit.
     "caelestia/scripts/tailscale.sh" = "caelestia/scripts/tailscale.sh";
   };
 in

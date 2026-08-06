@@ -2,10 +2,10 @@
 id: WF-15
 title: Retire custom scripts into caelestia built-ins
 label: wayfinder:build
-status: open
+status: implemented (live gate pending)
 assignee:
 blocked-by: [WF-11]
-triage: ready-for-agent
+triage: implemented (live gate pending)
 ---
 
 Parent map: [Replace waybar with a quickshell full shell](../MAP.md)
@@ -41,17 +41,40 @@ installed until then.
 
 ## Acceptance criteria
 
-- [ ] `cava.sh`, `sysinfo.sh`, `disk.sh`, `weather.sh`, `netspeed.sh`, and
+- [x] `cava.sh`, `sysinfo.sh`, `disk.sh`, `weather.sh`, `netspeed.sh`, and
       `waybar-autoreload.sh` are removed from the repo.
-- [ ] The waybar `mpris` module is gone (Media tab covers MPRIS).
-- [ ] The old waybar scripts directory is removed once the tailscale script is
+- [x] The waybar `mpris` module is gone (Media tab covers MPRIS).
+- [x] The old waybar scripts directory is removed once the tailscale script is
       relocated (coordinated with WF-13).
 - [ ] Live: cava audio-spectrum, CPU/GPU/mem/temp monitoring, disk usage,
       weather, and media controls all appear in the caelestia dashboard.
-- [ ] Build-time confirm recorded: whether caelestia's Cava shells out to the
+- [x] Build-time confirm recorded: whether caelestia's Cava shells out to the
       `cava` binary, and whether any remaining surface calls `notify-send`.
       (Outputs feed WF-16's `cava`/`libnotify` keep-or-drop.)
-- [ ] The WF-9 build-seam check stays green.
+- [x] The WF-9 build-seam check stays green.
+
+## Build-time confirm — recorded (feeds WF-16)
+
+Inspected the pinned `caelestia-shell` v2.2.0 source in the Nix store
+(`caelestia-shell-1.0.0` + `caelestia-qml-plugin`).
+
+- **`cava` → DROP.** Caelestia's built-in Cava is a native in-process C++ QML
+  type `CavaProvider` (subclass of `AudioProvider`, exports `bars` int +
+  `values` double-list; declared in `caelestia-services.qmltypes`). It does
+  **not** shell out to the `cava` binary: `services/Audio.qml` instantiates
+  `CavaProvider` with no `Process`/binary call, the `caelestia-shell` package
+  has no `cava` runtime dependency, and `caelestia.nix` adds none. The `cava`
+  system package was only the waybar `custom/cava` pill's dependency; with that
+  pill retired, `cava` is unused — WF-16 can drop it.
+- **`libnotify` → KEEP.** Caelestia itself shells out to `notify-send` via
+  `Quickshell.execDetached` in `modules/dashboard/Wrapper.qml` (profile-picture
+  change success/failure toasts) and `modules/areapicker/Picker.qml` (screenshot
+  taken). The ported tailscale script (`config/.config/caelestia/scripts/
+  tailscale.sh`) also calls `notify-send`, guarded by `command -v` so a
+  missing binary degrades gracefully. WF-16 must keep `libnotify`.
+
+`inotify-tools` (the `waybar-autoreload.sh` watcher's dep) is now unused once
+`waybar-autoreload.sh` is deleted; WF-16 drops it as already planned.
 
 ## Blocked by
 

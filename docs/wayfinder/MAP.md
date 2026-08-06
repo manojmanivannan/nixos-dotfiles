@@ -78,10 +78,12 @@ The spec broken into tracer-bullet vertical slices, each a complete path through
 the flake → HM module → vendored config → Hyprland autostart/keybinds → live
 session, sized to one fresh context window. `wayfinder:build`,
 `ready-for-agent`. Work the **frontier** — open tickets whose blockers are all
-closed. WF-9, WF-10, WF-11, and WF-13 are closed; WF-12 and WF-14 are
-implemented (live gate pending); the open frontier is WF-15 (unblocked —
-blocked only by the now-closed WF-11), and WF-16 is the merge gate after all
-functional slices + the manual validation gate.
+closed. WF-9, WF-10, WF-11, and WF-13 are closed; WF-12, WF-14, and WF-15 are
+implemented (live gate pending); WF-16 is the merge gate after all functional
+slices + the manual validation gate. WF-15's build-time confirm landed:
+`cava` → drop (caelestia's Cava is a native `CavaProvider`, no `cava` binary),
+`libnotify` → keep (caelestia's Wrapper.qml + Picker.qml + the tailscale script
+call `notify-send`).
 
 - [WF-9 — Build-seam baseline test](tickets/build-seam-test.md) — the repo's
   first automated test (`nix build .#nixos`); green on today's stack. Frontier.
@@ -110,7 +112,9 @@ functional slices + the manual validation gate.
 - [WF-15 — Retire custom scripts into caelestia built-ins](tickets/retire-custom-scripts.md)
   — drop cava/sysinfo/disk/weather/netspeed/waybar-autoreload + waybar mpris;
   rely on built-in Cava/Performance/Storage/Weather/Media + network popout;
-  build-time `cava`/`libnotify` keep-or-drop feeds WF-16. Blocked by WF-11.
+  build-time `cava`/`libnotify` keep-or-drop feeds WF-16. Implemented: `cava` →
+  drop (native `CavaProvider`), `libnotify` → keep (caelestia + tailscale script
+  call `notify-send`). Blocked by WF-11.
 - [WF-16 — Retirement: atomic merge to main + full removal](tickets/retirement-atomic-merge.md)
   — merge `quickshell`→`main`; remove old launch lines/keybinds, symlink
   entries, config dirs, retired packages (`waybar`/`swaync`/`wofi`/`wlogout`/
