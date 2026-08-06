@@ -79,11 +79,14 @@ the flake → HM module → vendored config → Hyprland autostart/keybinds → 
 session, sized to one fresh context window. `wayfinder:build`,
 `ready-for-agent`. Work the **frontier** — open tickets whose blockers are all
 closed. WF-9, WF-10, WF-11, and WF-13 are closed; WF-12, WF-14, and WF-15 are
-implemented (live gate pending); WF-16 is the merge gate after all functional
-slices + the manual validation gate. WF-15's build-time confirm landed:
-`cava` → drop (caelestia's Cava is a native `CavaProvider`, no `cava` binary),
-`libnotify` → keep (caelestia's Wrapper.qml + Picker.qml + the tailscale script
-call `notify-send`).
+implemented (WF-15's live gate complete; WF-12/WF-14 live gate pending in their
+ticket frontmatter but the user confirmed the full WF-16 validation gate
+passed 2026-08-06). WF-16's full removal landed on `quickshell` (build-seam
+green); the one-way merge to `main` is deferred per user request — `main`
+still carries the old waybar stack as fallback. WF-15's build-time confirm
+landed: `cava` → drop (caelestia's Cava is a native `CavaProvider`, no `cava`
+binary), `libnotify` → keep (caelestia's Wrapper.qml + Picker.qml + the
+tailscale script call `notify-send`).
 
 - [WF-9 — Build-seam baseline test](tickets/build-seam-test.md) — the repo's
   first automated test (`nix build .#nixos`); green on today's stack. Frontier.
@@ -118,8 +121,10 @@ call `notify-send`).
 - [WF-16 — Retirement: atomic merge to main + full removal](tickets/retirement-atomic-merge.md)
   — merge `quickshell`→`main`; remove old launch lines/keybinds, symlink
   entries, config dirs, retired packages (`waybar`/`swaync`/`wofi`/`wlogout`/
-  `hyprlock`/`inotify-tools`; `cava`/`libnotify` iff WF-15 confirms unused).
-  Blocked by WF-12, WF-13, WF-14, WF-15 + the manual validation gate.
+  `hyprlock`/`inotify-tools`; `cava` dropped, `libnotify` kept per WF-15).
+  Cleanup landed on `quickshell` (build-seam green); merge to `main` deferred
+  per user 2026-08-06. Blocked by WF-12, WF-13, WF-14, WF-15 + the manual
+  validation gate (gate passed; merge pending).
 
 ## Not yet specified
 
