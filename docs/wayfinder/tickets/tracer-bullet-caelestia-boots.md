@@ -2,10 +2,10 @@
 id: WF-11
 title: Tracer bullet — caelestia boots as the shell
 label: wayfinder:build
-status: open
+status: closed
 assignee:
 blocked-by: [WF-10]
-triage: implemented (live gate pending)
+triage: implemented (live gate completed)
 ---
 
 Parent map: [Replace waybar with a quickshell full shell](../MAP.md)
@@ -52,7 +52,7 @@ surfaces open via the existing keys.
       center, launcher, and power menu via Hyprland global shortcuts.
 - [x] `quickshell:*` / `caelestia-drawers` layer rules are in place; the dead
       `SUPER+R` and `SUPER+M` binds are gone.
-- [ ] Live: a caelestia bar renders, and the launcher / notification center /
+- [x] Live: a caelestia bar renders, and the launcher / notification center /
       OSD / power menu each open via their key and are usable.
 - [x] The WF-9 build-seam check stays green.
 - [x] `main` is untouched and still a working waybar fallback (checkout +
