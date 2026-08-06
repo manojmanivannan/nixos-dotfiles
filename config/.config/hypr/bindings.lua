@@ -33,6 +33,10 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 -- Power / session menu (WF-11). Was wlogout --protocol layer-shell (wlogout
 -- retires in the WF-16 merge).
 hl.bind(mainMod .. " + ESCAPE", hl.dsp.global(caelestia.session))
+-- Direct lock (WF-14). Skips the session menu and goes straight to caelestia's
+-- `Lock` module via logind's `Lock` signal — same path the menu's Lock button
+-- (caelestia.nix:285) and hypridle's idle/sleep listener take.
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
 
 
 -- Move focus with mainMod + arrow keys
