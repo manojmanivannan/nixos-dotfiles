@@ -70,6 +70,17 @@ let
       sed -i 's|emit saveFailed(err, m_screen);|if (!file.errorString().contains("Read-only file system")) emit saveFailed(err, m_screen);|' \
         plugin/src/Caelestia/Config/rootconfig.cpp
 
+      # Drop the rotating GIF (an animated image — the default caelestia
+      # "sessionGif", an anime-girl spin) wedged between the Shutdown and
+      # Hibernate buttons in modules/session/Content.qml. There's no config
+      # flag to hide it (only `general.sessionGifSpeed` to freeze a frame and
+      # `paths.sessionGif` to swap the asset), so patch the QML: delete the
+      # whole `AnimatedImage { … }` block (4-space-indented, lines 52-62 in
+      # the pinned v2.2.0 source). The two flanking SessionButtons collapse
+      # together; KeyNavigation.shutdown→hibernate still chains since it
+      # references the `hibernate` id, not the removed item.
+      sed -i '/^    AnimatedImage {/,/^    }$/d' modules/session/Content.qml
+
       # WF-13 — the tailscale custom module (the one ported module). Ships the
       # new QML + brand asset into the source tree and patches the existing
       # StatusIcons / Content / barconfig.hpp to wire them in. The new files
@@ -159,6 +170,12 @@ in
       # (path.txt pre-populated, Nexus page removed, regen launcher actions
       # dropped) — see the activation script below + the package postPatch.
       services.smartScheme = false;
+
+      # Weather temperatures in Celsius. Caelestia's Weather service formats
+      # via `GlobalConfig.services.useFahrenheit` (services/Weather.qml:30, and
+      # the LanguageAndRegion Nexus page binds the same key). Stated
+      # explicitly to pin Celsius rather than rely on the (false) default.
+      services.useFahrenheit = false;
 
       appearance.transparency = {
         # Transparency is the lever that makes the shell glassy and — via
@@ -329,4 +346,13 @@ in
     # wallpaper swaybg launches.
     $DRY_RUN_CMD echo "${wallpaperPath}" > "$HOME/.local/state/caelestia/wallpaper/path.txt"
   '';
+
+  # Profile picture. Caelestia's dashboard (modules/dashboard/dash/User.qml)
+  # and lock screen (modules/lock/center/ProfilePic.qml) both source the avatar
+  # from `${Paths.home}/.face` — there is no shell.json config key for it, the
+  # Nexus "Select a profile picture" picker just `CUtils.copyFile`s the chosen
+  # image to `~/.face`. Pin the repo's
+  # caelestia-overrides/profile_picture.jpg there via HM so it's managed
+  # (symlinked from the store, reproducible) rather than a loose runtime copy.
+  home.file.".face".source = ./caelestia-overrides/profile_picture.jpg;
 }
