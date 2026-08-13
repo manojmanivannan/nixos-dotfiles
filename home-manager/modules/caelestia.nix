@@ -213,6 +213,28 @@ in
       # "graphical-session.target", the target uwsm activates for this
       # Hyprland session (`programs.hyprland.withUWSM = true`). Confirmed
       # activating under uwsm in WF-11; no fallback needed.
+
+      # Qt Quick render-thread + continuous-update so the shell's own UI
+      # (drawers, toasts, the bongo-cat, animated widgets) tracks the
+      # monitor's refresh rate instead of stalling at ~60Hz / below. On
+      # NVIDIA (the RTX 4090 here) the default QSG render loop lets the
+      # compositor-bound shell surface cap below the display rate, so the
+      # panel feels choppy even though hyprctl reports 3840x2160@60. The
+      # upstream fix for this is caelestia-dots/shell#431, which sets these
+      # two env vars on the `caelestia shell -d` launch line — here the
+      # shell runs as a systemd user service (above), so the vars go into
+      # the unit's `Environment=` via the upstream module's
+      # `programs.caelestia.systemd.environment` option (appended after the
+      # module's own `QT_QPA_PLATFORM=wayland`). `QSG_RENDER_LOOP=threaded`
+      # moves scene graph rendering off the GUI thread; `QT_QUICK_CONTINUOUS_UPDATE=1`
+      # keeps the render loop pumping vsync-driven frames so animations
+      # don't gate on input/paint events. Both are effective only for the
+      # shell process, so a unit-scoped env is the right scope (no need to
+      # pollute the session env).
+      environment = [
+        "QSG_RENDER_LOOP=threaded"
+        "QT_QUICK_CONTINUOUS_UPDATE=1"
+      ];
     };
 
     # WF-12 theming payload. `settings` is merged (lib.recursiveUpdate) over
