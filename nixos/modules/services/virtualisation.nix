@@ -23,6 +23,18 @@
 
   virtualisation.docker.enable = true;
 
+  # Virt-manager / libvirtd — graphical VM management (libvirt + QEMU/KVM).
+  # See https://wiki.nixos.org/wiki/Virt-manager
+  virtualisation.libvirtd = {
+    enable = true;
+    # virtiofsd lets a VM share a host directory via the virtio-fs device.
+    qemu.vhostUserPackages = with pkgs; [ virtiofsd ];
+  };
+  programs.virt-manager.enable = true;
+  # Membership in `libvirtd` lets the user talk to the libvirt socket without a
+  # polkit password prompt each time.
+  users.extraGroups.libvirtd.members = [ user ];
+
   # Enable Podman
   virtualisation.podman = {
     enable = false;
@@ -54,5 +66,8 @@
     docker-compose
     lazydocker
     docker-credential-helpers
+
+    # dnsmasq provides DNS/DHCP for libvirt's default (NAT) network.
+    dnsmasq
   ];
 }
