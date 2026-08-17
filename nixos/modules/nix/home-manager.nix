@@ -21,6 +21,11 @@
   # self`), so it is a ready-to-use HM module — no `self` needed here.
   home-manager.sharedModules = [
     inputs.caelestia-shell.homeManagerModules.default
+    # `homeModules.default` is the canonical path; `homeManagerModules.default`
+    # is a deprecated alias that prints a build-time warning. The module
+    # defaults to disabled, so this is inert until a per-user module enables
+    # it (home-manager/modules/try.nix).
+    inputs.try.homeModules.default
   ];
 
   home-manager.users.${user} = import ../../../home-manager/home.nix;

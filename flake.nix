@@ -23,6 +23,13 @@
     # its own nixpkgs (larger closure, but the toolchain upstream tests
     # against). Confirm the build stays green — WF-10 build-phase risk #1.
     caelestia-shell.url = "github:caelestia-dots/shell/v2.2.0";
+
+    # try — a single-file Ruby CLI (tobi/try) for spinning up date-prefixed
+    # experiment dirs (`2025-08-17-redis-experiment`) with fuzzy navigation.
+    # Ships its own Nix flake + HM module `programs.try` that auto-wires
+    # `eval "$(try init <path>)"` into zsh's initContent. Enabled per-user in
+    # home-manager/modules/try.nix with experiments at ~/Experiments.
+    try.url = "github:tobi/try";
   };
 
   outputs = { nixpkgs, home-manager, ... }@inputs:

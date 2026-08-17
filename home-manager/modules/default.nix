@@ -17,5 +17,6 @@
     ./bat.nix
     ./lazygit.nix
     ./yazi.nix
+    ./try.nix
   ];
 }
