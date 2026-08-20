@@ -42,7 +42,9 @@ is_up() { tailscale status --json 2>/dev/null | jq -e '.BackendState == "Running
 # Structured-JSON --status — the schema the QML popout binds to:
 #   { up, loginName, tailnet, exitNode, exitNodes[], peers[] }
 #   exitNodes[]: { name, fqdn } — peers advertising ExitNodeOption (picker rows)
-#   peers[]:     { name, ip, online } — every peer (the peer list)
+#   peers[]:     { name, fqdn, ip, online } — every peer (the peer list); fqdn
+#                is the peer's full MagicDNS name, copied to the clipboard on
+#                click in the QML popout (machine name + tailnet)
 # Derived from the single `tailscale status --json` parse (same source the
 # waybar version used); the warm-metal colouring moved to QML (Colours roles),
 # so no Pango/tooltip colours are emitted here.
@@ -66,6 +68,7 @@ emit_status() {
           | { name: (.DNSName | split(".")[0]), fqdn: (.DNSName | sub("\\.$";"")) } ] ) as $exitNodes
     | ( [ .Peer[]?
           | { name: (.DNSName | split(".")[0]),
+              fqdn: (.DNSName | sub("\\.$";"")),
               ip: ((.TailscaleIPs // [])[0] // ""),
               online: (.Online // false) } ] ) as $peers
     | { up: $up, loginName: $loginName, tailnet: $tailnet,

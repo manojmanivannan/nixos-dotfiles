@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -124,41 +125,15 @@ ColumnLayout {
         font: Tokens.font.body.small
     }
 
+    // The peer list. Each row is clickable: clicking a peer copies its FQDN
+    // (machine name + tailnet, i.e. the peer's full MagicDNS name) to the
+    // clipboard via wl-copy — the same execDetached pattern CalcItem.qml uses.
+    // PeerRow mirrors ExitNodeRow's StyledRect + StateLayer + RowLayout shape.
     Repeater {
         model: Tailscale.peers
 
-        RowLayout {
-            required property var modelData
-
+        PeerRow {
             Layout.fillWidth: true
-            Layout.leftMargin: Tokens.padding.extraSmall
-            Layout.rightMargin: Tokens.padding.extraSmall
-            spacing: Tokens.spacing.small
-
-            Rectangle {
-                Layout.alignment: Qt.AlignVCenter
-
-                implicitWidth: 8
-                implicitHeight: 8
-                radius: 4
-
-                color: modelData.online ? Colours.palette.m3success : Colours.palette.m3outline
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                text: modelData.name
-                color: modelData.online ? Colours.palette.m3success : Colours.palette.m3outline
-                font: Tokens.font.body.small
-                elide: Text.ElideRight
-            }
-
-            StyledText {
-                text: modelData.ip
-                color: modelData.online ? Colours.palette.m3success : Colours.palette.m3outline
-                font: Tokens.font.body.small
-                horizontalAlignment: Text.AlignRight
-            }
         }
     }
 
@@ -230,6 +205,78 @@ ColumnLayout {
                 color: row.selected ? Colours.palette.m3secondary : Colours.palette.m3onSurface
                 font: Tokens.font.body.small
                 elide: Text.ElideRight
+            }
+        }
+    }
+
+    // A peer row. Same StyledRect + StateLayer + RowLayout shape as ExitNodeRow,
+    // but transparent (no selection state) — clicking copies the peer's FQDN
+    // (machine name + tailnet) to both Wayland selections and toasts confirmation.
+    // We shell out to wl-copy rather than using Quickshell.clipboardText for two
+    // reasons: (1) Quickshell's singleton has no primary-selection property, so
+    // the primary buffer (Super+V / middle-click paste) needs `wl-copy --primary`
+    // anyway; (2) under Wayland clipboardText is empty unless a Quickshell window
+    // is focused, and this hover popout loses focus on click. wl-copy is the
+    // pattern CalcItem.qml uses and is confirmed working here. StateLayer gives
+    // hover/press feedback so the click is discoverable even with no background.
+    component PeerRow: StyledRect {
+        id: row
+
+        required property var modelData
+
+        readonly property string name: modelData.name
+        readonly property string fqdn: modelData.fqdn
+        readonly property string ip: modelData.ip
+        readonly property bool online: modelData.online
+
+        Layout.fillWidth: true
+        implicitHeight: peerRow.implicitHeight + Tokens.padding.small
+
+        radius: Tokens.rounding.full
+        color: "transparent"
+
+        StateLayer {
+            color: Colours.palette.m3onSurface
+            onClicked: {
+                // Clipboard selection (Ctrl+V / Ctrl+Shift+V) + primary selection
+                // (Super+V / middle-click), so the FQDN pastes either way.
+                Quickshell.execDetached(["wl-copy", row.fqdn]);
+                Quickshell.execDetached(["wl-copy", "--primary", row.fqdn]);
+                Toaster.toast(qsTr("Copied"), qsTr("%1 copied to clipboard").arg(row.fqdn), "content_copy", Toast.Success);
+            }
+        }
+
+        RowLayout {
+            id: peerRow
+
+            anchors.fill: parent
+            anchors.leftMargin: Tokens.padding.small
+            anchors.rightMargin: Tokens.padding.small
+            spacing: Tokens.spacing.small
+
+            Rectangle {
+                Layout.alignment: Qt.AlignVCenter
+
+                implicitWidth: 8
+                implicitHeight: 8
+                radius: 4
+
+                color: row.online ? Colours.palette.m3success : Colours.palette.m3outline
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: row.name
+                color: row.online ? Colours.palette.m3success : Colours.palette.m3outline
+                font: Tokens.font.body.small
+                elide: Text.ElideRight
+            }
+
+            StyledText {
+                text: row.ip
+                color: row.online ? Colours.palette.m3success : Colours.palette.m3outline
+                font: Tokens.font.body.small
+                horizontalAlignment: Text.AlignRight
             }
         }
     }
