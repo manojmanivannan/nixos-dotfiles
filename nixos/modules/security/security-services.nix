@@ -69,10 +69,6 @@
         executable = "${lib.getBin pkgs.telegram-desktop}/bin/Telegram";
         profile = "${pkgs.firejail}/etc/firejail/Telegram.profile";
       };
-      brave = {
-        executable = "${lib.getBin pkgs.brave}/bin/brave";
-        profile = "${pkgs.firejail}/etc/firejail/brave.profile";
-      };
       qutebrowser = {
         executable = "${lib.getBin pkgs.qutebrowser}/bin/qutebrowser";
         profile = "${pkgs.firejail}/etc/firejail/qutebrowser.profile";

@@ -4,18 +4,22 @@ let
   dotfiles = "${config.home.homeDirectory}/nixos-dotfiles/config/.config";
   create_symlink = path: config.lib.file.mkOutOfStoreSymlink path;
 
-  # Standard .config/directory
+  # Standard .config/directory (recursive symlinks). Nested paths are
+  # fine — the key is just the xdg.configFile target name.
   configs = {
     hypr = "hypr";
-    waybar = "waybar";
-    wlogout = "wlogout";
-    swaync = "swaync";
-    wofi = "wofi";
     ghostty = "ghostty";
     eza = "eza"; # auto-loads theme.yml for colors/icons
     zsh = "zsh"; # ~/.config/zsh holds the sourced zshrc_addon.zsh loader
                  # and its zshrc.d/ snippets (functions, git, aliases, exports).
                  # Sourced from programs.zsh.initContent in home-manager/modules/zsh.nix.
+    # NOTE: caelestia's scheme is deliberately NOT symlinked here. The shell
+    # reads ~/.local/state/caelestia/scheme.json (services/Colours.qml:
+    # `${Paths.state}/scheme.json`), NOT ~/.config/caelestia/scheme/ — the
+    # WF-10 placeholder symlinked the wrong path. WF-12 delivers the
+    # vendored warm-metal scheme.json to state via an activation script in
+    # home-manager/modules/caelestia.nix (state is outside xdg.configFile's
+    # reach). The repo source lives at config/.config/caelestia/scheme/.
   };
 
   # Single-file config symlinks — manage just the file, not the whole
@@ -40,6 +44,31 @@ let
     # `starship init zsh` from programs.zsh.initContent instead of using HM's
     # programs.starship, so HM never manages this file — the symlink wins.
     "starship.toml" = "starship.toml";
+    # Caelestia runtime config (WF-10). The two flat files the shell reads
+    # from ~/.config/caelestia/ that the HM module does NOT manage. Kept as
+    # single-file entries (not a recursive entry) so they do NOT collide
+    # with the HM-generated ~/.config/caelestia/shell.json — the
+    # `programs.caelestia` module writes shell.json when `settings` is
+    # non-empty (see home-manager/modules/caelestia.nix). The vendored
+    # scheme.json is NOT here — the shell reads it from state
+    # (~/.local/state/caelestia/scheme.json), delivered by an activation
+    # script in caelestia.nix. shell-tokens.json is intentionally `{}` (all
+    # defaults) for WF-12 — the fancy motion levers (curves/durations/
+    # rounding/spacing) ship caelestia's curated defaults; the warm-metal
+    # identity comes from the scheme, not custom tokens (see
+    # config/.config/caelestia/README.md).
+    "caelestia/shell-tokens.json" = "caelestia/shell-tokens.json";
+    "caelestia/hypr-user.conf" = "caelestia/hypr-user.conf";
+    # WF-13 — the one ported custom module. tailscale logic stays in the script
+    # (no JS reimplementation — standing decision #6); caelestia's Tailscale QML
+    # singleton (home-manager/modules/caelestia-overrides/Tailscale.qml) shells
+    # out to it via Quickshell's Process API at
+    # ~/.config/caelestia/scripts/tailscale.sh (Paths.config + "/scripts/").
+    # Out-of-store symlink so edits reload on shell restart. This is the sole
+    # copy: WF-15 removed the now-dead waybar scripts directory (the old waybar
+    # tailscale copy went with it). Executable bit is set in the repo; the QML
+    # invokes it via `bash` so the symlink need not carry the exec bit.
+    "caelestia/scripts/tailscale.sh" = "caelestia/scripts/tailscale.sh";
   };
 in
 

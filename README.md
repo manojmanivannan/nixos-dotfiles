@@ -2,14 +2,15 @@
 
 # ❄️ nixos-dotfiles
 
-**A declarative, Flake-driven NixOS + Home Manager setup — Hyprland on Lua, Catppuccin all the way down.**
+**A declarative, Flake-driven NixOS + Home Manager setup — Hyprland on Lua, Caelestia shell, warm-metal all the way down.**
 
 <p>
   <img alt="NixOS" src="https://img.shields.io/badge/NixOS-26.05-5277C3?logo=nixos&logoColor=white">
   <img alt="Flakes" src="https://img.shields.io/badge/Flakes-enabled-8AADF4">
   <img alt="Home Manager" src="https://img.shields.io/badge/Home%20Manager-26.05-8bd5ca">
   <img alt="Hyprland" src="https://img.shields.io/badge/Hyprland-Wayland-a6da95">
-  <img alt="Catppuccin" src="https://img.shields.io/badge/Theme-Catppuccin%20Macchiato-ed8796">
+  <img alt="Shell" src="https://img.shields.io/badge/Shell-Caelestia%20(Quickshell)-d99a9a">
+  <img alt="Theme" src="https://img.shields.io/badge/Theme-Warm%20Metal-e8c272">
   <img alt="License" src="https://img.shields.io/badge/License-MIT-eea4ff">
 </p>
 
@@ -24,7 +25,8 @@
 
 - **Fully declarative** — one Flake rebuilds the entire system and user environment from a single repo.
 - **Hyprland, configured in Lua** via [`hyprlua`](https://github.com/hyprwm/hyprlua) — no 1000-line `hyprland.conf`.
-- **Catppuccin Macchiato** with a teal accent, applied consistently across Hyprland borders, GTK, cursors, the Linux console, and Plymouth.
+- **Caelestia shell** ([Quickshell](https://quickshell.outfoxxed.nl/) full-shell) — owns the bar, notifications, launcher, power menu, **and the lock screen**, replacing waybar / swaync / wofi / wlogout / hyprlock.
+- **Warm-metal theme** — brushed gold / copper / bronze on warm espresso, consistent across Hyprland borders, GTK, Ghostty, and the Linux console (cursors and Plymouth stay Catppuccin-Macchiato-teal until warm variants are adopted).
 - **Aggregated module layout** — `nixos/modules` is grouped into 10 domain subdirectories instead of 50 loose files.
 - **Host-identity decoupling** — clone, change one line, rebuild. No folder renaming.
 - **Hardened by default** — `sudo-rs`, TPM2, Yubikey PAM/u2f, AppArmor + the full LSM stack, kernel hardening.
@@ -51,18 +53,18 @@
 | User env       | Home Manager 26.05 (via `home-manager.nixosModules`)                   |
 | Compositor     | Hyprland (UWSM-managed), configured in **Lua** with `hyprlua`          |
 | Display manager| `greetd` + `tuigreet`                                                  |
-| Bar            | Waybar                                                                 |
-| Notifications  | SwayNC                                                                 |
-| Launcher       | Wofi / Hyprlauncher                                                    |
-| Lock / idle    | Hyprlock + Hypridle                                                    |
-| Logout menu    | Wlogout                                                                |
+| Desktop shell  | Caelestia (Quickshell full-shell) — bar, notifications, launcher, power menu, lock |
+| Launcher       | Caelestia launcher (SUPER+SPACE)                                       |
+| Notifications  | Caelestia sidebar (SUPER+N)                                            |
+| Lock / idle    | Caelestia `Lock` + Hypridle (auto-lock @600s)                          |
+| Power menu     | Caelestia session menu (SUPER+ESC)                                     |
 | Wallpaper      | Swaybg                                                                 |
 | Terminal       | Ghostty                                                                |
 | Shell          | Zsh + Oh-My-Zsh (amuse theme), autosuggestions, syntax highlighting    |
 | Browser        | Google Chrome (SUPER+B)                                                |
-| File manager   | Dolphin                                                                |
+| File manager   | Nautilus (SUPER+E)                                                     |
 | Editor         | Vim                                                                    |
-| Theme          | Catppuccin Macchiato, teal accent                                      |
+| Theme          | Warm-metal (gold/copper/bronze); Catppuccin-Macchiato-teal cursors/Plymouth |
 | Fonts          | JetBrains Mono + Nerd Fonts, Noto Color Emoji                          |
 | Graphics       | NVIDIA (modesetting, container toolkit) + Mesa / VA-API                |
 | Audio          | PipeWire + WirePlumber                                                 |
@@ -104,11 +106,9 @@ nixos-dotfiles/
 └── config/
     ├── .config/              # raw dotfiles (symlinked into ~/.config by Home Manager)
     │   ├── hypr/             #   Hyprland Lua config (monitors, input, bindings, …)
-    │   ├── waybar/           #   bar config + style + sysinfo script
-    │   ├── swaync/           #   notification daemon config + style
-    │   ├── wofi/             #   launcher + exit-prompt styles
-    │   ├── wlogout/          #   logout screen
+    │   ├── caelestia/        #   Caelestia shell runtime config (scheme, tokens, scripts)
     │   ├── ghostty/          #   terminal config
+    │   ├── gtk-3.0/ gtk-4.0/ #   warm-metal GTK overrides (gtk.css)
     │   ├── eza/              #   eza theme.yml (colors + icons)
     │   └── zsh/              #   zshrc_addon.zsh (custom functions)
     └── wallpaper/            # the wallpaper
@@ -132,7 +132,7 @@ nixos/modules/default.nix  ──►  boot/ hardware/ networking/ … users/
 - **`flake.nix`** defines a `hosts` list and folds it into `nixosConfigurations`.
 - **`hosts/<name>/configuration.nix`** is the only host-specific entrypoint; it pulls in the shared module tree and sets `networking.hostName` from the `hostname` special arg.
 - **`nixos/modules/default.nix`** aggregates the 10 category subdirectories — each of which is itself a `default.nix` that imports its own sub-files. Move a file, not ten imports.
-- **`home-manager/modules/dotfiles-symlinks.nix`** symlinks the raw `config/.config/*` directories into `~/.config` with `mkOutOfStoreSymlink`, so edits to Hyprland/Waybar/etc. take effect without a rebuild.
+- **`home-manager/modules/dotfiles-symlinks.nix`** symlinks the raw `config/.config/*` files/directories into `~/.config` with `mkOutOfStoreSymlink`, so edits to Hyprland/Caelestia/etc. take effect without a rebuild. Caelestia itself is launched as a systemd `caelestia.service` (wired in `home-manager/modules/caelestia.nix`), not a Hyprland `exec-once`.
 
 ## ✅ Prerequisites
 
@@ -227,7 +227,7 @@ Most feature modules are plain files — comment out a line in the relevant `def
 
 ### Edit the desktop
 
-Hyprland, Waybar, SwayNC, Wofi, Wlogout, Ghostty, and eza configs live as raw files under `config/.config/` and are symlinked into place — just edit them and reload (e.g. `hyprctl reload`); no rebuild needed for most changes. Hyprland itself is configured in **Lua**, split across `config/.config/hypr/`:
+Hyprland, Caelestia, Ghostty, GTK, and eza configs live as raw files under `config/.config/` and are symlinked into place — just edit them and reload (e.g. `hyprctl reload`, or restart `caelestia.service`); no rebuild needed for most changes. The Caelestia shell's QML overrides live in `home-manager/modules/caelestia-overrides/` (e.g. the ported Tailscale module). Hyprland itself is configured in **Lua**, split across `config/.config/hypr/`:
 
 | File            | Responsibility                                   |
 |-----------------|---------------------------------------------------|
@@ -242,15 +242,21 @@ Hyprland, Waybar, SwayNC, Wofi, Wlogout, Ghostty, and eza configs live as raw fi
 
 `SUPER` = the Windows key.
 
-| Binding                  | Action                          |
-|--------------------------|---------------------------------|
-| `SUPER + Return`         | Open terminal (Ghostty)         |
-| `SUPER + B`              | Open browser (Chrome)           |
-| `SUPER + ESC`            | Logout menu (Wlogout)           |
-| `SUPER + Arrows`         | Move focus                      |
-| `SUPER + [1-0]`          | Switch to workspace             |
-| `SUPER + Shift + [1-0]`  | Move window to workspace        |
-| `SUPER + C / V`          | **Universal copy/paste**        |
+| Binding                  | Action                                      |
+|--------------------------|---------------------------------------------|
+| `SUPER + Return`         | Open terminal (Ghostty)                     |
+| `SUPER + B`              | Open browser (Chrome)                       |
+| `SUPER + E`              | Open file manager (Nautilus)                |
+| `SUPER + Space`          | Launcher (Caelestia)                        |
+| `SUPER + N`              | Notification center / sidebar (Caelestia)   |
+| `SUPER + ESC`            | Power / session menu (Caelestia)            |
+| `SUPER + L`              | Lock screen (Caelestia Lock via logind)     |
+| `SUPER + Q`              | Close window                                |
+| `SUPER + Arrows`         | Move focus                                  |
+| `SUPER + [1-0]`          | Switch to workspace                         |
+| `SUPER + Shift + [1-0]`  | Move window to workspace                    |
+| `SUPER + S`              | Toggle scratchpad (special workspace)       |
+| `SUPER + C / V`          | **Universal copy/paste**                    |
 
 > [!TIP]
 > `SUPER+C`/`SUPER+V` forward to `Ctrl+Insert`/`Shift+Insert` rather than `Ctrl+C`/`Ctrl+V` — the Insert-based combos work in **terminals** too, where `Ctrl+C` is SIGINT, not copy.
@@ -272,15 +278,25 @@ The prompt is a custom one: `<path> <git> <venv> [exit-on-fail]` on the left, `[
 
 ## 🎨 Theming
 
-A single accent runs through the whole system:
+A warm-metal identity runs through the shell and most of the system — brushed
+gold / copper / bronze on warm espresso:
 
-- **Hyprland** — teal (`#8bd5ca`) active borders, `surface2` inactive.
-- **GTK / cursors** — `catppuccin-macchiato-teal-standard`, `Catppuccin-Macchiato-Teal` (xcursor + hyprcursor).
-- **Console** — the Catppuccin Macchiato 16-color palette applied to the Linux console.
-- **Plymouth** — `catppuccin-macchiato` boot splash.
+- **Caelestia shell** — a vendored static warm-metal `scheme.json` (M3 roles),
+  pinned and severed from the CLI regen path so colours stay stable
+  (`home-manager/modules/caelestia.nix`, `config/.config/caelestia/scheme/`).
+- **Hyprland** — warm-metal active borders (literal rgba in `config/.config/hypr/looknfeel.lua`).
+- **GTK** — `adw-gtk3-dark` (GTK3) + libadwaita dark (GTK4), recolored warm-metal
+  by `config/.config/gtk-3.0/gtk.css` and `config/.config/gtk-4.0/gtk.css`.
+- **Ghostty** — warm-metal 16-color palette + `background = #322a21`
+  (`config/.config/ghostty/config`).
+- **Console** — the warm-metal 16-color palette applied to the Linux console.
+- **Cursors / icons / Plymouth** — still Catppuccin-Macchiato-teal
+  (`Catppuccin-Macchiato-Teal` xcursor/hyprcursor, Colloid-teal icons,
+  `catppuccin-macchiato` Plymouth) until warm variants are adopted.
 - **eza** — theme YAML for colored, iconified `ls`.
 
-All theme variables are declared in `nixos/modules/desktop/theme.nix`.
+Theme variables are declared in `nixos/modules/desktop/theme.nix`; the Caelestia
+scheme and tokens are documented in `config/.config/caelestia/README.md`.
 
 ## 📝 Notes & Caveats
 

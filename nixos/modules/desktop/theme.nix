@@ -18,8 +18,9 @@
     earlySetup = true;
     # Warm-metal palette for the linux console. Color 0 is the TTY background,
     # set to the warm-metal base (slightly darker, matching ghostty's
-    # `background` and waybar's `base`); the rest are warm-metal accents that
-    # mirror the ghostty 16-color palette (config/.config/ghostty/config).
+    # `background` and the Caelestia shell's M3 `base` role); the rest are
+    # warm-metal accents that mirror the ghostty 16-color palette
+    # (config/.config/ghostty/config).
     # Cursors/icons below stay Catppuccin-teal until warm variants are adopted.
     colors = [
       "322a21"

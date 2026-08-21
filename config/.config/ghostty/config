@@ -21,8 +21,9 @@ font-size = 14.0
 
 # Warm-metal theme: brushed gold / copper / bronze on warm espresso
 # backgrounds, slightly darkened. Mirrored in the linux console colors
-# (nixos/modules/desktop/theme.nix), the waybar panel (waybar/style.css), and
-# GTK/libadwaita (config/.config/gtk-{3,4}.0/gtk.css).
+# (nixos/modules/desktop/theme.nix), the Caelestia shell scheme
+# (config/.config/caelestia/scheme/scheme.json), and GTK/libadwaita
+# (config/.config/gtk-{3,4}.0/gtk.css).
 foreground = #f0e6d2
 background = #322a21
 selection-foreground = #322a21

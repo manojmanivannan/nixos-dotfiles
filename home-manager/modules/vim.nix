@@ -26,7 +26,7 @@
 
       hidden = true;     # allow switching buffers without saving
       mouse = "a";       # mouse support in all modes
-      undofile = true;   # persist undo history across sessions
+      undofile = false;  # no .un~ undo files written next to edits
     };
 
     extraConfig = ''

@@ -1,5 +1,6 @@
 {
   imports = [
+    ./caelestia.nix
     ./claude.nix
     ./dotfiles-symlinks.nix
     ./nas-backup.nix
@@ -16,5 +17,6 @@
     ./bat.nix
     ./lazygit.nix
     ./yazi.nix
+    ./try.nix
   ];
 }

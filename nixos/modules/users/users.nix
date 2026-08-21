@@ -11,7 +11,6 @@
     shell = pkgs.zsh;
     packages = with pkgs; [
       vscode
-      brave
       google-chrome
     ];
 

@@ -1,0 +1,13 @@
+--- a/modules/bar/popouts/Content.qml	2026-08-06 12:43:12.835280596 +0100
++++ b/modules/bar/popouts/Content.qml	2026-08-06 12:43:20.157105910 +0100
+@@ -108,6 +108,10 @@
+             name: "battery"
+             sourceComponent: Battery {}
+         }
++        Popout {
++            name: "tailscale"
++            sourceComponent: TailscalePopout {}
++        }
+ 
+         Popout {
+             name: "audio"

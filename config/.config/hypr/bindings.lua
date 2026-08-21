@@ -6,8 +6,21 @@
 
 local terminal    = "ghostty"
 local fileManager = "nautilus --new-window"
-local menu        = "hyprlauncher"
 local browser     = "google-chrome"
+
+-- Caelestia surfaces are Hyprland DBus global shortcuts with a fixed appid
+-- `caelestia` (see the fork's modules/Shortcuts.qml +
+-- components/misc/CustomShortcut.qml); each surface's id is
+-- `caelestia:<name>`. Named here, like terminal/browser above, so the binds
+-- read off the table and the `caelestia:` prefix isn't restated at each bind.
+-- `sidebar` is the notification center (modules/sidebar/Notif*.qml);
+-- `session` is the power / session menu (modules/session/). See the canonical
+-- keybind example in the caelestia dots hypr/hyprland/keybinds.lua.
+local caelestia = {
+    launcher = "caelestia:launcher",
+    sidebar  = "caelestia:sidebar",
+    session  = "caelestia:session",
+}
 
 -- Application bindings
 
@@ -17,7 +30,13 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
-hl.bind(mainMod .. " + ESCAPE", hl.dsp.exec_cmd("wlogout --protocol layer-shell"))
+-- Power / session menu (WF-11). Was wlogout --protocol layer-shell (wlogout
+-- retires in the WF-16 merge).
+hl.bind(mainMod .. " + ESCAPE", hl.dsp.global(caelestia.session))
+-- Direct lock (WF-14). Skips the session menu and goes straight to caelestia's
+-- `Lock` module via logind's `Lock` signal — same path the menu's Lock button
+-- (caelestia.nix:285) and hypridle's idle/sleep listener take.
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
 
 
 -- Move focus with mainMod + arrow keys
@@ -62,30 +81,29 @@ end
 hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL",  key = "INSERT", window = "activewindow" }))
 hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "SHIFT", key = "INSERT", window = "activewindow" }))
 
--- Open App launcher
-hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("wofi --show drun"))
+-- Launcher (WF-11). The fork's QML toggles the launcher on the shortcut's
+-- *release* (it peeks on press for caelestia's hold-SUPER gesture), and a
+-- plain Hyprland `bind` delivers both press and release to a global
+-- shortcut, so a tap of SUPER+SPACE toggles it. Was wofi --show drun (wofi
+-- retires in the WF-16 merge).
+hl.bind(mainMod .. " + SPACE", hl.dsp.global(caelestia.launcher))
 
--- Toggle the swaync notification center.
--- `swaync-client -t` toggles the control-center visibility; `-sw` skips
--- waiting for the daemon to reload so the panel opens instantly. The daemon
--- itself is started from hyprland.lua on `hyprland.start`.
-hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
+-- Notification center (WF-11) — caelestia's sidebar drawer. Matches caelestia's
+-- own default kbShowSidebar = "SUPER + N". Was swaync-client -t -sw (swaync
+-- retires in the WF-16 merge).
+hl.bind(mainMod .. " + N", hl.dsp.global(caelestia.sidebar))
 
 
 -- hl.bind("SUPER" .. " + " .. "RETURN", hl.dsp.exec_cmd("uwsm app -- $TERMINAL --dir=$(omarchy-cmd-terminal-cwd)"))
--- Exit the session via `uwsm stop` so systemd tears down the wayland-session
--- units and cleans up the activation environment. Bypassing this (raw
--- compositor exit / kill) yanks Hyprland from under clients. A wofi --dmenu
--- prompt (in exit-prompt.sh) confirms first: only the "Exit" choice runs
--- `uwsm stop`; Cancel or Esc (empty selection) is a no-op. The shell logic
--- lives in a script rather than inline so the Lua config avoids long-bracket
--- quoting fragility.
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/exit-prompt.sh"))
+-- WF-11: SUPER+M (the standalone wofi exit-prompt) is dropped — the session
+-- / power menu on SUPER+ESCAPE above (caelestia:session) now owns
+-- logout/lock/shutdown, so the separate exit-prompt folds into it. SUPER+R
+-- (the dead `hyprlauncher` binding, never installed) is dropped too.
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 -- Reload the Hyprland (Lua) config so edits to this directory apply live,
--- without a full session restart. SUPER+R is the launcher above, so SHIFT
--- reuses the same key for the (less frequent) reload.
+-- without a full session restart. The launcher moved to SUPER+SPACE (a
+-- caelestia global shortcut, above), so SHIFT reuses R for the less-frequent
+-- live reload.
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))

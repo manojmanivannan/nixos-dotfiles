@@ -1,0 +1,46 @@
+--- a/modules/bar/components/StatusIcons.qml	2026-08-06 12:43:12.831716647 +0100
++++ b/modules/bar/components/StatusIcons.qml	2026-08-06 12:48:41.376560565 +0100
+@@ -255,6 +255,43 @@
+                 fill: 1
+             }
+         }
++        // Tailscale icon (WF-13 — the one ported custom module)
++        WrappedLoader {
++            name: "tailscale"
++            active: Config.bar.status.showTailscale
++
++            sourceComponent: Item {
++                readonly property int tsSize: Math.round(Tokens.font.body.large.pointSize * 1.2)
++
++                implicitWidth: tsSize
++                implicitHeight: tsSize
++
++                Image {
++                    id: tsIcon
++
++                    anchors.fill: parent
++                    fillMode: Image.PreserveAspectFit
++                    mipmap: true
++                    smooth: true
++                    source: Tailscale.up
++                        ? Quickshell.shellPath("assets/tailscale_on.png")
++                        : Quickshell.shellPath("assets/tailscale_off.png")
++                }
++
++                MouseArea {
++                    anchors.fill: parent
++                    acceptedButtons: Qt.LeftButton | Qt.RightButton
++                    cursorShape: Qt.PointingHandCursor
++
++                    onClicked: event => {
++                        if (event.button === Qt.LeftButton)
++                            Tailscale.toggle();
++                        else if (event.button === Qt.RightButton)
++                            Tailscale.switchProfile();
++                    }
++                }
++            }
++        }
+     }
+
+     component WrappedLoader: Loader {
