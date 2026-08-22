@@ -64,6 +64,8 @@
       btw = "echo i use nixos-btw";
       nrs = "sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos";
       claude = "nix run 'github:ryoppippi/nix-claude-code#stable' -- ";
+      antigravity-cli = "nix run github:jacopone/antigravity-nix#google-antigravity-cli";
+      antigravity-ide = "nix run github:jacopone/antigravity-nix#google-antigravity-ide";
       # NOTE: `gcommit` is intentionally not an alias here — the JIRA-aware
       # `gcommit` function in zshrc.d/20-git.zsh handles it (an alias would
       # shadow the function, since shellAliases are emitted after initContent).
