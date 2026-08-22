@@ -62,24 +62,36 @@ jobs:
         if: steps.latest.outputs.tag != steps.current.outputs.tag
         run: nix flake update herdr
 
-      - name: Open a pull request
+      - name: Open or update the pull request
         if: steps.latest.outputs.tag != steps.current.outputs.tag
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           branch="auto/herdr-${{ steps.latest.outputs.tag }}"
-          git checkout -b "$branch"
+          # -B creates or resets the branch, so a re-run doesn't trip over a
+          # local branch left by a previous attempt.
+          git checkout -B "$branch"
           git add flake.nix flake.lock
           git commit -m "herdr: ${{ steps.current.outputs.tag }} -> ${{ steps.latest.outputs.tag }}"
-          git push origin "$branch"
-          gh pr create \
-            --title "herdr: ${{ steps.current.outputs.tag }} -> ${{ steps.latest.outputs.tag }}" \
-            --body "Automated bump of the \`herdr\` flake input to the latest stable release.
+          # Force-push: a prior failed run may have left this branch on the
+          # remote with non-fast-forward history.
+          git push --force origin "$branch"
+          # Reuse an existing open PR for this branch if one already exists —
+          # the force-push above already refreshed its diff — so re-runs
+          # don't open duplicate PRs.
+          open=$(gh pr list --head "$branch" --state open --json number --jq 'length')
+          if [ "$open" = "0" ]; then
+            gh pr create \
+              --title "herdr: ${{ steps.current.outputs.tag }} -> ${{ steps.latest.outputs.tag }}" \
+              --body "Automated bump of the \`herdr\` flake input to the latest stable release.
 
-          Build locally before merging to confirm the system still evaluates:
-          \`\`\`
-          nix build .#nixos
-          \`\`\`" \
-            --base main
+            Build locally before merging to confirm the system still evaluates:
+            \`\`\`
+            nix build .#nixos
+            \`\`\`" \
+              --base main
+          else
+            echo "An open PR for $branch already exists; updated it in place."
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
