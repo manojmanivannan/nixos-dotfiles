@@ -42,7 +42,43 @@ let
   # build-phase risk #4). The page's QML files still ship (unreferenced) —
   # only the registry entries are excised, the minimal snapshot-and-diverge
   # edit.
-  shellPackage = inputs.caelestia-shell.packages.${pkgs.stdenv.hostPlatform.system}.with-cli.overrideAttrs (old: {
+  shellPackage = let
+    base = inputs.caelestia-shell.packages.${pkgs.stdenv.hostPlatform.system}.with-cli;
+    # WF-12: shell.json is a read-only Nix-store symlink (the HM
+    # `programs.caelestia` module writes it via `xdg.configFile.*.text`,
+    # which HM always symlinks into the store). GlobalConfig (which inherits
+    # RootConfig) auto-saves to it on every property change after load
+    # (plugin/src/Caelestia/Config/rootconfig.cpp:106-114); the write hits
+    # EROFS and emits `saveFailed`, which ConfigToasts.qml renders as the
+    # "Failed to save config" Error toast on every launch. The read-only
+    # failure is *expected* here — the file is pinned by Nix on purpose
+    # (the pin is the WF-12 design; runtime saves are intentionally dropped,
+    # the WARN log still records them). Gate only this case so genuine save
+    # failures (disk full, permissions, …) still surface as toasts.
+    # `file.errorString()` is "Read-only file system" for EROFS; the
+    # substituted line is unique in the file (verified).
+    #
+    # The `emit saveFailed` is compiled by the `plugin` derivation
+    # (caelestia-qml-plugin, exposed as `base.plugin`) — a SEPARATE
+    # derivation from the shell. The shell's own `src` contains
+    # rootconfig.cpp, so a sed in the shell's postPatch rewrites it, but
+    # the shell never compiles the C++ plugin (its cmake builds only
+    # ENABLE_MODULES=shell), so the edit is discarded — the loaded .so comes
+    # from `base.plugin`. The guard must therefore patch the *plugin*
+    # derivation, and the patched plugin must be swapped back into the
+    # shell's buildInputs (otherwise wrapQtAppsHook still points the QML
+    # import path at the unpatched .so). See memory
+    # caelestia-shelljson-readonly-save-toast.
+    patchedPlugin = base.plugin.overrideAttrs (old: {
+      postPatch = (old.postPatch or "") + ''
+        sed -i 's|emit saveFailed(err, m_screen);|if (!file.errorString().contains("Read-only file system")) emit saveFailed(err, m_screen);|' \
+          plugin/src/Caelestia/Config/rootconfig.cpp
+      '';
+    });
+  in base.overrideAttrs (old: {
+    # Swap the unpatched `base.plugin` for `patchedPlugin` so the shell's
+    # Qt wrapper resolves the Caelestia.Config .so from the patched build.
+    buildInputs = map (b: if b == base.plugin then patchedPlugin else b) (old.buildInputs or []);
     postPatch = (old.postPatch or "") + ''
       # WF-12: drop the Nexus "Wallpaper & style" page from both registries.
       # `sed` deletes from the `// Appearance` comment through the closing
@@ -53,22 +89,6 @@ let
       sed -i '/\/\/ Appearance/,/^        },$/d' modules/nexus/PageCompRegistry.qml
       # The now-unused import of the wallandstyle page components.
       sed -i '/^import qs\.modules\.nexus\.pages\.wallandstyle$/d' modules/nexus/PageCompRegistry.qml
-
-      # WF-12: shell.json is a read-only Nix-store symlink (the HM
-      # `programs.caelestia` module writes it via `xdg.configFile.*.text`,
-      # which HM always symlinks into the store). The shell's RootConfig
-      # auto-saves to it on every property change after load
-      # (plugin/src/Caelestia/Config/rootconfig.cpp:106-114); the write hits
-      # EROFS and emits `saveFailed`, which ConfigToasts.qml renders as the
-      # "Failed to save config" Error toast on every launch. The read-only
-      # failure is *expected* here — the file is pinned by Nix on purpose
-      # (the pin is the WF-12 design; runtime saves are intentionally
-      # dropped, the WARN log below still records them). Gate only this
-      # case so genuine save failures (disk full, permissions, …) still
-      # surface as toasts. `file.errorString()` is "Read-only file system"
-      # for EROFS; the substituted line is unique in the file (verified).
-      sed -i 's|emit saveFailed(err, m_screen);|if (!file.errorString().contains("Read-only file system")) emit saveFailed(err, m_screen);|' \
-        plugin/src/Caelestia/Config/rootconfig.cpp
 
       # Drop the rotating GIF (an animated image — the default caelestia
       # "sessionGif", an anime-girl spin) wedged between the Shutdown and
