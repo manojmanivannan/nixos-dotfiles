@@ -161,6 +161,19 @@ let
       # contrast on the new gold badge). Hot (>90C) branch stays m3onErrorContainer.
       sed -i 's|m3onErrorContainer : Colours.palette.m3secondary$|m3onErrorContainer : Colours.palette.m3onPrimary|' modules/lock/Resources.qml
 
+      # Dashboard Performance tab (modules/dashboard/Performance.qml). The two
+      # HeroCards (CPU / GPU) take an `accent` colour that drives every accented
+      # element in the card — the MaterialIcon, the "CPU"/"GPU" label, the
+      # thermometer icon + StyledProgressBar, and the usage % number (which is
+      # `color: root.accent` in HeroCard.qml). Upstream keys CPU to m3primary
+      # (#e8c272 gold) and GPU to m3secondary (#d99069 terracotta), so the GPU
+      # card reads pink next to the gold CPU card — the same terracotta-on-espresso
+      # clash fixed above for the lock-screen widgets. Recolour the GPU card to
+      # m3primary so both cards read as one gold family. The line is globally
+      # unique in this file: only the GPU HeroCard uses `m3secondary`; the CPU
+      # card's `accent: Colours.palette.m3primary` is untouched.
+      sed -i 's|accent: Colours.palette.m3secondary$|accent: Colours.palette.m3primary|' modules/dashboard/Performance.qml
+
       # WF-13 — the tailscale custom module (the one ported module). Ships the
       # new QML + brand asset into the source tree and patches the existing
       # StatusIcons / Content / barconfig.hpp to wire them in. The new files
