@@ -1,0 +1,85 @@
+# Auto-bumps the `herdr` flake input to the latest stable release on a weekly
+# schedule (and on manual dispatch) and opens a PR. Flakes can't track "latest
+# release tag" natively — a flake input ref is a git ref, and "latest release"
+# is a GitHub Releases concept — so this workflow rewrites the pinned tag in
+# flake.nix, refreshes flake.lock, and lets a human merge the PR after building
+# locally. Keeps us on stable releases (not master, which herdr's docs warn can
+# regress) with zero manual tag-hunting.
+#
+# To upgrade on demand instead of waiting for the schedule: Actions tab →
+# "update-herdr" → Run workflow.
+
+name: update-herdr
+
+on:
+  schedule:
+    # Mondays at 03:17 UTC — off the :00 mark to spread GitHub's cron load.
+    - cron: '17 3 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find latest herdr stable release
+        id: latest
+        run: |
+          # /releases/latest returns the most recent non-prerelease, non-draft.
+          tag=$(curl -fsSL https://api.github.com/repos/herdrdev/herdr/releases/latest | jq -r .tag_name)
+          [ -n "$tag" ] && [ "$tag" != "null" ] || { echo "No release found"; exit 1; }
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Read currently pinned tag
+        id: current
+        run: |
+          # Matches the herdr.url line in flake.nix: github:herdrdev/herdr/<tag>
+          tag=$(grep -oP 'herdr\.url = "github:herdrdev/herdr/\K[^"]+' flake.nix)
+          [ -n "$tag" ] || { echo "Could not find pinned herdr tag in flake.nix"; exit 1; }
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Stop if already up to date
+        if: steps.latest.outputs.tag == steps.current.outputs.tag
+        run: echo "herdr is already at ${{ steps.current.outputs.tag }} — nothing to do."
+
+      - name: Bump flake.nix ref to latest release
+        if: steps.latest.outputs.tag != steps.current.outputs.tag
+        run: |
+          sed -i -E "s#(herdr\.url = \"github:herdrdev/herdr/)[^\"]+#\1${{ steps.latest.outputs.tag }}#" flake.nix
+          grep -q "github:herdrdev/herdr/${{ steps.latest.outputs.tag }}" flake.nix \
+            || { echo "Failed to rewrite herdr ref in flake.nix"; exit 1; }
+
+      - name: Install Nix
+        if: steps.latest.outputs.tag != steps.current.outputs.tag
+        uses: DeterminateSystems/nix-installer-action@v22
+
+      - name: Refresh flake.lock for the herdr input
+        if: steps.latest.outputs.tag != steps.current.outputs.tag
+        run: nix flake update herdr
+
+      - name: Open a pull request
+        if: steps.latest.outputs.tag != steps.current.outputs.tag
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="auto/herdr-${{ steps.latest.outputs.tag }}"
+          git checkout -b "$branch"
+          git add flake.nix flake.lock
+          git commit -m "herdr: ${{ steps.current.outputs.tag }} -> ${{ steps.latest.outputs.tag }}"
+          git push origin "$branch"
+          gh pr create \
+            --title "herdr: ${{ steps.current.outputs.tag }} -> ${{ steps.latest.outputs.tag }}" \
+            --body "Automated bump of the \`herdr\` flake input to the latest stable release.
+
+          Build locally before merging to confirm the system still evaluates:
+          \`\`\`
+          nix build .#nixos
+          \`\`\`" \
+            --base main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
