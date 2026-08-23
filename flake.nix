@@ -37,6 +37,12 @@
     # Pinned to a release tag (the docs' recommendation over tracking master);
     # bump the tag here and `nix flake update herdr` to upgrade.
     herdr.url = "github:herdrdev/herdr/v0.8.2";
+
+    # Google Antigravity - Next-generation agentic IDE suite (Base App, IDE, and CLI `agy`)
+    antigravity-nix = {
+      url = "github:jacopone/antigravity-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { nixpkgs, home-manager, ... }@inputs:

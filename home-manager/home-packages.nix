@@ -1,5 +1,6 @@
 { inputs, pkgs, ... }: {
   home.packages = with pkgs; [
+    playwright-driver.browsers
     nixfmt
     eza # modern ls replacement; aliased via the oh-my-zsh `eza` plugin (see zsh.nix)
     nautilus # GNOME file manager; launched on Super+E via the `fileManager` bind in hypr/bindings.lua
@@ -9,5 +10,9 @@
     # herdr isn't packaged in nixpkgs. `inputs` reaches here via
     # home-manager.extraSpecialArgs in nixos/modules/nix/home-manager.nix.
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
+    # Google Antigravity suite (Base App, IDE, and CLI `agy`) via jacopone/antigravity-nix
+    inputs.antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-ide
+    inputs.antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-cli
   ];
 }
