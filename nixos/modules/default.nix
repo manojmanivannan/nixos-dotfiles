@@ -13,5 +13,6 @@
     ./programs
     ./development
     ./users
+    ./profile
   ];
 }

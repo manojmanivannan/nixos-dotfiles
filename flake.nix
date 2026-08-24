@@ -61,10 +61,10 @@
       { name = "nixos"; hostname = "linux-machine"; ipv4Address = "192.168.1.192"; defaultGateway = "192.168.1.1"; inherit stateVersion; }
     ];
 
-    makeSystem = { name, hostname, ipv4Address, defaultGateway, stateVersion }: nixpkgs.lib.nixosSystem {
+    makeSystem = { name, hostname, ipv4Address, defaultGateway, stateVersion, profile ? "full" }: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs stateVersion hostname user ipv4Address defaultGateway;
+        inherit inputs stateVersion hostname user ipv4Address defaultGateway profile;
       };
       modules = [
         ./hosts/${name}/configuration.nix
@@ -75,6 +75,7 @@
       configs // {
         "${host.name}" = makeSystem {
           inherit (host) name hostname ipv4Address defaultGateway stateVersion;
+          profile = host.profile or "full";
         };
       }) {} hosts;
 
@@ -87,19 +88,39 @@
       (map (host: host.name) hosts)
       (name: nixosConfigurations.${name}.config.system.build.toplevel);
 
-  in {
-    inherit nixosConfigurations;
+    # Profile evaluation test configurations: evaluate both 'minimal' and 'full'
+    # profiles to assert package membership and module gating.
+    evalProfileConfig = prof: (makeSystem {
+      name = "nixos";
+      hostname = "linux-machine";
+      ipv4Address = "192.168.1.192";
+      defaultGateway = "192.168.1.1";
+      inherit stateVersion;
+      profile = prof;
+    }).config;
 
-    packages.${system} = systemToplevels;
+    profileConfigs = {
+      minimal = evalProfileConfig "minimal";
+      full = evalProfileConfig "full";
+    };
 
-    # WF-9 — the repo's first automated test. The single build seam: the
-    # configured NixOS system evaluates and builds from the flake. One check
-    # per host; it forces the toplevel to build — exercising the whole
-    # integration (flake inputs, Home-Manager modules, system config) — and
-    # asserts only external behaviour ("the configured system builds"), with
-    # no assertions about Nix function internals or file layout. Run it with
-    # `nix flake check`; `nix build .#nixos` builds the same toplevel directly.
-    checks.${system} = nixpkgs.lib.mapAttrs
+    # Collect all resolved packages across system, per-user, and home-manager scopes
+    collectPackages = cfg:
+      let
+        sysPkgs = cfg.environment.systemPackages;
+        userPkgs = pkgs.lib.concatLists (pkgs.lib.mapAttrsToList (_: u: u.packages or []) cfg.users.users);
+        hmPkgs = pkgs.lib.concatLists (pkgs.lib.mapAttrsToList (_: u: u.home.packages or []) (cfg.home-manager.users or {}));
+      in
+        sysPkgs ++ userPkgs ++ hmPkgs;
+
+    hasPackage = cfg: name:
+      let
+        allPkgs = collectPackages cfg;
+        pkgName = p: p.pname or (builtins.parseDrvName (p.name or "")).name;
+      in
+        pkgs.lib.any (p: pkgName p == name) allPkgs;
+
+    hostBuildChecks = nixpkgs.lib.mapAttrs
       (name: toplevel: pkgs.runCommand "check-${name}-builds" {
         meta.description = "WF-9: the ${name} NixOS configuration evaluates and builds from the flake";
       } ''
@@ -111,5 +132,57 @@
         touch "$out"
       '')
       systemToplevels;
+
+    profileEvaluationChecks = {
+      profile-evaluations =
+        let
+          minCfg = profileConfigs.minimal;
+          fullCfg = profileConfigs.full;
+
+          minHasSteam = hasPackage minCfg "steam";
+          minHasZsh = hasPackage minCfg "zsh";
+          minHasVim = hasPackage minCfg "vim";
+
+          fullHasSteam = hasPackage fullCfg "steam";
+          fullHasZsh = hasPackage fullCfg "zsh";
+          fullHasVim = hasPackage fullCfg "vim";
+
+          minGamingOff = !minCfg.programs.steam.enable && !minCfg.hardware.graphics.enable32Bit && !minCfg.programs.gamemode.enable;
+          fullGamingOn = fullCfg.programs.steam.enable && fullCfg.hardware.graphics.enable32Bit && fullCfg.programs.gamemode.enable;
+        in
+          pkgs.runCommand "check-profile-evaluations" {
+            meta.description = "Automated evaluation checks asserting profile options and package membership across minimal and full profiles";
+          } ''
+            echo "Evaluating profile tiers..."
+
+            # Verify profile options
+            test "${minCfg.manoj.profile}" = "minimal" || { echo "FAIL: minimal config profile is not minimal" >&2; exit 1; }
+            test "${fullCfg.manoj.profile}" = "full" || { echo "FAIL: full config profile is not full" >&2; exit 1; }
+
+            # Verify gaming stack options
+            ${if !minGamingOff then "echo 'FAIL: minimal profile gaming stack is active' >&2; exit 1;" else ""}
+            ${if !fullGamingOn then "echo 'FAIL: full profile gaming stack is not active' >&2; exit 1;" else ""}
+
+            # Verify sentinel packages
+            ${if minHasSteam then "echo 'FAIL: sentinel package steam is present in minimal profile' >&2; exit 1;" else ""}
+            ${if !minHasZsh then "echo 'FAIL: base utility zsh is missing in minimal profile' >&2; exit 1;" else ""}
+            ${if !minHasVim then "echo 'FAIL: base utility vim is missing in minimal profile' >&2; exit 1;" else ""}
+
+            ${if !fullHasSteam then "echo 'FAIL: sentinel package steam is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasZsh then "echo 'FAIL: base utility zsh is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasVim then "echo 'FAIL: base utility vim is missing in full profile' >&2; exit 1;" else ""}
+
+            echo "All profile evaluation checks passed."
+            touch "$out"
+          '';
+    };
+
+  in {
+    inherit nixosConfigurations;
+
+    packages.${system} = systemToplevels;
+
+    # WF-9 & Profile Evaluation test harness
+    checks.${system} = hostBuildChecks // profileEvaluationChecks;
   };
 }
