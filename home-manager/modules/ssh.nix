@@ -16,7 +16,7 @@
     # so first-match-wins keeps these ahead of the defaults below.
     settings.homelab = {
       HostName = "192.168.1.120";
-      User = "manoj";
+      User = user;
     };
 
     # Defaults applied to every host. These are the legacy Home Manager
