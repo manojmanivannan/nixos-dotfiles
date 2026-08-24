@@ -167,3 +167,13 @@ hl.unbind("CTRL + ALT" .. " + " .. "DELETE")
 hl.bind("SUPER" .. " + " .. "Q", hl.dsp.window.close())
 
 hl.bind("SUPER" .. " + " .. "W", hl.dsp.send_shortcut({ mods = "CTRL", key= "W", window = "activewindow"}))
+
+-- Screenshots (grim, slurp, swappy, wl-copy)
+-- Print: Select region -> copy to clipboard
+hl.bind("PRINT", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
+
+-- SUPER + Print: Fullscreen -> copy to clipboard
+hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("grim - | wl-copy"))
+
+-- SHIFT + Print: Select region -> annotate/edit in Swappy
+hl.bind("SHIFT + PRINT", hl.dsp.exec_cmd('grim -g "$(slurp)" - | swappy -f -'))
