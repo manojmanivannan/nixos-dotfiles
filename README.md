@@ -27,8 +27,9 @@
 - **Hyprland, configured in Lua** via [`hyprlua`](https://github.com/hyprwm/hyprlua) — no 1000-line `hyprland.conf`.
 - **Caelestia shell** ([Quickshell](https://quickshell.outfoxxed.nl/) full-shell) — owns the bar, notifications, launcher, power menu, **and the lock screen**, replacing waybar / swaync / wofi / wlogout / hyprlock.
 - **Warm-metal theme** — brushed gold / copper / bronze on warm espresso, consistent across Hyprland borders, GTK, Ghostty, and the Linux console (cursors and Plymouth stay Catppuccin-Macchiato-teal until warm variants are adopted).
-- **Aggregated module layout** — `nixos/modules` is grouped into 10 domain subdirectories instead of 50 loose files.
+- **Aggregated module layout** — `nixos/modules` is grouped into domain subdirectories instead of 50 loose files.
 - **Host-identity decoupling** — clone, change one line, rebuild. No folder renaming.
+- **Install Profile Tiers (`minimal` vs `full`)** — per-host profile gating for lightweight base or full development/gaming setups.
 - **Hardened by default** — `sudo-rs`, TPM2, Yubikey PAM/u2f, AppArmor + the full LSM stack, kernel hardening.
 
 ## 📑 Table of Contents
@@ -36,6 +37,7 @@
 - [The Stack](#-the-stack)
 - [Repository Structure](#-repository-structure)
 - [How It's Wired](#-how-its-wired)
+- [Install Profiles (Minimal vs Full)](#-install-profiles-minimal-vs-full)
 - [Prerequisites](#-prerequisites)
 - [Installation](#-installation)
 - [Customization](#-customization)
@@ -76,17 +78,20 @@
 
 ```
 nixos-dotfiles/
-├── flake.nix                 # Flake entry — inputs, host list, nixosSystem wiring
+├── flake.nix                 # Flake entry — inputs, host list, profile wiring, nixosSystem
+│
+├── docs/
+│   └── profile-tiers.md      # Detailed profile tiers reference guide & software matrix
 │
 ├── hosts/
 │   └── nixos/                # Per-host machine config
-│       ├── configuration.nix # imports the module tree, sets hostName + stateVersion
+│       ├── configuration.nix # imports the module tree, sets hostName + stateVersion + profile
 │       ├── hardware-configuration.nix   # generated — disks, kernel modules
 │       └── local-packages.nix           # host-specific system packages
 │
 ├── nixos/
-│   └── modules/              # System-level modules (10 domain subdirectories)
-│       ├── default.nix       #   aggregator: imports all 10 subdirs
+│   └── modules/              # System-level modules (domain subdirectories)
+│       ├── default.nix       #   aggregator: imports all domain subdirs
 │       ├── boot/             #   bootloader (systemd-boot + Plymouth), kernel, swap
 │       ├── hardware/         #   Bluetooth, NVIDIA, screen brightness
 │       ├── networking/       #   interfaces, DNS, firewall, Tailscale
@@ -94,14 +99,16 @@ nixos-dotfiles/
 │       ├── i18n/             #   locale, timezone, keyboard layout
 │       ├── nix/              #   nix settings, overlays, GC, env vars, Home Manager
 │       ├── security/         #   sudo-rs, TPM2, Yubikey
-│       ├── services/         #   dbus, power, PipeWire, USB, radicle, virtualisation
+│       ├── services/         #   dbus, power, PipeWire, USB, desktop utilities & media
+│       ├── programs/         #   gaming stack (Steam, GameMode)
 │       ├── development/      #   direnv, LSPs, languages, terminals, fetchers
-│       └── users/            #   the user account, work packages
+│       ├── users/            #   the user account, work packages
+│       └── profile/          #   manoj.profile option declaration & defaults
 │
 ├── home-manager/
 │   ├── home.nix              # Home Manager entry
-│   ├── home-packages.nix     # user-level packages
-│   └── modules/              # git, zsh, fzf, py-file-opener, dotfile symlinks
+│   ├── home-packages.nix     # user-level packages (base & gated heavy packages)
+│   └── modules/              # git, zsh, fzf, caelestia, py-file-opener, profile, dotfiles
 │
 └── config/
     ├── .config/              # raw dotfiles (symlinked into ~/.config by Home Manager)
@@ -118,21 +125,76 @@ nixos-dotfiles/
 
 ```
 flake.nix
-   │  hosts = [{ name = "nixos"; hostname = "nixos"; ... }]
-   │  makeSystem → nixpkgs.lib.nixosSystem
+   │  hosts = [{ name = "nixos"; hostname = "nixos"; profile = "full"; ... }]
+   │  makeSystem → nixpkgs.lib.nixosSystem (specialArgs = { profile, ... })
    ▼
 hosts/nixos/configuration.nix
    │  imports = [ ./hardware-configuration.nix ./local-packages.nix ../../nixos/modules ]
    ▼
-nixos/modules/default.nix  ──►  boot/ hardware/ networking/ … users/
+nixos/modules/default.nix  ──►  boot/ hardware/ networking/ … profile/
+   │  options.manoj.profile = "full" | "minimal"
    │
    └─ nix/home-manager.nix  ──►  home-manager/home.nix ──► home-manager/modules/*
+      (extraSpecialArgs = { profile = config.manoj.profile; })
 ```
 
-- **`flake.nix`** defines a `hosts` list and folds it into `nixosConfigurations`.
-- **`hosts/<name>/configuration.nix`** is the only host-specific entrypoint; it pulls in the shared module tree and sets `networking.hostName` from the `hostname` special arg.
-- **`nixos/modules/default.nix`** aggregates the 10 category subdirectories — each of which is itself a `default.nix` that imports its own sub-files. Move a file, not ten imports.
+- **`flake.nix`** defines a `hosts` list with optional `profile` settings (`"minimal"` or `"full"`, defaulting to `"full"`), forwarding `specialArgs` into NixOS and Home Manager.
+- **`hosts/<name>/configuration.nix`** is the host-specific entrypoint; it pulls in the shared module tree and sets `networking.hostName` and optional `manoj.profile` overrides.
+- **`nixos/modules/default.nix`** aggregates the domain subdirectories — each of which is itself a `default.nix` that imports its own sub-files.
+- **`nixos/modules/profile/default.nix`** and **`home-manager/modules/profile.nix`** declare `manoj.profile`, allowing heavy modules and packages to be cleanly gated.
 - **`home-manager/modules/dotfiles-symlinks.nix`** symlinks the raw `config/.config/*` files/directories into `~/.config` with `mkOutOfStoreSymlink`, so edits to Hyprland/Caelestia/etc. take effect without a rebuild. Caelestia itself is launched as a systemd `caelestia.service` (wired in `home-manager/modules/caelestia.nix`), not a Hyprland `exec-once`.
+
+## 🎚️ Install Profiles (Minimal vs Full)
+
+The configuration supports two install profile tiers configured per-host via `flake.nix`:
+
+- **`full` (Default)** — complete workstation environment with development toolchains, LSPs, language runtimes (`nix-ld`, Node, Bun, UV), gaming stack (Steam, GameMode, 32-bit graphics), media suite (MPV, Qutebrowser, FFmpeg, Swappy), GUI apps (Chrome, VSCode), and desktop suites (Google Antigravity suite, Obsidian, Playwright, Herdr).
+- **`minimal`** — lean base desktop and utility profile. Retains the full Hyprland compositor, Caelestia shell, warm-metal theme, audio/video pipeline, hardware acceleration, security stack, core terminal utilities (Zsh, Ghostty, Starship, ripgrep, fzf, bat, git), and base Wayland desktop utilities (`grim`, `slurp`, `wl-clipboard`, `wl-screenrec`, `cliphist`, `libnotify`, `nautilus`, `localsend`, `eza`), while omitting heavy development runtimes, LSPs, media apps, gaming, and large application binaries.
+
+### Tier Breakdown Matrix
+
+| Layer | Subsystem / Package Area | Minimal (`minimal`) | Full (`full`, default) |
+| :--- | :--- | :--- | :--- |
+| **System** (`nixos/modules/`) | **Boot, Hardware & Security** | systemd-boot, Plymouth, NVIDIA, Bluetooth, `sudo-rs`, TPM2, Yubikey, AppArmor | Same (Always on) |
+| | **Networking & VPN** | NetworkManager, Firewall, Tailscale VPN | Same (Always on) |
+| | **Desktop Compositor** | Hyprland (UWSM), `greetd`/`tuigreet`, warm-metal GTK themes & fonts | Same (Always on) |
+| | **Core Wayland & Desktop Utilities** | `grim`, `slurp`, `wl-clipboard`, `wl-screenrec`, `cliphist`, `libnotify`, `xdg-utils` | Same (Always on) |
+| | **Media & Graphics Suite** | *Omitted* | `qutebrowser`, `zathura`, `mpv`, `mpv-handler`, `imv`, `imagemagick`, `swappy`, `ffmpeg` |
+| | **Core Dev Tools & Terminal** | `zsh`, `ghostty`, `starship`, `ripgrep`, `jq`, `fzf`, `bat`, `fd`, `gcc`, `git`, `gh` | Same (Always on) |
+| | **Language Servers (LSPs)** | *Omitted* | `nil`, `nixd`, `ruff`, `yaml-language-server`, `marksman`, `taplo`, `bash-language-server`, etc. |
+| | **Language Runtimes & Loader** | *Omitted* | `nix-ld` (unpatched dynamic loader), `nodejs_20`, `bun`, `uv` |
+| | **System Monitors & Fetchers** | *Omitted* | `fastfetch`, `btop`, `nvtop` |
+| | **Gaming Stack** | *Omitted* | `steam`, `hardware.graphics.enable32Bit`, `gamemode` |
+| **Per-User** (`users.users.<user>`) | **GUI Desktop Applications** | *Omitted* | `vscode`, `google-chrome` |
+| **Home-Manager** (`home-manager/`) | **Desktop Shell & Configs** | Caelestia Quickshell suite, Hyprland Lua symlinks, GTK & Ghostty styling | Same (Always on) |
+| | **CLI & Productive Tools** | `nixfmt`, `eza`, `nautilus`, `localsend`, `zoxide`, `lazygit`, `yazi`, `try`, `vim` | Same (Always on) |
+| | **Heavy Suites & Packages** | *Omitted* | Antigravity suite (Base App, IDE, CLI `agy`), `obsidian`, `herdr`, `playwright-driver.browsers` |
+
+### Setting Host Profile
+
+Set `profile = "minimal"` or `profile = "full"` for any host in `flake.nix`:
+
+```nix
+# flake.nix
+hosts = [
+  {
+    name = "nixos";
+    hostname = "linux-machine";
+    profile = "minimal";  # "minimal" or "full" (default: "full")
+    ipv4Address = "192.168.1.192";
+    defaultGateway = "192.168.1.1";
+    inherit stateVersion;
+  }
+];
+```
+
+Or override within a host's `hosts/<name>/configuration.nix`:
+
+```nix
+manoj.profile = "minimal"; # or "full"
+```
+
+For complete architectural details, module developer guidelines, and CI test harnesses, see the [Profile Tiers Guide](docs/profile-tiers.md).
 
 ## ✅ Prerequisites
 
@@ -210,11 +272,11 @@ The `#nixos` is the flake attr (the `name` field), **not** your machine's hostna
 
 ```nix
 hosts = [
-  { name = "nixos";  hostname = "nixos";  inherit stateVersion; }
-  { name = "laptop"; hostname = "thinky"; inherit stateVersion; }
+  { name = "nixos";  hostname = "nixos";  profile = "full";    inherit stateVersion; }
+  { name = "laptop"; hostname = "thinky"; profile = "minimal"; inherit stateVersion; }
 ];
 ```
-Then create `hosts/laptop/configuration.nix` (copy from `nixos/`), give it its own `hardware-configuration.nix`, and rebuild with `--flake .#laptop`. The `name`/`hostname` split lets the folder + attr stay clean while the network name is whatever you want.
+Then create `hosts/laptop/configuration.nix` (copy from `nixos/`), give it its own `hardware-configuration.nix`, and rebuild with `--flake .#laptop`. The `name`/`hostname` split lets the folder + attr stay clean while the network name is whatever you want, and `profile` selects between the `minimal` and `full` tiers.
 
 ### Toggle a module
 
