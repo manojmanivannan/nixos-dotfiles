@@ -118,7 +118,9 @@
         allPkgs = collectPackages cfg;
         pkgName = p: p.pname or (builtins.parseDrvName (p.name or "")).name;
       in
-        pkgs.lib.any (p: pkgName p == name) allPkgs;
+        pkgs.lib.any (p:
+          let pn = pkgName p; in pn == name || pkgs.lib.hasPrefix (name + "-") (p.name or "") || pkgs.lib.hasPrefix (name + "-") pn
+        ) allPkgs;
 
     hostBuildChecks = nixpkgs.lib.mapAttrs
       (name: toplevel: pkgs.runCommand "check-${name}-builds" {
@@ -139,6 +141,74 @@
           minCfg = profileConfigs.minimal;
           fullCfg = profileConfigs.full;
 
+          minGamingOff = !minCfg.programs.steam.enable && !minCfg.hardware.graphics.enable32Bit && !minCfg.programs.gamemode.enable;
+          fullGamingOn = fullCfg.programs.steam.enable && fullCfg.hardware.graphics.enable32Bit && fullCfg.programs.gamemode.enable;
+
+          # Programming languages sentinels & options
+          minNixLdOff = !minCfg.programs.nix-ld.enable;
+          fullNixLdOn = fullCfg.programs.nix-ld.enable;
+          minHasNodejs = hasPackage minCfg "nodejs";
+          minHasBun = hasPackage minCfg "bun";
+          minHasUv = hasPackage minCfg "uv";
+          fullHasNodejs = hasPackage fullCfg "nodejs";
+          fullHasBun = hasPackage fullCfg "bun";
+          fullHasUv = hasPackage fullCfg "uv";
+
+          # LSP sentinels
+          minHasNil = hasPackage minCfg "nil";
+          minHasNixd = hasPackage minCfg "nixd";
+          minHasRuff = hasPackage minCfg "ruff";
+          minHasMarksman = hasPackage minCfg "marksman";
+          fullHasNil = hasPackage fullCfg "nil";
+          fullHasNixd = hasPackage fullCfg "nixd";
+          fullHasRuff = hasPackage fullCfg "ruff";
+          fullHasMarksman = hasPackage fullCfg "marksman";
+
+          # Info fetchers sentinels
+          minHasFastfetch = hasPackage minCfg "fastfetch";
+          minHasBtop = hasPackage minCfg "btop";
+          minHasNvtop = hasPackage minCfg "nvtop";
+          fullHasFastfetch = hasPackage fullCfg "fastfetch";
+          fullHasBtop = hasPackage fullCfg "btop";
+          fullHasNvtop = hasPackage fullCfg "nvtop";
+
+          # Services split sentinels - Base Wayland desktop utilities (present in both minimal & full)
+          minHasGrim = hasPackage minCfg "grim";
+          minHasSlurp = hasPackage minCfg "slurp";
+          minHasWlClipboard = hasPackage minCfg "wl-clipboard";
+          minHasWlScreenrec = hasPackage minCfg "wl-screenrec";
+          minHasCliphist = hasPackage minCfg "cliphist";
+          minHasLibnotify = hasPackage minCfg "libnotify";
+          minHasXdgUtils = hasPackage minCfg "xdg-utils";
+
+          fullHasGrim = hasPackage fullCfg "grim";
+          fullHasSlurp = hasPackage fullCfg "slurp";
+          fullHasWlClipboard = hasPackage fullCfg "wl-clipboard";
+          fullHasWlScreenrec = hasPackage fullCfg "wl-screenrec";
+          fullHasCliphist = hasPackage fullCfg "cliphist";
+          fullHasLibnotify = hasPackage fullCfg "libnotify";
+          fullHasXdgUtils = hasPackage fullCfg "xdg-utils";
+
+          # Services split sentinels - Media applications (absent in minimal, present in full)
+          minHasQutebrowser = hasPackage minCfg "qutebrowser";
+          minHasZathura = hasPackage minCfg "zathura";
+          minHasMpv = hasPackage minCfg "mpv";
+          minHasMpvHandler = hasPackage minCfg "mpv-handler";
+          minHasImv = hasPackage minCfg "imv";
+          minHasImagemagick = hasPackage minCfg "imagemagick";
+          minHasSwappy = hasPackage minCfg "swappy";
+          minHasFfmpeg = hasPackage minCfg "ffmpeg";
+
+          fullHasQutebrowser = hasPackage fullCfg "qutebrowser";
+          fullHasZathura = hasPackage fullCfg "zathura";
+          fullHasMpv = hasPackage fullCfg "mpv";
+          fullHasMpvHandler = hasPackage fullCfg "mpv-handler";
+          fullHasImv = hasPackage fullCfg "imv";
+          fullHasImagemagick = hasPackage fullCfg "imagemagick";
+          fullHasSwappy = hasPackage fullCfg "swappy";
+          fullHasFfmpeg = hasPackage fullCfg "ffmpeg";
+
+          # Base system sentinels
           minHasSteam = hasPackage minCfg "steam";
           minHasZsh = hasPackage minCfg "zsh";
           minHasVim = hasPackage minCfg "vim";
@@ -146,9 +216,6 @@
           fullHasSteam = hasPackage fullCfg "steam";
           fullHasZsh = hasPackage fullCfg "zsh";
           fullHasVim = hasPackage fullCfg "vim";
-
-          minGamingOff = !minCfg.programs.steam.enable && !minCfg.hardware.graphics.enable32Bit && !minCfg.programs.gamemode.enable;
-          fullGamingOn = fullCfg.programs.steam.enable && fullCfg.hardware.graphics.enable32Bit && fullCfg.programs.gamemode.enable;
         in
           pkgs.runCommand "check-profile-evaluations" {
             meta.description = "Automated evaluation checks asserting profile options and package membership across minimal and full profiles";
@@ -163,7 +230,71 @@
             ${if !minGamingOff then "echo 'FAIL: minimal profile gaming stack is active' >&2; exit 1;" else ""}
             ${if !fullGamingOn then "echo 'FAIL: full profile gaming stack is not active' >&2; exit 1;" else ""}
 
-            # Verify sentinel packages
+            # Verify programming languages stack & options
+            ${if !minNixLdOff then "echo 'FAIL: minimal profile nix-ld is active' >&2; exit 1;" else ""}
+            ${if !fullNixLdOn then "echo 'FAIL: full profile nix-ld is not active' >&2; exit 1;" else ""}
+            ${if minHasNodejs then "echo 'FAIL: sentinel package nodejs is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasBun then "echo 'FAIL: sentinel package bun is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasUv then "echo 'FAIL: sentinel package uv is present in minimal profile' >&2; exit 1;" else ""}
+            ${if !fullHasNodejs then "echo 'FAIL: sentinel package nodejs is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasBun then "echo 'FAIL: sentinel package bun is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasUv then "echo 'FAIL: sentinel package uv is missing in full profile' >&2; exit 1;" else ""}
+
+            # Verify LSP suite sentinels
+            ${if minHasNil then "echo 'FAIL: sentinel package nil is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasNixd then "echo 'FAIL: sentinel package nixd is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasRuff then "echo 'FAIL: sentinel package ruff is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasMarksman then "echo 'FAIL: sentinel package marksman is present in minimal profile' >&2; exit 1;" else ""}
+            ${if !fullHasNil then "echo 'FAIL: sentinel package nil is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasNixd then "echo 'FAIL: sentinel package nixd is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasRuff then "echo 'FAIL: sentinel package ruff is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasMarksman then "echo 'FAIL: sentinel package marksman is missing in full profile' >&2; exit 1;" else ""}
+
+            # Verify info fetchers sentinels
+            ${if minHasFastfetch then "echo 'FAIL: sentinel package fastfetch is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasBtop then "echo 'FAIL: sentinel package btop is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasNvtop then "echo 'FAIL: sentinel package nvtop is present in minimal profile' >&2; exit 1;" else ""}
+            ${if !fullHasFastfetch then "echo 'FAIL: sentinel package fastfetch is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasBtop then "echo 'FAIL: sentinel package btop is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasNvtop then "echo 'FAIL: sentinel package nvtop is missing in full profile' >&2; exit 1;" else ""}
+
+            # Verify services module split: core Wayland desktop utilities in both
+            ${if !minHasGrim then "echo 'FAIL: core utility grim is missing in minimal profile' >&2; exit 1;" else ""}
+            ${if !minHasSlurp then "echo 'FAIL: core utility slurp is missing in minimal profile' >&2; exit 1;" else ""}
+            ${if !minHasWlClipboard then "echo 'FAIL: core utility wl-clipboard is missing in minimal profile' >&2; exit 1;" else ""}
+            ${if !minHasWlScreenrec then "echo 'FAIL: core utility wl-screenrec is missing in minimal profile' >&2; exit 1;" else ""}
+            ${if !minHasCliphist then "echo 'FAIL: core utility cliphist is missing in minimal profile' >&2; exit 1;" else ""}
+            ${if !minHasLibnotify then "echo 'FAIL: core utility libnotify is missing in minimal profile' >&2; exit 1;" else ""}
+            ${if !minHasXdgUtils then "echo 'FAIL: core utility xdg-utils is missing in minimal profile' >&2; exit 1;" else ""}
+
+            ${if !fullHasGrim then "echo 'FAIL: core utility grim is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasSlurp then "echo 'FAIL: core utility slurp is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasWlClipboard then "echo 'FAIL: core utility wl-clipboard is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasWlScreenrec then "echo 'FAIL: core utility wl-screenrec is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasCliphist then "echo 'FAIL: core utility cliphist is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasLibnotify then "echo 'FAIL: core utility libnotify is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasXdgUtils then "echo 'FAIL: core utility xdg-utils is missing in full profile' >&2; exit 1;" else ""}
+
+            # Verify services module split: media applications gated to full
+            ${if minHasQutebrowser then "echo 'FAIL: media package qutebrowser is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasZathura then "echo 'FAIL: media package zathura is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasMpv then "echo 'FAIL: media package mpv is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasMpvHandler then "echo 'FAIL: media package mpv-handler is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasImv then "echo 'FAIL: media package imv is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasImagemagick then "echo 'FAIL: media package imagemagick is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasSwappy then "echo 'FAIL: media package swappy is present in minimal profile' >&2; exit 1;" else ""}
+            ${if minHasFfmpeg then "echo 'FAIL: media package ffmpeg is present in minimal profile' >&2; exit 1;" else ""}
+
+            ${if !fullHasQutebrowser then "echo 'FAIL: media package qutebrowser is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasZathura then "echo 'FAIL: media package zathura is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasMpv then "echo 'FAIL: media package mpv is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasMpvHandler then "echo 'FAIL: media package mpv-handler is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasImv then "echo 'FAIL: media package imv is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasImagemagick then "echo 'FAIL: media package imagemagick is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasSwappy then "echo 'FAIL: media package swappy is missing in full profile' >&2; exit 1;" else ""}
+            ${if !fullHasFfmpeg then "echo 'FAIL: media package ffmpeg is missing in full profile' >&2; exit 1;" else ""}
+
+            # Base system sentinels
             ${if minHasSteam then "echo 'FAIL: sentinel package steam is present in minimal profile' >&2; exit 1;" else ""}
             ${if !minHasZsh then "echo 'FAIL: base utility zsh is missing in minimal profile' >&2; exit 1;" else ""}
             ${if !minHasVim then "echo 'FAIL: base utility vim is missing in minimal profile' >&2; exit 1;" else ""}
