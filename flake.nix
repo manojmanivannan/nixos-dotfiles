@@ -313,8 +313,8 @@
               test "${fullCfg.manoj.profile}" = "full" || { echo "FAIL: full config profile is not full" >&2; exit 1; }
 
               # Verify Home-Manager profile options
-              test "${minCfg.home-manager.users.manoj.manoj.profile}" = "minimal" || { echo "FAIL: minimal HM profile is not minimal" >&2; exit 1; }
-              test "${fullCfg.home-manager.users.manoj.manoj.profile}" = "full" || { echo "FAIL: full HM profile is not full" >&2; exit 1; }
+              test "${minCfg.home-manager.users.${user}.manoj.profile}" = "minimal" || { echo "FAIL: minimal HM profile is not minimal" >&2; exit 1; }
+              test "${fullCfg.home-manager.users.${user}.manoj.profile}" = "full" || { echo "FAIL: full HM profile is not full" >&2; exit 1; }
 
               # Verify gaming stack options
               ${if !minGamingOff then "echo 'FAIL: minimal profile gaming stack is active' >&2; exit 1;" else ""}
