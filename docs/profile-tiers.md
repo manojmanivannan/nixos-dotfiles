@@ -302,6 +302,6 @@ nix build .#profileConfigs.full.system.build.toplevel
 
 ### GitHub Actions CI
 
-Continuous integration (`.github/workflows/nix-ci.yml`) runs on every pull request and push to `main`:
+Continuous integration (`.github/workflows/ci.yml`) runs on every pull request and push to `main`:
 - **Determinate Systems Flake Checker**: Verifies flake health and input locks.
 - **Nix Flake Check**: Executes `nix flake check` ensuring all host builds and profile assertions pass cleanly.
