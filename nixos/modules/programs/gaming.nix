@@ -1,6 +1,6 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-{
+lib.mkIf (config.manoj.profile == "full") {
   # Steam. `programs.steam.enable` installs the client and pulls in the
   # steam-runtime container plus the 32-bit graphics stack it needs.
   programs.steam = {

@@ -1,4 +1,10 @@
-{ pkgs, user, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  user,
+  ...
+}:
 
 {
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -7,12 +13,21 @@
   users.users.${user} = {
     isNormalUser = true;
     description = user;
-    extraGroups = [ "input" "wheel" "video" "audio" "tss" ];
-    shell = pkgs.zsh;
-    packages = with pkgs; [
-      vscode
-      google-chrome
+    extraGroups = [
+      "input"
+      "wheel"
+      "video"
+      "audio"
+      "tss"
     ];
+    shell = pkgs.zsh;
+    packages = lib.optionals (config.manoj.profile == "full") (
+      with pkgs;
+      [
+        vscode
+        google-chrome
+      ]
+    );
 
     # Public keys authorised to log into this account over SSH. Password auth
     # is disabled (openssh.nix), so this list is the *only* way in — keep at
@@ -37,6 +52,6 @@
   # Remove if usage stays well under the default — it only sets a ceiling,
   # it does not reserve RAM.
   services.logind.settings.Login = {
-    RuntimeDirectorySize="8G";
+    RuntimeDirectorySize = "8G";
   };
 }

@@ -1,17 +1,24 @@
-{ inputs, user, stateVersion, ... }: {
+{
+  config,
+  inputs,
+  user,
+  stateVersion,
+  ...
+}:
+{
   imports = [ inputs.home-manager.nixosModules.home-manager ];
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
 
-  # Pass the flake `inputs` into Home-Manager modules so a per-user HM
-  # module can reference a flake input directly — e.g. the caelestia HM
-  # module's `package = inputs.caelestia-shell.packages.${system}.with-cli`
-  # (WF-10). A clean prefactor: it keeps `main` green on its own and
-  # unblocks the caelestia HM module without coupling the module to a
-  # `specialArgs`-only `inputs`.
-  home-manager.extraSpecialArgs = { inherit inputs user stateVersion; };
+  # Pass the flake `inputs` and configuration profile into Home-Manager modules
+  # so a per-user HM module can reference flake inputs directly or gate
+  # package installation on the active profile tier.
+  home-manager.extraSpecialArgs = {
+    inherit inputs user stateVersion;
+    profile = config.manoj.profile;
+  };
 
   # Register flake-provided HM modules so they are available to every
   # user's HM config. `programs.caelestia` defaults to disabled, so this

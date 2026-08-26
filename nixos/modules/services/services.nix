@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   # Enable Services
@@ -17,20 +17,12 @@
   # services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 
   environment.systemPackages = with pkgs; [
-    qutebrowser
-    zathura
-    mpv
-    mpv-handler
-    imv
     at-spi2-atk
     qt6.qtwayland
     playerctl
     psmisc
     grim
     slurp
-    imagemagick
-    swappy
-    ffmpeg_6-full
     wl-screenrec
     wl-clipboard
     wl-clip-persist
@@ -41,5 +33,14 @@
     # kept libnotify after confirming caelestia shells out to it (WF-15).
     libnotify
     libfido2
+  ] ++ lib.optionals (config.manoj.profile == "full") [
+    qutebrowser
+    zathura
+    mpv
+    mpv-handler
+    imv
+    imagemagick
+    swappy
+    ffmpeg_6-full
   ];
 }

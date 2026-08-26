@@ -18,5 +18,6 @@
     ./lazygit.nix
     ./yazi.nix
     ./try.nix
+    ./profile.nix
   ];
 }
