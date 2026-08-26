@@ -207,6 +207,16 @@ let
       patch -p1 --fuzz=0 < ${./caelestia-overrides/0001-statusicons-tailscale.patch}
       patch -p1 --fuzz=0 < ${./caelestia-overrides/0002-content-tailscale.patch}
       patch -p1 --fuzz=0 < ${./caelestia-overrides/0003-barconfig-showTailscale.patch}
+      # 0004 — bar clock: add month + year to the date block. Upstream's
+      # BarClock date Loader (modules/bar/components/Clock.qml) renders only
+      # the weekday abbreviation ("ddd") and the day-of-month number ("d")
+      # when `Config.bar.clock.showDate` is on. Insert two StyledText lines
+      # after the day number (before the divider) for the abbreviated month
+      # ("MMM", e.g. "Aug") and the four-digit year ("yyyy", e.g. "2026"),
+      # styled like the weekday line (small 0.9). `Time.format` wraps
+      # Qt.formatDateTime, so these are standard Qt date tokens. Exact
+      # against v2.2.0; --fuzz=0 fails the build if upstream drifts.
+      patch -p1 --fuzz=0 < ${./caelestia-overrides/0004-clock-show-month-year.patch}
 
       # WF-14 — password-only lock PAM. Caelestia's lock can authenticate three
       # ways: `passwd` (password), `fprint` (pam_fprintd.so), and `howdy`
@@ -304,6 +314,16 @@ in
         base = 0.85;
         layers = 0.4;
       };
+
+      # Bar clock: show the date + day-of-week under the time. Caelestia's
+      # BarClock (plugin/src/Caelestia/Config/barconfig.hpp) defaults
+      # `showDate = false`, so the bar renders only the hour/minute by default.
+      # Flipping it on adds the weekday abbreviation ("ddd"), the day-of-month
+      # number ("d"), and a divider line above the time — see
+      # modules/bar/components/Clock.qml's `Config.bar.clock.showDate` Loader.
+      # `showIcon` already defaults true (the calendar_month glyph), so it's
+      # left untouched.
+      bar.clock.showDate = true;
 
       background = {
         # Caelestia's background module renders the wallpaper on the

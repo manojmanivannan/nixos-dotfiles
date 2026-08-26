@@ -1,0 +1,23 @@
+--- a/modules/bar/components/Clock.qml	2026-08-26 14:53:42.025870785 +0100
++++ b/modules/bar/components/Clock.qml	2026-08-26 14:53:42.030588993 +0100
+@@ -60,6 +60,20 @@
+                     color: root.colour
+                 }
+ 
++                StyledText {
++                    Layout.alignment: Qt.AlignHCenter
++                    text: Time.format("MMM")
++                    font: Tokens.font.body.builders.small.scale(0.9).build()
++                    color: root.colour
++                }
++
++                StyledText {
++                    Layout.alignment: Qt.AlignHCenter
++                    text: Time.format("yyyy")
++                    font: Tokens.font.body.builders.small.scale(0.9).build()
++                    color: root.colour
++                }
++
+                 StyledRect {
+                     Layout.fillWidth: true
+                     Layout.leftMargin: -Tokens.padding.extraSmall
