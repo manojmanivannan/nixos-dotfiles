@@ -8,7 +8,14 @@
 # nixos/modules/nix/home-manager.nix via `home-manager.sharedModules` and
 # defines the `programs.caelestia` options; this module enables it.
 
-{ config, lib, inputs, pkgs, ... }:
+{
+  config,
+  lib,
+  inputs,
+  pkgs,
+  weatherLocation,
+  ...
+}:
 
 let
   # The repo checkout root (matches the convention in
@@ -42,202 +49,204 @@ let
   # build-phase risk #4). The page's QML files still ship (unreferenced) —
   # only the registry entries are excised, the minimal snapshot-and-diverge
   # edit.
-  shellPackage = let
-    base = inputs.caelestia-shell.packages.${pkgs.stdenv.hostPlatform.system}.with-cli;
-    # WF-12: shell.json is a read-only Nix-store symlink (the HM
-    # `programs.caelestia` module writes it via `xdg.configFile.*.text`,
-    # which HM always symlinks into the store). GlobalConfig (which inherits
-    # RootConfig) auto-saves to it on every property change after load
-    # (plugin/src/Caelestia/Config/rootconfig.cpp:106-114); the write hits
-    # EROFS and emits `saveFailed`, which ConfigToasts.qml renders as the
-    # "Failed to save config" Error toast on every launch. The read-only
-    # failure is *expected* here — the file is pinned by Nix on purpose
-    # (the pin is the WF-12 design; runtime saves are intentionally dropped,
-    # the WARN log still records them). Gate only this case so genuine save
-    # failures (disk full, permissions, …) still surface as toasts.
-    # `file.errorString()` is "Read-only file system" for EROFS; the
-    # substituted line is unique in the file (verified).
-    #
-    # The `emit saveFailed` is compiled by the `plugin` derivation
-    # (caelestia-qml-plugin, exposed as `base.plugin`) — a SEPARATE
-    # derivation from the shell. The shell's own `src` contains
-    # rootconfig.cpp, so a sed in the shell's postPatch rewrites it, but
-    # the shell never compiles the C++ plugin (its cmake builds only
-    # ENABLE_MODULES=shell), so the edit is discarded — the loaded .so comes
-    # from `base.plugin`. The guard must therefore patch the *plugin*
-    # derivation, and the patched plugin must be swapped back into the
-    # shell's buildInputs (otherwise wrapQtAppsHook still points the QML
-    # import path at the unpatched .so). See memory
-    # caelestia-shelljson-readonly-save-toast.
-    patchedPlugin = base.plugin.overrideAttrs (old: {
+  shellPackage =
+    let
+      base = inputs.caelestia-shell.packages.${pkgs.stdenv.hostPlatform.system}.with-cli;
+      # WF-12: shell.json is a read-only Nix-store symlink (the HM
+      # `programs.caelestia` module writes it via `xdg.configFile.*.text`,
+      # which HM always symlinks into the store). GlobalConfig (which inherits
+      # RootConfig) auto-saves to it on every property change after load
+      # (plugin/src/Caelestia/Config/rootconfig.cpp:106-114); the write hits
+      # EROFS and emits `saveFailed`, which ConfigToasts.qml renders as the
+      # "Failed to save config" Error toast on every launch. The read-only
+      # failure is *expected* here — the file is pinned by Nix on purpose
+      # (the pin is the WF-12 design; runtime saves are intentionally dropped,
+      # the WARN log still records them). Gate only this case so genuine save
+      # failures (disk full, permissions, …) still surface as toasts.
+      # `file.errorString()` is "Read-only file system" for EROFS; the
+      # substituted line is unique in the file (verified).
+      #
+      # The `emit saveFailed` is compiled by the `plugin` derivation
+      # (caelestia-qml-plugin, exposed as `base.plugin`) — a SEPARATE
+      # derivation from the shell. The shell's own `src` contains
+      # rootconfig.cpp, so a sed in the shell's postPatch rewrites it, but
+      # the shell never compiles the C++ plugin (its cmake builds only
+      # ENABLE_MODULES=shell), so the edit is discarded — the loaded .so comes
+      # from `base.plugin`. The guard must therefore patch the *plugin*
+      # derivation, and the patched plugin must be swapped back into the
+      # shell's buildInputs (otherwise wrapQtAppsHook still points the QML
+      # import path at the unpatched .so). See memory
+      # caelestia-shelljson-readonly-save-toast.
+      patchedPlugin = base.plugin.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          sed -i 's|emit saveFailed(err, m_screen);|if (!file.errorString().contains("Read-only file system")) emit saveFailed(err, m_screen);|' \
+            plugin/src/Caelestia/Config/rootconfig.cpp
+        '';
+      });
+    in
+    base.overrideAttrs (old: {
+      # Swap the unpatched `base.plugin` for `patchedPlugin` so the shell's
+      # Qt wrapper resolves the Caelestia.Config .so from the patched build.
+      buildInputs = map (b: if b == base.plugin then patchedPlugin else b) (old.buildInputs or [ ]);
       postPatch = (old.postPatch or "") + ''
-        sed -i 's|emit saveFailed(err, m_screen);|if (!file.errorString().contains("Read-only file system")) emit saveFailed(err, m_screen);|' \
-          plugin/src/Caelestia/Config/rootconfig.cpp
+        # WF-12: drop the Nexus "Wallpaper & style" page from both registries.
+        # `sed` deletes from the `// Appearance` comment through the closing
+        # `},` at 8-space indent (the first such line after the comment) — the
+        # page object / Component block. Verified against the upstream QML;
+        # the two lists stay parallel (both now start at Network, index 0).
+        sed -i '/\/\/ Appearance/,/^        },$/d' modules/nexus/PageRegistry.qml
+        sed -i '/\/\/ Appearance/,/^        },$/d' modules/nexus/PageCompRegistry.qml
+        # The now-unused import of the wallandstyle page components.
+        sed -i '/^import qs\.modules\.nexus\.pages\.wallandstyle$/d' modules/nexus/PageCompRegistry.qml
+
+        # Drop the rotating GIF (an animated image — the default caelestia
+        # "sessionGif", an anime-girl spin) wedged between the Shutdown and
+        # Hibernate buttons in modules/session/Content.qml. There's no config
+        # flag to hide it (only `general.sessionGifSpeed` to freeze a frame and
+        # `paths.sessionGif` to swap the asset), so patch the QML: delete the
+        # whole `AnimatedImage { … }` block (4-space-indented, lines 52-62 in
+        # the pinned v2.2.0 source). The two flanking SessionButtons collapse
+        # together; KeyNavigation.shutdown→hibernate still chains since it
+        # references the `hibernate` id, not the removed item.
+        sed -i '/^    AnimatedImage {/,/^    }$/d' modules/session/Content.qml
+
+        # Lock-screen resource widgets (modules/lock/Resources.qml). Three
+        # `Resource {}` blocks render CPU / Memory / Disk, each with `colour`
+        # (the percentage number), `shapeColour` (the shape backdrop the number
+        # sits on), and `fillColour` (the wavy fill bar). Upstream paints each
+        # in a different token family — CPU gold/amber (m3primary /
+        # m3primaryContainer), Memory teal-on-dark (m3tertiary / m3onTertiary),
+        # Disk terracotta/amber (m3secondary / m3secondaryContainer) — and the
+        # percentage text used the same warm token as its shape (gold-on-amber,
+        # terracotta-on-amber), which is low-contrast and hard to read on the
+        # espresso lock screen.
+        #
+        # Two fixes in one pass:
+        #  1. Unify all three widgets on the gold/amber scheme — shape backdrop
+        #     `m3primaryContainer` (#c08a4f amber), fill bar `m3primary @ 0.3`
+        #     (#e8c272 gold) — so the widgets read as one family.
+        #  2. Make the text clearer. The percentage number renders on top of the
+        #     amber shape, so use `m3onPrimaryContainer` (#f0dca0 pale cream) —
+        #     the Material "on primaryContainer" token, the high-contrast text
+        #     colour designed for content on the amber container, still in the
+        #     gold/cream family. The widget icons are recolored to the same pale
+        #     cream (upstream hard-coded them to m3secondary / #d99069 terracotta,
+        #     which read pinkish and muddy on the amber shape).
+        # The CPU temperature badge originally sat on m3secondaryContainer
+        # (#c08a4f amber) — the *same* value as m3primaryContainer here, so the
+        # circle was indistinguishable from the pentagon behind it. Its
+        # normal-state backdrop is shifted to m3primary (#e8c272 gold) for a
+        # subtle in-family differentiation, and its label to m3onPrimary
+        # (#322a21 dark brown) for contrast on the brighter gold. The >90C hot
+        # state stays m3errorContainer / m3onErrorContainer (already clear).
+        # Widget shapes (Pentagon / Slanted / Gem) are left alone.
+        #
+        # Every target line is globally unique in this file — the per-widget
+        # token (m3tertiary / m3primary / m3secondary) and the 0.3 / 0.4 alpha
+        # variants disambiguate the fill lines, and the British `colour:` /
+        # `shapeColour:` spelling keeps these distinct from the temperature
+        # badge's American `color:` ternary lines — so content matches are exact
+        # and survive upstream line drift.
+        # Memory widget (teal-on-dark -> gold/amber + clear text).
+        sed -i 's|colour: Colours.palette.m3tertiary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
+        sed -i 's|shapeColour: Colours.palette.m3onTertiary$|shapeColour: Colours.palette.m3primaryContainer|' modules/lock/Resources.qml
+        sed -i 's|fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
+        # CPU widget (already gold/amber shape; clearer text + gold fill).
+        sed -i 's|colour: Colours.palette.m3primary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
+        sed -i 's|fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
+        # Disk widget (terracotta/amber -> gold/amber + clear text).
+        sed -i 's|colour: Colours.palette.m3secondary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
+        sed -i 's|shapeColour: Colours.palette.m3secondaryContainer$|shapeColour: Colours.palette.m3primaryContainer|' modules/lock/Resources.qml
+        sed -i 's|fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
+        # Widget icons (terracotta -> pale cream). American `color:` + the bare
+        # `m3secondary` token + `$` anchor matches only the shared icon line, not
+        # the disk widget's British `colour:` number or the temp-label ternary.
+        sed -i 's|color: Colours.palette.m3secondary$|color: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
+        # CPU temperature badge backdrop, normal state (amber -> gold to
+        # differentiate from the amber widget shape). Hot (>90C) branch stays
+        # m3errorContainer.
+        sed -i 's|color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer$|color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3primary|' modules/lock/Resources.qml
+        # CPU temperature label, normal state (terracotta -> dark brown, for
+        # contrast on the new gold badge). Hot (>90C) branch stays m3onErrorContainer.
+        sed -i 's|m3onErrorContainer : Colours.palette.m3secondary$|m3onErrorContainer : Colours.palette.m3onPrimary|' modules/lock/Resources.qml
+
+        # Dashboard Performance tab (modules/dashboard/Performance.qml). The two
+        # HeroCards (CPU / GPU) take an `accent` colour that drives every accented
+        # element in the card — the MaterialIcon, the "CPU"/"GPU" label, the
+        # thermometer icon + StyledProgressBar, and the usage % number (which is
+        # `color: root.accent` in HeroCard.qml). Upstream keys CPU to m3primary
+        # (#e8c272 gold) and GPU to m3secondary (#d99069 terracotta), so the GPU
+        # card reads pink next to the gold CPU card — the same terracotta-on-espresso
+        # clash fixed above for the lock-screen widgets. Recolour the GPU card to
+        # m3primary so both cards read as one gold family. The line is globally
+        # unique in this file: only the GPU HeroCard uses `m3secondary`; the CPU
+        # card's `accent: Colours.palette.m3primary` is untouched.
+        sed -i 's|accent: Colours.palette.m3secondary$|accent: Colours.palette.m3primary|' modules/dashboard/Performance.qml
+
+        # WF-13 — the tailscale custom module (the one ported module). Ships the
+        # new QML + brand asset into the source tree and patches the existing
+        # StatusIcons / Content / barconfig.hpp to wire them in. The new files
+        # live in home-manager/modules/caelestia-overrides/ as real repo files
+        # (reviewable, lintable by eye); the path interpolations below copy them
+        # into this nix-store build tree (the caelestia-shell flake input's
+        # derivation can't see this repo directly — only paths interpolated into
+        # the postPatch string). See docs/wayfinder/tickets/
+        # tailscale-custom-module.md.
+        #
+        # services/Tailscale.qml        — Process-wrapped singleton (status poll
+        #                                  + toggle/switch/set-exit-node). Auto-
+        #                                  registered as a singleton by the
+        #                                  quickshell config-loader's qmldir
+        #                                  generation (no qmldir in the source).
+        # modules/bar/popouts/TailscalePopout.qml — the hover popout. Referenced
+        #                                  from Content.qml as `TailscalePopout`
+        #                                  (same-dir implicit import, like the
+        #                                  Network/Battery popouts).
+        # assets/tailscale_{on,off}.png — brand marks; the bar icon (an Image in
+        #                                  the StatusIcons patch) swaps between
+        #                                  them on Tailscale.up, so the colour
+        #                                  (green/grey) is baked into the PNGs
+        #                                  rather than applied at runtime.
+        cp ${./caelestia-overrides/Tailscale.qml} services/Tailscale.qml
+        cp ${./caelestia-overrides/TailscalePopout.qml} modules/bar/popouts/TailscalePopout.qml
+        cp ${./caelestia-overrides/tailscale_on.png} assets/tailscale_on.png
+        cp ${./caelestia-overrides/tailscale_off.png} assets/tailscale_off.png
+        # --fuzz=0: the patches are exact against the pinned v2.2.0 source; fail
+        # cleanly (build red) rather than fuzz-applying if upstream drifts.
+        patch -p1 --fuzz=0 < ${./caelestia-overrides/0001-statusicons-tailscale.patch}
+        patch -p1 --fuzz=0 < ${./caelestia-overrides/0002-content-tailscale.patch}
+        patch -p1 --fuzz=0 < ${./caelestia-overrides/0003-barconfig-showTailscale.patch}
+        # 0004 — bar clock: add month + year to the date block. Upstream's
+        # BarClock date Loader (modules/bar/components/Clock.qml) renders only
+        # the weekday abbreviation ("ddd") and the day-of-month number ("d")
+        # when `Config.bar.clock.showDate` is on. Insert two StyledText lines
+        # after the day number (before the divider) for the abbreviated month
+        # ("MMM", e.g. "Aug") and the four-digit year ("yyyy", e.g. "2026"),
+        # styled like the weekday line (small 0.9). `Time.format` wraps
+        # Qt.formatDateTime, so these are standard Qt date tokens. Exact
+        # against v2.2.0; --fuzz=0 fails the build if upstream drifts.
+        patch -p1 --fuzz=0 < ${./caelestia-overrides/0004-clock-show-month-year.patch}
+
+        # WF-14 — password-only lock PAM. Caelestia's lock can authenticate three
+        # ways: `passwd` (password), `fprint` (pam_fprintd.so), and `howdy`
+        # (pam_howdy.so) — see modules/lock/Pam.qml. The build spec (WF-8 Solution:
+        # Lock screen) drops fingerprint/face/Yubikey at the lock screen. Two
+        # layers make that hold:
+        #   1. `lock.enableFprint`/`enableHowdy` = false in `settings` below stops
+        #      the ManualPamContexts from ever starting (their `canAttempt` gate
+        #      is `available && enabled && ...`, and `enabled` binds to these).
+        #   2. This rewrite drops the `pam_fprintd.so` / `pam_howdy.so` auth lines
+        #      from the vendored PAM files themselves — the "build-phase PAM
+        #      rewrite of the same shape caelestia's derivation already does" the
+        #      spec calls for (upstream's prePatch only rewrites the .so *paths*;
+        #      we remove the lines). Defense in depth: even if a future `enable*`
+        #      flip re-arms a context, the PAM file has no module to load.
+        # The files keep their `%PAM-1.0` header so they remain valid PAM files;
+        # they're simply inert (no auth lines) and unreferenced once disabled.
+        printf '%s\n' '#%PAM-1.0' > assets/pam.d/fprint
+        printf '%s\n' '#%PAM-1.0' > assets/pam.d/howdy
       '';
     });
-  in base.overrideAttrs (old: {
-    # Swap the unpatched `base.plugin` for `patchedPlugin` so the shell's
-    # Qt wrapper resolves the Caelestia.Config .so from the patched build.
-    buildInputs = map (b: if b == base.plugin then patchedPlugin else b) (old.buildInputs or []);
-    postPatch = (old.postPatch or "") + ''
-      # WF-12: drop the Nexus "Wallpaper & style" page from both registries.
-      # `sed` deletes from the `// Appearance` comment through the closing
-      # `},` at 8-space indent (the first such line after the comment) — the
-      # page object / Component block. Verified against the upstream QML;
-      # the two lists stay parallel (both now start at Network, index 0).
-      sed -i '/\/\/ Appearance/,/^        },$/d' modules/nexus/PageRegistry.qml
-      sed -i '/\/\/ Appearance/,/^        },$/d' modules/nexus/PageCompRegistry.qml
-      # The now-unused import of the wallandstyle page components.
-      sed -i '/^import qs\.modules\.nexus\.pages\.wallandstyle$/d' modules/nexus/PageCompRegistry.qml
-
-      # Drop the rotating GIF (an animated image — the default caelestia
-      # "sessionGif", an anime-girl spin) wedged between the Shutdown and
-      # Hibernate buttons in modules/session/Content.qml. There's no config
-      # flag to hide it (only `general.sessionGifSpeed` to freeze a frame and
-      # `paths.sessionGif` to swap the asset), so patch the QML: delete the
-      # whole `AnimatedImage { … }` block (4-space-indented, lines 52-62 in
-      # the pinned v2.2.0 source). The two flanking SessionButtons collapse
-      # together; KeyNavigation.shutdown→hibernate still chains since it
-      # references the `hibernate` id, not the removed item.
-      sed -i '/^    AnimatedImage {/,/^    }$/d' modules/session/Content.qml
-
-      # Lock-screen resource widgets (modules/lock/Resources.qml). Three
-      # `Resource {}` blocks render CPU / Memory / Disk, each with `colour`
-      # (the percentage number), `shapeColour` (the shape backdrop the number
-      # sits on), and `fillColour` (the wavy fill bar). Upstream paints each
-      # in a different token family — CPU gold/amber (m3primary /
-      # m3primaryContainer), Memory teal-on-dark (m3tertiary / m3onTertiary),
-      # Disk terracotta/amber (m3secondary / m3secondaryContainer) — and the
-      # percentage text used the same warm token as its shape (gold-on-amber,
-      # terracotta-on-amber), which is low-contrast and hard to read on the
-      # espresso lock screen.
-      #
-      # Two fixes in one pass:
-      #  1. Unify all three widgets on the gold/amber scheme — shape backdrop
-      #     `m3primaryContainer` (#c08a4f amber), fill bar `m3primary @ 0.3`
-      #     (#e8c272 gold) — so the widgets read as one family.
-      #  2. Make the text clearer. The percentage number renders on top of the
-      #     amber shape, so use `m3onPrimaryContainer` (#f0dca0 pale cream) —
-      #     the Material "on primaryContainer" token, the high-contrast text
-      #     colour designed for content on the amber container, still in the
-      #     gold/cream family. The widget icons are recolored to the same pale
-      #     cream (upstream hard-coded them to m3secondary / #d99069 terracotta,
-      #     which read pinkish and muddy on the amber shape).
-      # The CPU temperature badge originally sat on m3secondaryContainer
-      # (#c08a4f amber) — the *same* value as m3primaryContainer here, so the
-      # circle was indistinguishable from the pentagon behind it. Its
-      # normal-state backdrop is shifted to m3primary (#e8c272 gold) for a
-      # subtle in-family differentiation, and its label to m3onPrimary
-      # (#322a21 dark brown) for contrast on the brighter gold. The >90C hot
-      # state stays m3errorContainer / m3onErrorContainer (already clear).
-      # Widget shapes (Pentagon / Slanted / Gem) are left alone.
-      #
-      # Every target line is globally unique in this file — the per-widget
-      # token (m3tertiary / m3primary / m3secondary) and the 0.3 / 0.4 alpha
-      # variants disambiguate the fill lines, and the British `colour:` /
-      # `shapeColour:` spelling keeps these distinct from the temperature
-      # badge's American `color:` ternary lines — so content matches are exact
-      # and survive upstream line drift.
-      # Memory widget (teal-on-dark -> gold/amber + clear text).
-      sed -i 's|colour: Colours.palette.m3tertiary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
-      sed -i 's|shapeColour: Colours.palette.m3onTertiary$|shapeColour: Colours.palette.m3primaryContainer|' modules/lock/Resources.qml
-      sed -i 's|fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
-      # CPU widget (already gold/amber shape; clearer text + gold fill).
-      sed -i 's|colour: Colours.palette.m3primary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
-      sed -i 's|fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
-      # Disk widget (terracotta/amber -> gold/amber + clear text).
-      sed -i 's|colour: Colours.palette.m3secondary$|colour: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
-      sed -i 's|shapeColour: Colours.palette.m3secondaryContainer$|shapeColour: Colours.palette.m3primaryContainer|' modules/lock/Resources.qml
-      sed -i 's|fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)|fillColour: Qt.alpha(Colours.palette.m3primary, 0.3)|' modules/lock/Resources.qml
-      # Widget icons (terracotta -> pale cream). American `color:` + the bare
-      # `m3secondary` token + `$` anchor matches only the shared icon line, not
-      # the disk widget's British `colour:` number or the temp-label ternary.
-      sed -i 's|color: Colours.palette.m3secondary$|color: Colours.palette.m3onPrimaryContainer|' modules/lock/Resources.qml
-      # CPU temperature badge backdrop, normal state (amber -> gold to
-      # differentiate from the amber widget shape). Hot (>90C) branch stays
-      # m3errorContainer.
-      sed -i 's|color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer$|color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3primary|' modules/lock/Resources.qml
-      # CPU temperature label, normal state (terracotta -> dark brown, for
-      # contrast on the new gold badge). Hot (>90C) branch stays m3onErrorContainer.
-      sed -i 's|m3onErrorContainer : Colours.palette.m3secondary$|m3onErrorContainer : Colours.palette.m3onPrimary|' modules/lock/Resources.qml
-
-      # Dashboard Performance tab (modules/dashboard/Performance.qml). The two
-      # HeroCards (CPU / GPU) take an `accent` colour that drives every accented
-      # element in the card — the MaterialIcon, the "CPU"/"GPU" label, the
-      # thermometer icon + StyledProgressBar, and the usage % number (which is
-      # `color: root.accent` in HeroCard.qml). Upstream keys CPU to m3primary
-      # (#e8c272 gold) and GPU to m3secondary (#d99069 terracotta), so the GPU
-      # card reads pink next to the gold CPU card — the same terracotta-on-espresso
-      # clash fixed above for the lock-screen widgets. Recolour the GPU card to
-      # m3primary so both cards read as one gold family. The line is globally
-      # unique in this file: only the GPU HeroCard uses `m3secondary`; the CPU
-      # card's `accent: Colours.palette.m3primary` is untouched.
-      sed -i 's|accent: Colours.palette.m3secondary$|accent: Colours.palette.m3primary|' modules/dashboard/Performance.qml
-
-      # WF-13 — the tailscale custom module (the one ported module). Ships the
-      # new QML + brand asset into the source tree and patches the existing
-      # StatusIcons / Content / barconfig.hpp to wire them in. The new files
-      # live in home-manager/modules/caelestia-overrides/ as real repo files
-      # (reviewable, lintable by eye); the path interpolations below copy them
-      # into this nix-store build tree (the caelestia-shell flake input's
-      # derivation can't see this repo directly — only paths interpolated into
-      # the postPatch string). See docs/wayfinder/tickets/
-      # tailscale-custom-module.md.
-      #
-      # services/Tailscale.qml        — Process-wrapped singleton (status poll
-      #                                  + toggle/switch/set-exit-node). Auto-
-      #                                  registered as a singleton by the
-      #                                  quickshell config-loader's qmldir
-      #                                  generation (no qmldir in the source).
-      # modules/bar/popouts/TailscalePopout.qml — the hover popout. Referenced
-      #                                  from Content.qml as `TailscalePopout`
-      #                                  (same-dir implicit import, like the
-      #                                  Network/Battery popouts).
-      # assets/tailscale_{on,off}.png — brand marks; the bar icon (an Image in
-      #                                  the StatusIcons patch) swaps between
-      #                                  them on Tailscale.up, so the colour
-      #                                  (green/grey) is baked into the PNGs
-      #                                  rather than applied at runtime.
-      cp ${./caelestia-overrides/Tailscale.qml} services/Tailscale.qml
-      cp ${./caelestia-overrides/TailscalePopout.qml} modules/bar/popouts/TailscalePopout.qml
-      cp ${./caelestia-overrides/tailscale_on.png} assets/tailscale_on.png
-      cp ${./caelestia-overrides/tailscale_off.png} assets/tailscale_off.png
-      # --fuzz=0: the patches are exact against the pinned v2.2.0 source; fail
-      # cleanly (build red) rather than fuzz-applying if upstream drifts.
-      patch -p1 --fuzz=0 < ${./caelestia-overrides/0001-statusicons-tailscale.patch}
-      patch -p1 --fuzz=0 < ${./caelestia-overrides/0002-content-tailscale.patch}
-      patch -p1 --fuzz=0 < ${./caelestia-overrides/0003-barconfig-showTailscale.patch}
-      # 0004 — bar clock: add month + year to the date block. Upstream's
-      # BarClock date Loader (modules/bar/components/Clock.qml) renders only
-      # the weekday abbreviation ("ddd") and the day-of-month number ("d")
-      # when `Config.bar.clock.showDate` is on. Insert two StyledText lines
-      # after the day number (before the divider) for the abbreviated month
-      # ("MMM", e.g. "Aug") and the four-digit year ("yyyy", e.g. "2026"),
-      # styled like the weekday line (small 0.9). `Time.format` wraps
-      # Qt.formatDateTime, so these are standard Qt date tokens. Exact
-      # against v2.2.0; --fuzz=0 fails the build if upstream drifts.
-      patch -p1 --fuzz=0 < ${./caelestia-overrides/0004-clock-show-month-year.patch}
-
-      # WF-14 — password-only lock PAM. Caelestia's lock can authenticate three
-      # ways: `passwd` (password), `fprint` (pam_fprintd.so), and `howdy`
-      # (pam_howdy.so) — see modules/lock/Pam.qml. The build spec (WF-8 Solution:
-      # Lock screen) drops fingerprint/face/Yubikey at the lock screen. Two
-      # layers make that hold:
-      #   1. `lock.enableFprint`/`enableHowdy` = false in `settings` below stops
-      #      the ManualPamContexts from ever starting (their `canAttempt` gate
-      #      is `available && enabled && ...`, and `enabled` binds to these).
-      #   2. This rewrite drops the `pam_fprintd.so` / `pam_howdy.so` auth lines
-      #      from the vendored PAM files themselves — the "build-phase PAM
-      #      rewrite of the same shape caelestia's derivation already does" the
-      #      spec calls for (upstream's prePatch only rewrites the .so *paths*;
-      #      we remove the lines). Defense in depth: even if a future `enable*`
-      #      flip re-arms a context, the PAM file has no module to load.
-      # The files keep their `%PAM-1.0` header so they remain valid PAM files;
-      # they're simply inert (no auth lines) and unreferenced once disabled.
-      printf '%s\n' '#%PAM-1.0' > assets/pam.d/fprint
-      printf '%s\n' '#%PAM-1.0' > assets/pam.d/howdy
-    '';
-  });
 in
 {
   programs.caelestia = {
@@ -301,6 +310,12 @@ in
       # the LanguageAndRegion Nexus page binds the same key). Stated
       # explicitly to pin Celsius rather than rely on the (false) default.
       services.useFahrenheit = false;
+
+      # Weather location is defined centrally in the flake so it is easy to
+      # change per machine/user without editing the shell module. The weather
+      # service accepts either a city string or coordinates; plain city names
+      # are more readable and avoid the wrong-ISP fallback to Southampton.
+      services.weatherLocation = weatherLocation;
 
       appearance.transparency = {
         # Transparency is the lever that makes the shell glassy and — via
@@ -385,7 +400,10 @@ in
       # (nixos/modules/desktop/hyprland.nix). The session menu's action set is
       # otherwise caelestia's default (logout/shutdown/hibernate/reboot —
       # suspend already absent, per the spec), so only `logout` is overridden.
-      session.commands.logout = [ "uwsm" "stop" ];
+      session.commands.logout = [
+        "uwsm"
+        "stop"
+      ];
 
       # WF-12: the launcher actions minus every scheme-regenerating one.
       # Dropped: `>scheme` / `>variant` / `>wallpaper` (autocomplete →
@@ -406,7 +424,10 @@ in
           name = "Calculator";
           icon = "calculate";
           description = "Do simple math equations (powered by Qalc)";
-          command = [ "autocomplete" "calc" ];
+          command = [
+            "autocomplete"
+            "calc"
+          ];
         }
         {
           name = "Shutdown";
@@ -430,7 +451,10 @@ in
           # systemd Wayland-session teardown). `SessionManager.exec` returns
           # false for `uwsm` for the same reason as `session.commands.logout`
           # above, so this likewise falls through to `Quickshell.execDetached`.
-          command = [ "uwsm" "stop" ];
+          command = [
+            "uwsm"
+            "stop"
+          ];
           dangerous = true;
         }
         {
@@ -443,7 +467,10 @@ in
           # `WlSessionLock.locked` (plugin/src/Caelestia/Services/
           # sessionmanager.cpp + modules/IdleMonitors.qml `onLockRequested`),
           # so this surfaces the caelestia lock screen, not a hyprlock one.
-          command = [ "loginctl" "lock-session" ];
+          command = [
+            "loginctl"
+            "lock-session"
+          ];
         }
         {
           name = "Sleep";
@@ -455,7 +482,12 @@ in
           name = "Settings";
           icon = "settings";
           description = "Configure the shell";
-          command = [ "caelestia" "shell" "nexus" "open" ];
+          command = [
+            "caelestia"
+            "shell"
+            "nexus"
+            "open"
+          ];
         }
       ];
     };

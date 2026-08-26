@@ -1,4 +1,11 @@
-{ inputs, user, stateVersion, ... }: {
+{
+  inputs,
+  user,
+  stateVersion,
+  weatherLocation,
+  ...
+}:
+{
   imports = [ inputs.home-manager.nixosModules.home-manager ];
 
   home-manager.useGlobalPkgs = true;
@@ -11,7 +18,14 @@
   # (WF-10). A clean prefactor: it keeps `main` green on its own and
   # unblocks the caelestia HM module without coupling the module to a
   # `specialArgs`-only `inputs`.
-  home-manager.extraSpecialArgs = { inherit inputs user stateVersion; };
+  home-manager.extraSpecialArgs = {
+    inherit
+      inputs
+      user
+      stateVersion
+      weatherLocation
+      ;
+  };
 
   # Register flake-provided HM modules so they are available to every
   # user's HM config. `programs.caelestia` defaults to disabled, so this
