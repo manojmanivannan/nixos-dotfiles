@@ -41,7 +41,13 @@
 
   services.dbus.apparmor = "enabled";
   services.fail2ban.enable = true;
-  # security.polkit.enable = true;
+  # Explicitly enable polkit rather than rely on a transitive enabler (it was
+  # coming up only because virtualisation.libvirtd enables it). The polkit
+  # rule in ./polkit.nix (passwordless logind power actions for the active
+  # wheel user) and the hyprpolkitagent autostart both depend on polkitd
+  # being up; if libvirtd is ever disabled, those would silently break and
+  # the caelestia power menu would stop turning the PC off again.
+  security.polkit.enable = true;
   programs.firejail = {
     enable = true;
     wrappedBinaries = { 

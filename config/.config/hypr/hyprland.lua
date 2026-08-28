@@ -35,6 +35,19 @@ hl.on("hyprland.start", function ()
   -- back to `pass` at ~/.password-store. The login keyring is unlocked at
   -- greetd login via pam_gnome_keyring (see nixos/modules/security/keyring.nix).
   hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
+  -- Polkit authentication agent (the GUI password prompter). The caelestia
+  -- power menu itself no longer needs this — nixos/modules/security/polkit.nix
+  -- authorises wheel for logind power actions outright (polkit.Result.YES),
+  -- so PowerOff/Reboot succeed without any auth challenge. This agent is the
+  -- handler for any OTHER polkit prompt the session might raise (e.g. udisks
+  -- mounts, pkexec). Started via the systemd user unit the hyprpolkitagent
+  -- package ships (PartOf=graphical-session.target, ConditionEnvironment=
+  -- WAYLAND_DISPLAY) rather than as a bare process: the package only puts the
+  -- binary in libexec/ (NOT bin/), so `hyprpolkitagent` isn't on PATH and a
+  -- plain `exec hyprpolkitagent` silently fails — `systemctl --user start`
+  -- finds the shipped unit and gets its restart/slice behaviour. Idempotent,
+  -- so safe under hyprland.start re-entry.
+  hl.exec_cmd("systemctl --user start hyprpolkitagent")
 end)
 
 
