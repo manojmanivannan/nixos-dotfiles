@@ -5,6 +5,6 @@
     fastfetch
     btop
     nvtopPackages.nvidia
-    nvtopPackages.intel
+    nvtopPackages.amd
   ];
 }
