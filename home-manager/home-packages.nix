@@ -1,5 +1,10 @@
 { inputs, pkgs, ... }: {
   home.packages = with pkgs; [
+    # Patchelf'd browsers for PLAYWRIGHT_BROWSERS_PATH (see home.nix). Playwright
+    # only accepts its exact matching revision, so pin any playwright package to
+    # `nix eval nixpkgs#playwright-driver.version` (currently 1.59.1) — e.g.
+    # `npx -y playwright@1.59.1`; never `npx playwright`, which floats to latest
+    # and falls back to unpatched ~/.cache builds (missing libglib-2.0.so.0).
     playwright-driver.browsers
     nixfmt
     eza # modern ls replacement; aliased via the oh-my-zsh `eza` plugin (see zsh.nix)
