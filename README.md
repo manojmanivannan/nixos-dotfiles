@@ -38,6 +38,7 @@
 - [How It's Wired](#-how-its-wired)
 - [Prerequisites](#-prerequisites)
 - [Installation](#-installation)
+- [Checklist: Hardcoded Values & Machine Settings](#-checklist-hardcoded-values--machine-settings)
 - [Customization](#-customization)
 - [Keybindings](#-keybindings)
 - [Shell & CLI Goodies](#-shell--cli-goodies)
@@ -173,13 +174,20 @@ The repo assumes it's cloned at `~/nixos-dotfiles` (see [Notes & Caveats](#-note
 Edit `flake.nix`:
 
 ```nix
-user = "your-username";          # flows to the user account, docker group, Home Manager, env vars
+user = "your-username";            # flows to user account, docker group, Home Manager, env vars
+weatherLocation = "51.338,-0.748"; # lat,long or "City, Country" for Caelestia weather widget
 hosts = [
-  { name = "nixos"; hostname = "your-hostname"; inherit stateVersion; }
+  {
+    name = "nixos";
+    hostname = "your-hostname";
+    ipv4Address = "192.168.1.192"; # set to your static IP (or see checklist for DHCP)
+    defaultGateway = "192.168.1.1";
+    inherit stateVersion;
+  }
 ];
 ```
 
-`name` is the stable identity (the flake attr `.nixos` and the `hosts/<name>/` folder) — leave it as `nixos`. `hostname` is the machine's network name, `user` is your login name. These two lines are the only edits most cloners need.
+`name` is the stable identity (the flake attr `.nixos` and the `hosts/<name>/` folder) — leave it as `nixos`. `hostname` is the machine's network name, and `user` is your login name.
 
 ### 4. Drop in your generated hardware config
 
@@ -190,6 +198,11 @@ cp /etc/nixos/hardware-configuration.nix ~/nixos-dotfiles/hosts/nixos/
 ```
 
 ### 5. Rebuild and switch
+
+> [!WARNING]
+> **Check before rebuilding!** This repository contains several hardware- and personal-specific defaults — most notably a **hardcoded network interface (`eno1`) with DHCP disabled** in `nixos/modules/networking/networking.nix`, **strictly key-based SSH** with the author's public keys in `nixos/modules/users/users.nix`, and **Lenovo battery charging thresholds**.
+>
+> Please review the **[Checklist: Hardcoded Values & Machine Settings](#-checklist-hardcoded-values--machine-settings)** below before running `nixos-rebuild switch` so you do not lose network connectivity or lock yourself out.
 
 ```sh
 sudo nixos-rebuild switch --flake ~/nixos-dotfiles#nixos   # alias: nrs
@@ -203,6 +216,82 @@ The `#nixos` is the flake attr (the `name` field), **not** your machine's hostna
 > sudo passwd <your-username>
 > ```
 > This matters here because `greetd`/`tuigreet` offer no `root` login, so a locked account with no password means no way in.
+
+## ⚙️ Checklist: Hardcoded Values & Machine Settings
+
+This repository was created for a specific personal workstation (an AMD laptop with an NVIDIA RTX GPU, static IP on an Intel I226-V Ethernet interface, Lenovo battery management, and private homelab services). If you are cloning or adapting this setup, review and update the following settings:
+
+### Quick Reference
+
+| Category | File | Hardcoded Item / Setting | Default in Repo | What to Change / Why |
+|:---|:---|:---|:---|:---|
+| **Network Interface** | [`nixos/modules/networking/networking.nix`](nixos/modules/networking/networking.nix) | `networking.interfaces.eno1` | `eno1` | Change to your NIC name (e.g. `eth0`, `enp3s0`), or remove for DHCP. |
+| **DHCP / IP Mode** | [`nixos/modules/networking/networking.nix`](nixos/modules/networking/networking.nix) | `networking.useDHCP = false;` | `false` | Set to `true` (or enable NetworkManager) if you do not use a static IP. |
+| **Wake-on-LAN** | [`nixos/modules/networking/networking.nix`](nixos/modules/networking/networking.nix) | `systemd.services.eno1-wol`, `powerManagement` | `eno1` (Intel I226-V) | Change `eno1` or comment out if not using Wake-on-LAN. |
+| **Static IP & Gateway** | [`flake.nix`](flake.nix) | `ipv4Address`, `defaultGateway` | `192.168.1.192`, `192.168.1.1` | Set to your local subnet IP/gateway, or omit if using DHCP. |
+| **DNS Servers** | [`nixos/modules/networking/dns.nix`](nixos/modules/networking/dns.nix) | `networking.nameservers` | `[ "192.168.1.1" "8.8.8.8" ]` | Change `192.168.1.1` to your router/local DNS or upstream provider. |
+| **SSH Authorized Keys** | [`nixos/modules/users/users.nix`](nixos/modules/users/users.nix) | `openssh.authorizedKeys.keys` | Author's SSH public keys | **Critical**: Replace with your own `~/.ssh/id_ed25519.pub`. |
+| **SSH Password Auth** | [`nixos/modules/services/openssh.nix`](nixos/modules/services/openssh.nix) | `PasswordAuthentication = false;` | `false` (key-only) | Enforces SSH key logins only; will lock you out if keys are not updated. |
+| **User Account** | [`flake.nix`](flake.nix) | `user = "manoj";` | `"manoj"` | Set your username; cascades to user account, HM, and permissions. |
+| **User Avatar** | [`home-manager/modules/caelestia.nix`](home-manager/modules/caelestia.nix) | `home.file.".face".source` | `./caelestia-overrides/profile_picture.jpg` | Replace image or link to your own profile picture. |
+| **Git Identity** | [`home-manager/modules/git.nix`](home-manager/modules/git.nix) | `user.name`, `user.email` | `Manoj Manivannan`, `manojm18@live.in` | Set your Git committer name and email. |
+| **Weather Location** | [`flake.nix`](flake.nix) | `weatherLocation` | `"51.338,-0.748"` (Fleet, UK) | Change to your coordinates or `"City, Country"` for Caelestia weather. |
+| **Hardware Config** | [`hosts/nixos/hardware-configuration.nix`](hosts/nixos/hardware-configuration.nix) | Disks, UUIDs, CPU microcode | NVMe UUIDs, AMD CPU microcode | Overwrite with your generated `/etc/nixos/hardware-configuration.nix`. |
+| **GPU Drivers** | [`nixos/modules/hardware/nvidia.nix`](nixos/modules/hardware/nvidia.nix) | `videoDrivers = ["nvidia"]` | NVIDIA proprietary | Adjust or disable if using AMD or Intel graphics. |
+| **GPU Loader Libs** | [`nixos/modules/development/programming-languages.nix`](nixos/modules/development/programming-languages.nix) | `programs.nix-ld.libraries` | `nvidia_x11` | Remove `nvidia_x11` if not using NVIDIA. |
+| **Battery Threshold** | [`nixos/modules/services/power.nix`](nixos/modules/services/power.nix) | `STOP_CHARGE_THRESH_BAT0 = 1;` | `1` (Lenovo mode) | Caps battery charging (~60–80%) on Lenovo. Remove or change for 100% charge. |
+| **Kernel Parameters** | [`nixos/modules/boot/linux-kernel.nix`](nixos/modules/boot/linux-kernel.nix) | `boot.kernelParams` | `acpi_rev_override=5`, etc. | Laptop ACPI quirk workarounds; adjust or remove if unneeded. |
+| **Timezone & RTC** | [`nixos/modules/i18n/time.nix`](nixos/modules/i18n/time.nix) | `timeZone`, `hardwareClockInLocalTime` | `"Europe/London"`, `true` | Change timezone. Set `hardwareClockInLocalTime = false` if not dual-booting Windows. |
+| **Display Scaling** | [`config/.config/hypr/monitors.lua`](config/.config/hypr/monitors.lua) | `hl.env("GDK_SCALE", 1.9)` | `1.9` | Fractional scale factor for 4K. Change to `1` (1080p/1440p) or `2` (HiDPI). |
+| **Tailscale Profiles** | [`config/.config/caelestia/scripts/tailscale.sh`](config/.config/caelestia/scripts/tailscale.sh) | `PROFILES=( ... )` | Author's Gmail accounts | Change to your Tailscale login emails for the right-click profile switcher. |
+| **Homelab SSH Host** | [`home-manager/modules/ssh.nix`](home-manager/modules/ssh.nix) | `settings.homelab` | `192.168.1.120` | Remote homelab server alias; edit or delete. |
+| **Claude Local URL** | [`config/.claude/settings.json`](config/.claude/settings.json) | `ANTHROPIC_BASE_URL` | `http://192.168.1.120:11434` | Local LLM proxy endpoint; edit or delete. |
+| **NAS Rsync Backup** | [`config/.config/rsync/archive_to_nas.sh`](config/.config/rsync/archive_to_nas.sh) | `rsync://manoj@dxp2800-nas-mm.local:...` | Private NAS host | Backs up `~/Apps` to private NAS. Edit or disable timer in `nas-backup.nix`. |
+| **NAS Timer Schedule**| [`home-manager/modules/nas-backup.nix`](home-manager/modules/nas-backup.nix) | `OnCalendar = "Sat *-*-* 03:00:00"` | Every Saturday 3 AM | Systemd timer for the NAS backup. |
+| **GitHub CLI Defaults**| [`config/.config/gh/config.yml`](config/.config/gh/config.yml) | `browser: brave`, `editor: hx` | `brave`, `hx` | Default web browser and editor for `gh`. |
+| **Zsh Work Aliases** | [`config/.config/zsh/zshrc.d/20-git.zsh`](config/.config/zsh/zshrc.d/20-git.zsh) | `gcommit`, `gcbi` JIRA prefixes | `IN-`, `NLA-`, `AP-` | Custom JIRA project key matching for Git branch/commit scripts. |
+| **Experiments Dir** | [`home-manager/modules/try.nix`](home-manager/modules/try.nix) | `path = "~/Experiments"` | `~/Experiments` | Directory where `try` generates scratch experiment projects. |
+
+---
+
+### Detailed Breakdown & How to Modify
+
+#### 1. Networking (`eno1` vs DHCP)
+In [`nixos/modules/networking/networking.nix`](nixos/modules/networking/networking.nix):
+- **Interface name**: `networking.interfaces.eno1` is tied to the author's physical Ethernet card. If your machine's interface is named differently (run `ip link` to find yours, e.g. `enp3s0`, `eth0`, `wlan0`), rename all occurrences of `eno1` in `networking.nix`.
+- **Using DHCP**: If your network uses DHCP rather than a static IP address:
+  ```nix
+  networking.useDHCP = true;
+  # Or uncomment:
+  # networking.networkmanager.enable = true;
+  ```
+  Then comment out or remove the static `networking.interfaces.eno1` configuration block and `systemd.services.eno1-wol`.
+- **WOL service & power hooks**: The `eno1-wol` systemd service and power management commands force Wake-on-LAN persistence for Intel I226-V chips using `ethtool`. If you don't need Wake-on-LAN, remove or comment out `systemd.services.eno1-wol` and the `powerManagement` block.
+- **DNS**: [`nixos/modules/networking/dns.nix`](nixos/modules/networking/dns.nix) hardcodes `192.168.1.1` as a primary nameserver. Change this to your local router address or public resolvers (`1.1.1.1`, `8.8.8.8`).
+
+#### 2. SSH Access & Authentication
+- **Authorized keys**: In [`nixos/modules/users/users.nix`](nixos/modules/users/users.nix), replace the strings in `openssh.authorizedKeys.keys` with the contents of your own `~/.ssh/id_ed25519.pub`.
+- **Key-only enforcement**: [`nixos/modules/services/openssh.nix`](nixos/modules/services/openssh.nix) sets `PasswordAuthentication = false`. If you attempt to connect over SSH without configuring your public key in `users.nix`, SSH connections will be rejected.
+- **Yubikey / PAM U2F**: [`nixos/modules/security/yubikey.nix`](nixos/modules/security/yubikey.nix) enables `security.pam.u2f` with `control = "sufficient"`. It will not block password login if a Yubikey is missing, but if you do not use U2F hardware keys, you can disable this module in [`nixos/modules/security/default.nix`](nixos/modules/security/default.nix).
+
+#### 3. Hardware, Power & Graphics
+- **Disks & CPU**: Replace [`hosts/nixos/hardware-configuration.nix`](hosts/nixos/hardware-configuration.nix) with the file generated on your machine by `nixos-generate-config` (or from `/etc/nixos/hardware-configuration.nix`). Ensure CPU microcode matches your processor (`hardware.cpu.amd.updateMicrocode` vs `intel`) and virtualization kernel module (`kvm-amd` vs `kvm-intel`).
+- **NVIDIA GPU**: [`nixos/modules/hardware/nvidia.nix`](nixos/modules/hardware/nvidia.nix) loads proprietary NVIDIA drivers. For Intel or AMD graphics, remove or comment out `./nvidia.nix` from [`nixos/modules/hardware/default.nix`](nixos/modules/hardware/default.nix), and remove `config.boot.kernelPackages.nvidia_x11` from `programs.nix-ld.libraries` in [`nixos/modules/development/programming-languages.nix`](nixos/modules/development/programming-languages.nix).
+- **Battery conservation**: In [`nixos/modules/services/power.nix`](nixos/modules/services/power.nix), `STOP_CHARGE_THRESH_BAT0 = 1;` activates Lenovo battery conservation mode (holding charge at ~60–80%). On other brands, this will have no effect or fail; if you want 100% full charge, comment this line out.
+- **Kernel parameters**: In [`nixos/modules/boot/linux-kernel.nix`](nixos/modules/boot/linux-kernel.nix), `acpi_rev_override=5` is an ACPI override specifically for the author's laptop. Remove it if your hardware does not need it.
+
+#### 4. User Profile, Avatar & Theming
+- **Avatar (`~/.face`)**: In [`home-manager/modules/caelestia.nix`](home-manager/modules/caelestia.nix), `home.file.".face".source = ./caelestia-overrides/profile_picture.jpg;` links the author's avatar picture for the Caelestia lock screen and user dashboard. Replace `home-manager/modules/caelestia-overrides/profile_picture.jpg` with your own photo or point the attribute elsewhere.
+- **Weather coordinates**: In [`flake.nix`](flake.nix), update `weatherLocation = "51.338,-0.748";` to your latitude/longitude or city string (e.g. `"New York, USA"`).
+- **Display scaling**: In [`config/.config/hypr/monitors.lua`](config/.config/hypr/monitors.lua), `hl.env("GDK_SCALE", 1.9)` sets fractional scaling for 4K displays. Set to `1` for 1080p/1440p displays or adjust as preferred.
+- **Timezone**: In [`nixos/modules/i18n/time.nix`](nixos/modules/i18n/time.nix), update `time.timeZone = "Europe/London";`. If you do not dual-boot Windows, set `time.hardwareClockInLocalTime = false;`.
+
+#### 5. Personal Services & Scripts
+- **Tailscale switcher**: [`config/.config/caelestia/scripts/tailscale.sh`](config/.config/caelestia/scripts/tailscale.sh) contains `PROFILES` with author's Gmail accounts. Replace them with your Tailscale login emails to use the right-click profile toggling feature in the Caelestia bar.
+- **NAS backup**: [`home-manager/modules/nas-backup.nix`](home-manager/modules/nas-backup.nix) and [`config/.config/rsync/archive_to_nas.sh`](config/.config/rsync/archive_to_nas.sh) configure a scheduled weekly rsync of `~/Apps` to a private NAS (`rsync://manoj@dxp2800-nas-mm.local:/home/Backup/linux-backup`). If you don't need this, remove `./nas-backup.nix` from `home-manager/modules/default.nix`.
+- **Homelab SSH & Claude**: [`home-manager/modules/ssh.nix`](home-manager/modules/ssh.nix) defines a `homelab` host at `192.168.1.120`, and [`config/.claude/settings.json`](config/.claude/settings.json) sets `ANTHROPIC_BASE_URL` to `http://192.168.1.120:11434`. Update or remove if you don't run a local LLM server at that address.
+- **Default editor & browser in GH CLI**: In [`config/.config/gh/config.yml`](config/.config/gh/config.yml), `editor: hx` and `browser: brave` are set.
+- **Work Git helpers**: [`config/.config/zsh/zshrc.d/20-git.zsh`](config/.config/zsh/zshrc.d/20-git.zsh) contains `gcommit` and `gcbi` functions tailored to Jira issue key prefixes (`IN-`, `NLA-`, `AP-`). Edit these functions for your own team's issue ticketing conventions.
 
 ## 🛠 Customization
 
