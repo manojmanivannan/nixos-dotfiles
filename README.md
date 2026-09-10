@@ -389,6 +389,7 @@ scheme and tokens are documented in `config/.config/caelestia/README.md`.
 
 ## 📝 Notes & Caveats
 
+- **Hardcoded items checklist** — see the full **[Checklist: Hardcoded Values & Machine Settings](#-checklist-hardcoded-values--machine-settings)** for all machine-specific networking, hardware, authentication, and service settings that need adjustment before rebuilding.
 - **Username** — change the `user = "manoj";` let-binding in `flake.nix`. It flows everywhere via a `specialArg`: the user account, docker group, Home Manager, and env vars. No other file hardcodes the username.
 - **Clone path** — the repo assumes it's cloned at `~/nixos-dotfiles`. Nix modules reference it via `${config.home.homeDirectory}/nixos-dotfiles` and the Hyprland Lua configs via `$HOME/nixos-dotfiles` (both expand dynamically). If you clone elsewhere, update those references or just clone at `~/nixos-dotfiles`.
 - **`hardware-configuration.nix`** is machine-specific and must be regenerated per box.
