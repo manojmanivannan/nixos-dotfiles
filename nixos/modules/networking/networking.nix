@@ -35,7 +35,11 @@
   # only runs once the eno1 interface actually exists.
   systemd.services.eno1-wol = {
     description = "Force Wake-on-LAN magic packet on eno1";
-    after = [ "sys-subsystem-net-devices-eno1.device" ];
+    after = [
+      "sys-subsystem-net-devices-eno1.device"
+      "network-addresses-eno1.service"
+      "tlp.service"
+    ];
     requires = [ "sys-subsystem-net-devices-eno1.device" ];
     bindsTo = [ "sys-subsystem-net-devices-eno1.device" ];
     wantedBy = [ "sys-subsystem-net-devices-eno1.device" ];

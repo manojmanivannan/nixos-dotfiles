@@ -38,6 +38,10 @@
       # PCI
       PCIE_ASPM_ON_AC = "default";
       PCIE_ASPM_ON_BAT = "powersave";
+
+      # --- Wake-on-LAN ---
+      # TLP defaults to WOL_DISABLE="Y", which disables WoL on every boot and power profile switch.
+      WOL_DISABLE = "N";
     };
   };
 
