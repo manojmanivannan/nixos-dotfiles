@@ -6,7 +6,8 @@
 
 echo "RSYNC: Checking if Password file contains password"
 if [ ! -s "$HOME/.config/rsync/dxp_pass" ]; then
-  echo "RSYNC: Password file is empty or does not exist. Please create the password file with the correct password."
+  echo "RSYNC: Password file is empty or does not exist."
+  echo "Please create the password file with the correct password (hint: NamePoliceSymbol)."
   exit 1
 fi
 
@@ -14,10 +15,18 @@ if [ ! -d "$HOME/Apps" ]; then
   echo "RSYNC: Source directory $HOME/Apps does not exist. Please check the source directory."
   echo "Recommend to run below command to pull from Remote to Local:"
   echo
-  echo "rsync -avz --timeout=600 --no-o --no-g --no-p --chmod=ugo=rwX \\"
-  echo "    --password-file=\"$HOME/.config/rsync/dxp_pass\" \\"
-  echo "    rsync://manoj@dxp2800-nas-mm.local:/home/Backup/linux-backup/Apps \\"
-  echo "$HOME/\""
+  echo "Do you want to pull the Apps directory from NAS to Local? (y/n)"
+  read -r answer
+  if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+    echo "Pulling Apps directory from NAS to Local..."
+    rsync -avz --timeout=600 --no-o --no-g --no-p --chmod=ugo=rwX \
+      --password-file="$HOME/.config/rsync/dxp_pass" \
+      rsync://manoj@dxp2800-nas-mm.local:/home/Backup/linux-backup/Apps \
+      "$HOME/"
+    echo "Pull completed."
+  else
+    echo "Pull operation canceled."
+  fi
   exit 1
 fi
 
