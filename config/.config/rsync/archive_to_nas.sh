@@ -13,7 +13,7 @@ fi
 
 if [ ! -d "$HOME/Apps" ]; then
   echo "RSYNC: Source directory $HOME/Apps does not exist. Please check the source directory."
-  echo "Recommend to run below command to pull from Remote to Local:"
+  echo "Recommend to pull Apps directory from NAS to Local:"
   echo
   echo "Do you want to pull the Apps directory from NAS to Local? (y/n)"
   read -r answer
