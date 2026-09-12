@@ -15,8 +15,13 @@ if [ ! -d "$HOME/Apps" ]; then
   echo "RSYNC: Source directory $HOME/Apps does not exist. Please check the source directory."
   echo "Recommend to pull Apps directory from NAS to Local:"
   echo
-  echo "Do you want to pull the Apps directory from NAS to Local? (y/n)"
-  read -r answer
+  if [ -t 0 ]; then
+    echo "Do you want to pull the Apps directory from NAS to Local? (y/n)"
+    read -r answer
+  else
+    echo "RSYNC: Non-interactive (systemd service) run: cannot prompt for pull."
+    answer="n"
+  fi
   if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
     echo "Pulling Apps directory from NAS to Local..."
     rsync -avz --timeout=600 --no-o --no-g --no-p --chmod=ugo=rwX \
