@@ -107,6 +107,10 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + T", hl.dsp.window.float({ action = "toggle" }))
+-- No args = toggle fullscreen at the current mode (0): full toggle, the mode
+-- (1 = maximize / 2 = full) is only set on first entry per Hyprland's
+-- `fullscreen` dispatcher. SUPER+F since P/T/J above own the other window states.
+hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Example special workspace (scratchpad)
