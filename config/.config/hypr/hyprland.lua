@@ -60,6 +60,14 @@ end)
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
+-- Render on the RTX 4090 (card0), not the Raphael iGPU. Without this,
+-- Aquamarine picks the AMD iGPU as the "primary" render device even though
+-- the monitor is on the NVIDIA output, forcing every frame through a
+-- multigpu LINEAR buffer blit (see "GBM: Buffer is marked as multigpu,
+-- forcing linear" in the hyprland.log) — the cause of the choppy cursor and
+-- animations. https://wiki.hypr.land/Configuring/Multi-GPU
+hl.env("AQ_DRM_DEVICES", "/dev/dri/card0")
+
 
 
 
