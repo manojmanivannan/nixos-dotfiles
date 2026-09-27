@@ -18,5 +18,7 @@
     ./lazygit.nix
     ./yazi.nix
     ./try.nix
+    # Standalone web apps as XDG .desktop entries (shown in SUPER+SPACE launcher)
+    ./webapps
   ];
 }
