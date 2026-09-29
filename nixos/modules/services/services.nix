@@ -16,6 +16,15 @@
   # services.gnome.core-shell.enable = true;
   # services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 
+  # Stable symlink for the RTX 4090's DRM card. /dev/dri/cardN numbering is not
+  # boot-stable (on 2026-09-29 the AMD iGPU grabbed card0 while the RTX sat on
+  # card1, leaving Hyprland pinned to an iGPU with no monitor -> black console).
+  # AQ_DRM_DEVICES splits on ':', so the colon-bearing /dev/dri/by-path entries
+  # are unusable there; a udev symlink gives us a fixed, colon-free name.
+  services.udev.extraRules = ''
+    SUBSYSTEM=="drm", KERNEL=="card[0-9]*", SUBSYSTEMS=="pci", KERNELS=="0000:01:00.0", SYMLINK+="dri/rtx4090"
+  '';
+
   environment.systemPackages = with pkgs; [
     qutebrowser
     zathura

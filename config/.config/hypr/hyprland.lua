@@ -66,7 +66,12 @@ hl.env("HYPRCURSOR_SIZE", "24")
 -- multigpu LINEAR buffer blit (see "GBM: Buffer is marked as multigpu,
 -- forcing linear" in the hyprland.log) — the cause of the choppy cursor and
 -- animations. https://wiki.hypr.land/Configuring/Multi-GPU
-hl.env("AQ_DRM_DEVICES", "/dev/dri/card0")
+-- Pin by udev symlink (see nixos/modules/services/services.nix). /dev/dri/cardN
+-- is not stable across boots: this config booted with the RTX as card0 and got
+-- a black console when a later boot flipped it to card1. PCI by-path names
+-- contain ':' which AQ_DRM_DEVICES treats as a list separator — also broken.
+-- NOTE: device won't exist until the udev rule has been built & activated.
+hl.env("AQ_DRM_DEVICES", "/dev/dri/rtx4090")
 
 
 
