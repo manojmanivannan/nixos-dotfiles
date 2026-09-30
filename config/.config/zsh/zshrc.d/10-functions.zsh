@@ -190,21 +190,19 @@ function s_in_quotes(){
 
 # cd override: auto-activate ./.venv on enter, deactivate when leaving the venv tree.
 function cd() {
-  builtin cd "$@"
+  builtin cd "$@" || return
 
-  if [[ -z "$VIRTUAL_ENV" ]] ; then
-    ## If env folder is found then activate the vitualenv
-      if [[ -d ./.venv ]] ; then
-        source ./.venv/bin/activate
-      fi
-  else
-    ## check the current folder belong to earlier VIRTUAL_ENV folder
-    # if yes then do nothing
-    # else deactivate
-      parentdir="$(dirname "$VIRTUAL_ENV")"
-      if [[ "$PWD"/ != "$parentdir"/* ]] ; then
-        deactivate
-      fi
+  ## Deactivate if we have left the earlier VIRTUAL_ENV tree
+  if [[ -n "$VIRTUAL_ENV" ]] ; then
+    parentdir="$(dirname "$VIRTUAL_ENV")"
+    if [[ "$PWD"/ != "$parentdir"/* ]] ; then
+      deactivate
+    fi
+  fi
+
+  ## If a venv folder is found (with an activate script) activate it
+  if [[ -z "$VIRTUAL_ENV" && -f ./.venv/bin/activate ]] ; then
+    source ./.venv/bin/activate
   fi
 }
 
