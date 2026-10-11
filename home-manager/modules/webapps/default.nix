@@ -44,6 +44,17 @@
       terminal = false;
       categories = [ "Network" ];
     };
+
+    whatsapp = {
+      name = "WhatsApp";
+      genericName = "Messaging";
+      comment = "WhatsApp Web";
+      exec = "google-chrome --app=https://web.whatsapp.com --class=whatsapp";
+      icon = "whatsapp";
+      type = "Application";
+      terminal = false;
+      categories = [ "Network" "InstantMessaging" ];
+    };
   };
 
   # hicolor is the terminal fallback of every freedesktop icon lookup, so a
@@ -51,4 +62,5 @@
   # theme is active. ~/.local/share/icons/hicolor is a plain user directory
   # (Steam's icon already lives beside this), so xdg.dataFile can grow it.
   xdg.dataFile."icons/hicolor/32x32/apps/ugreen.png".source = ./ugreen.png;
+  xdg.dataFile."icons/hicolor/64x64/apps/whatsapp.png".source = ./whatsapp.png;
 }
