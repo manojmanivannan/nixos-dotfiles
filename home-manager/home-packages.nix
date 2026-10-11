@@ -11,6 +11,7 @@
     nautilus # GNOME file manager; launched on Super+E via the `fileManager` bind in hypr/bindings.lua
     localsend # AirDrop-style cross-platform file transfer; ports opened in networking/firewall.nix
     obsidian # local-folder Markdown knowledge base
+    typst # markup-based typesetting; used by ~/Github/resume/generate.sh
     mullvad-browser # privacy-focused Firefox fork (Tor Browser base) from Mullvad
     # Built from the herdr flake input (flake.nix) rather than nixpkgs, since
     # herdr isn't packaged in nixpkgs. `inputs` reaches here via
