@@ -40,9 +40,11 @@
 
     # hyprwhspr — voice dictation for Hyprland (github.com/goodroot/hyprwhspr).
     # Consumed via its NixOS module `services.hyprwhspr` in
-    # nixos/modules/desktop/hyprwhspr.nix. The flake packages Whisper.cpp
-    # CPU transcription only (beta; GPU backends / model downloads are
-    # refused on the Nix build), so config must keep the `cpu` backend.
+    # nixos/modules/desktop/hyprwhspr.nix. Upstream's own pywhispercpp is a
+    # CPU-only Nix build; that module swaps in a prebuilt CUDA-12 wheel via
+    # the package's `callPackage` seam to get GPU transcription. Upstream's
+    # manual first-run (config init / model download) is replaced by
+    # home-manager/modules/hyprwhspr.nix + dotfiles-symlinks.nix.
     # `follows` is safe here: upstream pins nixos-26.05 itself, the package
     # is pure Python + whisper.cpp (no Qt/C++ ABI surface like caelestia),
     # and sharing nixpkgs keeps the closure single-build.

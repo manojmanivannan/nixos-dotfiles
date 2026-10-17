@@ -7,6 +7,7 @@
     ./fzf.nix
     ./git.nix
     ./gtk.nix
+    ./hyprwhspr.nix
     ./py-file-opener.nix
     ./ssh.nix
     ./scripts.nix

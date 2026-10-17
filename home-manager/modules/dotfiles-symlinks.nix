@@ -59,6 +59,12 @@ let
     # config/.config/caelestia/README.md).
     "caelestia/shell-tokens.json" = "caelestia/shell-tokens.json";
     "caelestia/hypr-user.conf" = "caelestia/hypr-user.conf";
+    # hyprwhspr daemon config (nixos/modules/desktop/hyprwhspr.nix + this
+    # directory's hyprwhspr.nix). Symlinked rather than written so `hyprwhspr
+    # config edit` lands as a trackable repo change. NOTE: a fresh install
+    # needs this file to exist before the user service starts — the unit's
+    # ConditionPathExists=%E/hyprwhspr/config.json gates on it.
+    "hyprwhspr/config.json" = "hyprwhspr/config.json";
     # WF-13 — the one ported custom module. tailscale logic stays in the script
     # (no JS reimplementation — standing decision #6); caelestia's Tailscale QML
     # singleton (home-manager/modules/caelestia-overrides/Tailscale.qml) shells

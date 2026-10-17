@@ -7,12 +7,13 @@
 # daemon follows the session. Security note (upstream docs): `input` group
 # membership grants read of input devices and keystroke injection.
 #
-# The module only wires the unit; first-run is manual (see NIX.md):
-#   hyprwhspr config init          # writes ~/.config/hyprwhspr/config.json
-#   hyprwhspr config edit          # the unit's ConditionPathExists gates on this file
-#   hyprwhspr model download base  # -> ~/.local/share/pywhispercpp/models
-# Until config.json exists the service refuses to start, so a plain
-# `systemctl --user start hyprwhspr` alone is not enough.
+# The module only wires the unit; upstream's manual first-run steps are
+# replaced declaratively:
+#   ~/.config/hyprwhspr/config.json  <- symlinked from config/.config/hyprwhspr/
+#     (home-manager/modules/dotfiles-symlinks.nix). The unit gates on it via
+#     ConditionPathExists=%E/hyprwhspr/config.json.
+#   ggml-small.en.bin                <- fetched into the store and symlinked
+#     into ~/.local/share/pywhispercpp/models/ by home-manager/modules/hyprwhspr.nix.
 #
 # GPU — the flake's own pywhispercpp hardcodes GGML_CUDA=OFF (CPU-only Nix
 # build), which made dictation latency fall back to CPU (~seconds per utterance

@@ -1,0 +1,5 @@
+{
+  "$schema": "https://raw.githubusercontent.com/goodroot/hyprwhspr/main/share/config.schema.json",
+  "external_bindings": true,
+  "model": "small.en"
+}
