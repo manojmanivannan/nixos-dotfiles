@@ -86,8 +86,11 @@ pick_vm() {
 # pick_mount -> echoes the chosen mount point under /run/media/$USER
 pick_mount() {
     local -a mounts=()
+    # findmnt escapes whitespace etc. as \xNN in the TARGET column (e.g.
+    # "Seagate\x20HDD") — decode so df/rsync get a real path
     mapfile -t mounts < <(findmnt -rn -o TARGET -t exfat,vfat,ntfs,ntfs3,btrfs,ext4 2>/dev/null \
-        | grep -E "^/run/media/${USER:-manoj}/" || true)
+        | grep -E "^/run/media/${USER:-manoj}/" \
+        | perl -pe 's{\\x([0-9a-fA-F]{2})}{chr(hex($1))}ge' || true)
     ((${#mounts[@]})) || die "no external drive mounted under /run/media/${USER:-manoj} — mount it first"
     printf 'Available destinations:\n' >&2
     local i=1 m f t
