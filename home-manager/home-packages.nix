@@ -13,6 +13,8 @@
     obsidian # local-folder Markdown knowledge base
     typst # markup-based typesetting; used by ~/Github/resume/generate.sh
     mullvad-browser # privacy-focused Firefox fork (Tor Browser base) from Mullvad
+    gnome-calculator # GNOME calculator; searchable in the launcher alongside other apps
+    aria2 # lightweight multi-protocol (HTTP/S/FTP/S/BT/METALINK) download utility
     # Built from the herdr flake input (flake.nix) rather than nixpkgs, since
     # herdr isn't packaged in nixpkgs. `inputs` reaches here via
     # home-manager.extraSpecialArgs in nixos/modules/nix/home-manager.nix.
