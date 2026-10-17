@@ -480,6 +480,26 @@
         "type": "github"
       }
     },
+    "hyprwhspr": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792209271,
+        "narHash": "sha256-7CzrKGVRLUegdFD8LwHd7oLrA2rDBhX6bqyUSX3aPF8=",
+        "owner": "goodroot",
+        "repo": "hyprwhspr",
+        "rev": "49edd0c5012c8b5956b6526b170d9e41dc0bfe24",
+        "type": "github"
+      },
+      "original": {
+        "owner": "goodroot",
+        "repo": "hyprwhspr",
+        "type": "github"
+      }
+    },
     "hyprwire": {
       "inputs": {
         "hyprutils": [
@@ -671,6 +691,7 @@
         "herdr": "herdr",
         "home-manager": "home-manager",
         "hyprland": "hyprland",
+        "hyprwhspr": "hyprwhspr",
         "nixpkgs": "nixpkgs_4",
         "systems": "systems_3",
         "try": "try"

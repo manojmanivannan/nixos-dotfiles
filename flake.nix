@@ -38,6 +38,19 @@
     # bump the tag here and `nix flake update herdr` to upgrade.
     herdr.url = "github:herdrdev/herdr/v0.9.3";
 
+    # hyprwhspr — voice dictation for Hyprland (github.com/goodroot/hyprwhspr).
+    # Consumed via its NixOS module `services.hyprwhspr` in
+    # nixos/modules/desktop/hyprwhspr.nix. The flake packages Whisper.cpp
+    # CPU transcription only (beta; GPU backends / model downloads are
+    # refused on the Nix build), so config must keep the `cpu` backend.
+    # `follows` is safe here: upstream pins nixos-26.05 itself, the package
+    # is pure Python + whisper.cpp (no Qt/C++ ABI surface like caelestia),
+    # and sharing nixpkgs keeps the closure single-build.
+    hyprwhspr = {
+      url = "github:goodroot/hyprwhspr";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Google Antigravity - Next-generation agentic IDE suite (Base App, IDE, and CLI `agy`)
     antigravity-nix = {
       url = "github:jacopone/antigravity-nix";

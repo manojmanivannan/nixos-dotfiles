@@ -37,6 +37,13 @@ hl.bind(mainMod .. " + ESCAPE", hl.dsp.global(caelestia.session))
 -- `Lock` module via logind's `Lock` signal — same path the menu's Lock button
 -- (caelestia.nix:285) and hypridle's idle/sleep listener take.
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
+-- Voice dictation toggle (hyprwhspr, systemd user service
+-- nixos/modules/desktop/hyprwhspr.nix). Press to start recording, press again
+-- to stop + paste into the focused window. The daemon runs with
+-- `external_bindings: true` so the compositor owns the shortcut (the
+-- upstream-default evdev keyboard grab would eat SUPER+ALT+D in every app);
+-- this is the packaged-install setting from hyprwhspr's own setup flow.
+hl.bind(mainMod .. " + ALT + D", hl.dsp.exec_cmd("hyprwhspr record toggle"))
 
 
 -- Move focus with mainMod + arrow keys
