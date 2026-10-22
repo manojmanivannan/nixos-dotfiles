@@ -47,7 +47,21 @@
   nixpkgs.config.packageOverrides = pkgs: {
     # Orange matches the warm-metal accent (#e8c272 gold); teal was the last
     # cool-toned holdover from before the warm-metal palette was adopted.
-    colloid-icon-theme = pkgs.colloid-icon-theme.override { colorVariants = ["orange"]; };
+    colloid-icon-theme = (pkgs.colloid-icon-theme.override { colorVariants = ["orange"]; })
+      .overrideAttrs (old: {
+        # GTK4/Nautilus rasterizes "scalable" SVGs at the SVG's declared
+        # intrinsic size (width=/height=, "64" throughout this theme) and
+        # upscales the resulting texture, so large grid icons come out
+        # soft-blurred (folders worst; mimetype icons go through a different
+        # paintable path and stay crisp). Same upstream symptom as
+        # vinceliuice/Tela-circle-icon-theme#300. Rework the root tag's
+        # declared size to 512 so the raster happens at display size; viewBox
+        # is untouched, so artwork is unchanged. One occurrence per file, root
+        # tag only — verified against the built theme's SVGs.
+        postFixup = (old.postFixup or "") + ''
+          find "$out/share/icons" -name '*.svg' -path '*scalable*' -exec sed -i '1s/width="64"/width="512"/; 1s/height="64"/height="512"/' {} +
+        '';
+      });
     discord = pkgs.discord.override {
       withOpenASAR = true;
       withTTS = true;
