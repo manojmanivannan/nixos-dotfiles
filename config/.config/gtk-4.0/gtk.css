@@ -58,3 +58,73 @@
 
 @define-color shade_color rgba(0, 0, 0, 0.36);
 @define-color scrollbar_outline_color rgba(0, 0, 0, 0.5);
+
+/*
+ * Look-and-feel polish (in addition to the palette above).
+ *
+ * Softens the stock libadwaita geometry: rounded headerbar/sidebar edges,
+ * pill-shaped path bar and nav buttons, and warm hover states. Icons are
+ * icon-theme territory (Colloid-Orange-Dark, see home-manager/modules/gtk.nix)
+ * not CSS, so structural Nautilus UI is untouched.
+ *
+ * Radius scale: 8px panels → 9px floating widgets → 10px pills.
+ */
+headerbar,
+.sidebar-pane .top-bar {
+  border-radius: 8px 8px 0 0;
+}
+
+/* Round the whole sidebar pane and soften rows */
+.sidebar-pane {
+  border-radius: 8px;
+}
+.sidebar-pane .navigation-sidebar > row {
+  border-radius: 6px;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+.sidebar-pane .navigation-sidebar > row:hover {
+  background-color: rgba(232, 194, 114, 0.10);
+}
+.sidebar-pane .navigation-sidebar > row:selected {
+  background-color: rgba(201, 150, 58, 0.28);
+}
+
+/* Pill-shaped path bar: current folder reads as a warm "location" chip */
+.path-bar-box {
+  border-radius: 10px;
+}
+.path-bar-box button {
+  border-radius: 10px;
+  margin: 1px;
+}
+.path-bar-box button:checked,
+.path-bar-box button:active {
+  background-color: rgba(201, 150, 58, 0.30);
+  color: @accent_fg_color;
+}
+
+/* Slightly rounder generic buttons & entries (search field etc.) */
+button, entry {
+  border-radius: 8px;
+}
+
+/* Round view cards (grid tiles / list rows) and warm their hover */
+.view .card,
+.columnview > listview > row,
+.gridview child {
+  border-radius: 8px;
+}
+.columnview > listview > row:hover,
+.gridview child:hover {
+  background-color: rgba(232, 194, 114, 0.08);
+}
+.columnview > listview > row:selected,
+.gridview child:selected {
+  background-color: rgba(201, 150, 58, 0.26);
+}
+
+/* Popovers and dialogs pick up the softened geometry too */
+popover.menu, popover, dialog {
+  border-radius: 10px;
+}

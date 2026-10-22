@@ -12,6 +12,11 @@
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
       gtk-theme = "adw-gtk3-dark";
+      # Declared so icon-theme can't drift to an uninstalled theme (a stale
+      # manual `gsettings set` pointed at Papirus-Dark, which was never
+      # installed — Nautilus fell back to hicolor's generic icons). The
+      # -Dark suffix is real: the HM-managed Colloid-Orange-Dark theme.
+      icon-theme = "Colloid-Orange-Dark";
     };
   };
 }

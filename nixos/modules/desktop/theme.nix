@@ -21,7 +21,8 @@
     # `background` and the Caelestia shell's M3 `base` role); the rest are
     # warm-metal accents that mirror the ghostty 16-color palette
     # (config/.config/ghostty/config).
-    # Cursors/icons below stay Catppuccin-teal until warm variants are adopted.
+    # Cursors stay Catppuccin-teal until warm variants are adopted (icons went
+    # warm via the Colloid-Orange variant above).
     colors = [
       "322a21"
       "e5805f"
@@ -44,7 +45,9 @@
 
   # Override packages
   nixpkgs.config.packageOverrides = pkgs: {
-    colloid-icon-theme = pkgs.colloid-icon-theme.override { colorVariants = ["teal"]; };
+    # Orange matches the warm-metal accent (#e8c272 gold); teal was the last
+    # cool-toned holdover from before the warm-metal palette was adopted.
+    colloid-icon-theme = pkgs.colloid-icon-theme.override { colorVariants = ["orange"]; };
     discord = pkgs.discord.override {
       withOpenASAR = true;
       withTTS = true;
