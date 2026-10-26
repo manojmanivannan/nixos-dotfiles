@@ -36,7 +36,7 @@
     # consumed directly as a home package in home-manager/home-packages.nix.
     # Pinned to a release tag (the docs' recommendation over tracking master);
     # bump the tag here and `nix flake update herdr` to upgrade.
-    herdr.url = "github:herdrdev/herdr/v0.9.3";
+    herdr.url = "github:herdrdev/herdr/v0.9.5";
 
     # hyprwhspr — voice dictation for Hyprland (github.com/goodroot/hyprwhspr).
     # Consumed via its NixOS module `services.hyprwhspr` in
