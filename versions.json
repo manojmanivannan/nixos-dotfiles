@@ -1,0 +1,86 @@
+{
+  "_note": "Manually-pinned packages/versions in this repo that do NOT come from nixpkgs. Each entry must be bumped by hand (edit the nix file, refresh the hash if the source changed, then rebuild). Verify against upstream before updating.",
+  "_checked": "2026-10-30",
+
+  "packages": [
+      "name": "herdr",
+      "version": "0.9.5",
+      "latestUpstream": "0.9.5",
+      "outdated": false,
+      "source": "github:herdrdev/herdr",
+      "upstream": "https://github.com/herdrdev/herdr",
+      "pin": {
+        "file": "flake.nix",
+        "line": 39,
+        "kind": "flake-input-tag"
+      },
+      "howToUpdate": "Bump the URL tag in flake.nix, then `nix flake update herdr`"
+    },
+    {
+      "name": "caelestia-shell",
+      "version": "2.5.0",
+      "latestUpstream": "2.5.0",
+      "outdated": false,
+      "source": "github:caelestia-dots/shell",
+      "upstream": "https://github.com/caelestia-dots/shell",
+      "pin": {
+        "file": "flake.nix",
+        "line": 25,
+        "kind": "flake-input-tag"
+      },
+      "howToUpdate": "Bump the URL tag in flake.nix, then `nix flake update caelestia-shell`"
+    },
+    {
+      "name": "pywhispercpp",
+      "version": "1.5.1-1-cuda12",
+      "latestUpstream": "1.5.1-1",
+      "outdated": false,
+      "source": "hyprwhspr 'wheels-v2' release wheel",
+      "upstream": "https://github.com/goodroot/hyprwhspr/releases/tag/wheels-v2",
+      "pin": {
+        "file": "nixos/modules/desktop/hyprwhspr.nix",
+        "lines": [47, 50, 51],
+        "kind": "hardcoded-wheel-url-and-hash",
+        "url": "https://github.com/goodroot/hyprwhspr/releases/download/wheels-v2/pywhispercpp-1.5.1-1-cp313-cp313-linux_x86_64+cuda12.whl"
+      },
+      "howToUpdate": "Update the wheel URL + sha256 in nixos/modules/desktop/hyprwhspr.nix (version string, fetchurl url and hash all carry the version)"
+    },
+    {
+      "name": "py-file-opener",
+      "version": "0.1.0-unstable-2026-04-22",
+      "latestUpstream": "0.1.0-unstable-2026-04-22 (HEAD)",
+      "outdated": false,
+      "source": "github:manojmanivannan/py-file-opener",
+      "upstream": "https://github.com/manojmanivannan/py-file-opener",
+      "pin": {
+        "file": "home-manager/modules/py-file-opener.nix",
+        "lines": [25, 31],
+        "kind": "hardcoded-version-and-git-rev",
+        "rev": "533bb87eb659d962c50734e65305c60bedf175a9"
+      },
+      "howToUpdate": "Update `version` + `rev` + `hash` in home-manager/modules/py-file-opener.nix"
+    }
+  ],
+
+  "flakeInputs_channelPinned": [
+    {
+      "name": "nixpkgs",
+      "version": "26.05",
+      "pin": { "file": "flake.nix", "line": 5, "kind": "flake-input-branch" },
+      "howToUpdate": "Bump branch in flake.nix or `nix flake update nixpkgs`"
+    },
+    {
+      "name": "home-manager",
+      "version": "26.05",
+      "pin": { "file": "flake.nix", "line": 8, "kind": "flake-input-branch" },
+      "howToUpdate": "Bump branch in flake.nix or `nix flake update home-manager`"
+    }
+  ],
+
+  "flakeInputs_tracked": [
+    { "name": "hyprland", "url": "github:hyprwm/Hyprland", "pinned": false },
+    { "name": "try", "url": "github:tobi/try", "pinned": false },
+    { "name": "hyprwhspr", "url": "github:goodroot/hyprwhspr", "pinned": false },
+    { "name": "antigravity-nix", "url": "github:jacopone/antigravity-nix", "pinned": false }
+  ]
+}

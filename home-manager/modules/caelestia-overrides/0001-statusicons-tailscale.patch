@@ -1,46 +1,52 @@
---- a/modules/bar/components/StatusIcons.qml	2026-08-06 12:43:12.831716647 +0100
-+++ b/modules/bar/components/StatusIcons.qml	2026-08-06 12:48:41.376560565 +0100
-@@ -255,6 +255,43 @@
-                 fill: 1
-             }
-         }
-+        // Tailscale icon (WF-13 — the one ported custom module)
-+        WrappedLoader {
-+            name: "tailscale"
-+            active: Config.bar.status.showTailscale
+--- a/modules/bar/components/StatusIcons.qml
++++ b/modules/bar/components/StatusIcons.qml
+@@ -142,6 +142,49 @@
+                         }
+                     }
+                 }
++                DelegateChoice {
++                    roleValue: "tailscale"
++                    delegate: EntryWrapper {
++                        // Tailscale icon (WF-13 — the one ported custom module).
++                        // Rebased for v2.5.0's model-driven EntryWrapper rewrite
++                        // (the v2.2.0 WrappedLoader version is gone). The
++                        // EntryWrapper's name derives from the modelData id
++                        // ("tailscale"), which the bar's popout wiring matches
++                        // to the TailscalePopout in modules/bar/popouts/
++                        // Content.qml (0002) on hover.
++                        Item {
++                            readonly property int tsSize: Math.round(Tokens.font.body.large.pointSize * 1.2)
 +
-+            sourceComponent: Item {
-+                readonly property int tsSize: Math.round(Tokens.font.body.large.pointSize * 1.2)
++                            implicitWidth: tsSize
++                            implicitHeight: tsSize
 +
-+                implicitWidth: tsSize
-+                implicitHeight: tsSize
++                            Image {
++                                id: tsIcon
 +
-+                Image {
-+                    id: tsIcon
++                                anchors.fill: parent
++                                fillMode: Image.PreserveAspectFit
++                                mipmap: true
++                                smooth: true
++                                source: Tailscale.up
++                                    ? Quickshell.shellPath("assets/tailscale_on.png")
++                                    : Quickshell.shellPath("assets/tailscale_off.png")
++                            }
 +
-+                    anchors.fill: parent
-+                    fillMode: Image.PreserveAspectFit
-+                    mipmap: true
-+                    smooth: true
-+                    source: Tailscale.up
-+                        ? Quickshell.shellPath("assets/tailscale_on.png")
-+                        : Quickshell.shellPath("assets/tailscale_off.png")
-+                }
++                            MouseArea {
++                                anchors.fill: parent
++                                acceptedButtons: Qt.LeftButton | Qt.RightButton
++                                cursorShape: Qt.PointingHandCursor
 +
-+                MouseArea {
-+                    anchors.fill: parent
-+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-+                    cursorShape: Qt.PointingHandCursor
-+
-+                    onClicked: event => {
-+                        if (event.button === Qt.LeftButton)
-+                            Tailscale.toggle();
-+                        else if (event.button === Qt.RightButton)
-+                            Tailscale.switchProfile();
++                                onClicked: event => {
++                                    if (event.button === Qt.LeftButton)
++                                        Tailscale.toggle();
++                                    else if (event.button === Qt.RightButton)
++                                        Tailscale.switchProfile();
++                                }
++                            }
++                        }
 +                    }
 +                }
-+            }
-+        }
+             }
+         }
      }
-
-     component WrappedLoader: Loader {

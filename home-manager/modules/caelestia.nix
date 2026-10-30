@@ -54,19 +54,27 @@ let
       base = inputs.caelestia-shell.packages.${pkgs.stdenv.hostPlatform.system}.with-cli;
       # WF-12: shell.json is a read-only Nix-store symlink (the HM
       # `programs.caelestia` module writes it via `xdg.configFile.*.text`,
-      # which HM always symlinks into the store). GlobalConfig (which inherits
-      # RootConfig) auto-saves to it on every property change after load
-      # (plugin/src/Caelestia/Config/rootconfig.cpp:106-114); the write hits
-      # EROFS and emits `saveFailed`, which ConfigToasts.qml renders as the
-      # "Failed to save config" Error toast on every launch. The read-only
-      # failure is *expected* here — the file is pinned by Nix on purpose
-      # (the pin is the WF-12 design; runtime saves are intentionally dropped,
-      # the WARN log still records them). Gate only this case so genuine save
-      # failures (disk full, permissions, …) still surface as toasts.
-      # `file.errorString()` is "Read-only file system" for EROFS; the
-      # substituted line is unique in the file (verified).
+      # which HM always symlinks into the store). ConfigRoot auto-saves shell.json
+      # on every property change after load (SettingsFile debounced write →
+      # writeFailed, plugin/src/Caelestia/Settings/rootnode.cpp:15-17), which the
+      # config module routes to `detail::saveFailed`
+      # (plugin/src/Caelestia/Config/rootnodes.cpp) — rendered by
+      # ConfigToasts.qml as the "Failed to save config" Error toast on every
+      # launch. The read-only failure is *expected* here — the file is pinned by
+      # Nix on purpose (the pin is the WF-12 design; runtime saves are
+      # intentionally dropped, the WARN log still records them). Gate only this
+      # case so genuine save failures (disk full, permissions, …) still surface
+      # as toasts. The propagated error string for EROFS is "Failed to open:
+      # Read-only file system" (settingsfile.cpp wraps `file.errorString()`),
+      # so substring-match "Read-only file system"; the substituted line is
+      # unique in the file (verified against the pinned v2.5.0 source).
       #
-      # The `emit saveFailed` is compiled by the `plugin` derivation
+      # NOTE: v2.4.0 rewrote the config module ("rewrite config module",
+      # #1861) — the v2.2.0 target was `emit saveFailed(err, m_screen);` in
+      # plugin/src/Caelestia/Config/rootconfig.cpp; that file is gone and the
+      # emit now happens inside `detail::saveFailed` in rootnodes.cpp.
+      #
+      # The `saveFailed` toast is compiled by the `plugin` derivation
       # (caelestia-qml-plugin, exposed as `base.plugin`) — a SEPARATE
       # derivation from the shell. The shell's own `src` contains
       # rootconfig.cpp, so a sed in the shell's postPatch rewrites it, but
@@ -77,10 +85,21 @@ let
       # shell's buildInputs (otherwise wrapQtAppsHook still points the QML
       # import path at the unpatched .so). See memory
       # caelestia-shelljson-readonly-save-toast.
+      # The plugin's tree is the full shell source, so config-default patches
+      # that live under plugin/src must ALSO be applied here. 0003 adds
+      # LIST_ENTRY(tailscale, true) to barconfig.hpp's statusIcons defaults —
+      # those defaults are compiled into this .so's EntryList, and the shell's
+      # own postPatch edit of the same file is discarded (the shell never
+      # compiles the plugin; see the NOTE below). Without this, the shell QML
+      # has the tailscale DelegateChoice but Config.bar.statusIcons has no
+      # tailscale entry, so the icon silently never renders.
       patchedPlugin = base.plugin.overrideAttrs (old: {
         postPatch = (old.postPatch or "") + ''
-          sed -i 's|emit saveFailed(err, m_screen);|if (!file.errorString().contains("Read-only file system")) emit saveFailed(err, m_screen);|' \
-            plugin/src/Caelestia/Config/rootconfig.cpp
+          patch -p1 --fuzz=0 < ${./caelestia-overrides/0003-barconfig-showTailscale.patch}
+          # The plugin compiles with QT_NO_CAST_FROM_ASCII, so the literal
+          # must be a Qt string literal (u"..."_s), not a C string.
+          sed -i 's|if (kind != ConfigKind::Shell)|if (kind != ConfigKind::Shell \|\| error.contains(u"Read-only file system"_s))|' \
+            plugin/src/Caelestia/Config/rootnodes.cpp
         '';
       });
     in
@@ -104,8 +123,8 @@ let
         # Hibernate buttons in modules/session/Content.qml. There's no config
         # flag to hide it (only `general.sessionGifSpeed` to freeze a frame and
         # `paths.sessionGif` to swap the asset), so patch the QML: delete the
-        # whole `AnimatedImage { … }` block (4-space-indented, lines 52-62 in
-        # the pinned v2.2.0 source). The two flanking SessionButtons collapse
+        # whole `AnimatedImage { … }` block (4-space-indented, lines 52-63 in
+        # the pinned v2.5.0 source). The two flanking SessionButtons collapse
         # together; KeyNavigation.shutdown→hibernate still chains since it
         # references the `hibernate` id, not the removed item.
         sed -i '/^    AnimatedImage {/,/^    }$/d' modules/session/Content.qml
@@ -211,8 +230,11 @@ let
         cp ${./caelestia-overrides/TailscalePopout.qml} modules/bar/popouts/TailscalePopout.qml
         cp ${./caelestia-overrides/tailscale_on.png} assets/tailscale_on.png
         cp ${./caelestia-overrides/tailscale_off.png} assets/tailscale_off.png
-        # --fuzz=0: the patches are exact against the pinned v2.2.0 source; fail
+        # --fuzz=0: the patches are exact against the pinned v2.5.0 source; fail
         # cleanly (build red) rather than fuzz-applying if upstream drifts.
+        # NOTE: 0003 edits plugin/src/... so it is ALSO applied in patchedPlugin
+        # above; this copy only keeps the shell tree in sync (harmless, never
+        # compiled here).
         patch -p1 --fuzz=0 < ${./caelestia-overrides/0001-statusicons-tailscale.patch}
         patch -p1 --fuzz=0 < ${./caelestia-overrides/0002-content-tailscale.patch}
         patch -p1 --fuzz=0 < ${./caelestia-overrides/0003-barconfig-showTailscale.patch}
@@ -224,7 +246,7 @@ let
         # ("MMM", e.g. "Aug") and the four-digit year ("yyyy", e.g. "2026"),
         # styled like the weekday line (small 0.9). `Time.format` wraps
         # Qt.formatDateTime, so these are standard Qt date tokens. Exact
-        # against v2.2.0; --fuzz=0 fails the build if upstream drifts.
+        # against v2.5.0; --fuzz=0 fails the build if upstream drifts.
         patch -p1 --fuzz=0 < ${./caelestia-overrides/0004-clock-show-month-year.patch}
 
         # WF-14 — password-only lock PAM. Caelestia's lock can authenticate three
@@ -305,11 +327,15 @@ in
       # dropped) — see the activation script below + the package postPatch.
       services.smartScheme = false;
 
-      # Weather temperatures in Celsius. Caelestia's Weather service formats
-      # via `GlobalConfig.services.useFahrenheit` (services/Weather.qml:30, and
-      # the LanguageAndRegion Nexus page binds the same key). Stated
-      # explicitly to pin Celsius rather than rely on the (false) default.
-      services.useFahrenheit = false;
+      # Weather temperatures in Celsius. NOTE: key renamed upstream in the
+      # v2.3-v2.5 window — the old `services.useFahrenheit` (bool) is gone;
+      # v2.5.0 has an enum `GlobalConfig.services.weatherUnits`
+      # (serviceconfig.hpp, TemperatureUnit::Auto|Celsius|Fahrenheit|Kelvin —
+      # Auto guesses from the locale). Enum config properties decode from
+      # case-insensitive JSON strings (Settings/codecs.cpp EnumCodec), so the
+      # value is the enum key "Celsius". Stated explicitly to pin Celsius
+      # rather than rely on the (locale-dependent) Auto default.
+      services.weatherUnits = "Celsius";
 
       # Weather location is defined centrally in the flake so it is easy to
       # change per machine/user without editing the shell module. The weather
@@ -374,7 +400,7 @@ in
       };
 
       # WF-14 — hypridle is the sole idle daemon. The build spec (WF-8
-      # Solution: Idle) assumed "Caelestia ships no idle module"; v2.2.0 in
+      # Solution: Idle) assumed "Caelestia ships no idle module"; v2.5.0 in
       # fact ships `modules/IdleMonitors.qml` (Quickshell `IdleMonitor`s) with
       # DEFAULT timeouts that lock at 180s, dpms-off at 300s, and
       # suspend-then-hibernate at 600s (generalconfig.hpp `GeneralIdle.timeouts`).

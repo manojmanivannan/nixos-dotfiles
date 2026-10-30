@@ -132,21 +132,19 @@ function f() {
 function fo(){
     local regex=${1?param missing - specify string.}
     local location=${2?param missing - specify directory.}
-    local RESULT=$(f $regex $location)
-    local RESULT_LENGTH=$(echo $RESULT | tr ' ' '\n' | wc -l)
+    # Collect matches NUL-safely — filenames with spaces stay intact, and the
+    # count of matches is just the array length.
+    local array=()
+    while IFS= read -r -d $'\0'; do
+        array+=("$REPLY")
+    done < <(f "$regex" "$location" "print")
 
-    if [[ ${RESULT_LENGTH} == "1" ]] && [[ ! -z ${RESULT} ]]; then
-        echo "Opening $RESULT"
-        sleep 0.5
-        vim $RESULT
-    elif [[ ${RESULT_LENGTH} -gt "1" ]] && [[ ! -z ${RESULT} ]]; then
-        local array=()
-        while IFS=  read -r -d $'\0'; do
-            array+=("$REPLY")
-        done < <(f $regex $location "print")
-        py-file-opener "$location" "${array[@]}"
+    if [[ ${#array} -eq 0 ]]; then
+        echo "No files found matching: \"$regex\""
     else
-        echo "No files found matching: \"$1\""
+        # py-file-opener prints "Opening: <path>", routes non-text files to
+        # xdg-open, opens multiples as editor tabs, and records frecency.
+        py-file-opener "${array[@]}"
     fi
 }
 

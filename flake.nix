@@ -9,7 +9,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # WF-10 — the quickshell full shell. Fork `caelestia-dots/shell` @
-    # v2.2.0 (Hyprland-native, full-shell, ships its own Nix flake + HM
+    # v2.5.0 (Hyprland-native, full-shell, ships its own Nix flake + HM
     # module `programs.caelestia`). Pointed at upstream until the
     # snapshot-and-diverge fork exists (WF-1); the URL is the only thing
     # that changes then.
@@ -22,7 +22,7 @@
     # riskiest build-phase item). Dropping `follows` lets caelestia pull
     # its own nixpkgs (larger closure, but the toolchain upstream tests
     # against). Confirm the build stays green — WF-10 build-phase risk #1.
-    caelestia-shell.url = "github:caelestia-dots/shell/v2.2.0";
+    caelestia-shell.url = "github:caelestia-dots/shell/v2.5.0";
 
     # try — a single-file Ruby CLI (tobi/try) for spinning up date-prefixed
     # experiment dirs (`2025-08-17-redis-experiment`) with fuzzy navigation.
@@ -36,7 +36,7 @@
     # consumed directly as a home package in home-manager/home-packages.nix.
     # Pinned to a release tag (the docs' recommendation over tracking master);
     # bump the tag here and `nix flake update herdr` to upgrade.
-    herdr.url = "github:herdrdev/herdr/v0.9.3";
+    herdr.url = "github:herdrdev/herdr/v0.9.5";
 
     # hyprwhspr — voice dictation for Hyprland (github.com/goodroot/hyprwhspr).
     # Consumed via its NixOS module `services.hyprwhspr` in

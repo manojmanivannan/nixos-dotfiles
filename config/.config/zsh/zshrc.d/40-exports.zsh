@@ -6,6 +6,12 @@
 # ---------------------------------------------------------------------------
 # Exports / environment
 # ---------------------------------------------------------------------------
+# EDITOR is set system-wide (environment.variables.EDITOR, set-environment),
+# but terminals inside an already-running graphical session inherit the stale
+# value from before the rebuild — so enforce it here. Editors that prefer
+# $VISUAL (py-file-opener's chain) get the same treatment.
+export EDITOR=vim
+export VISUAL="$EDITOR"
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
 export PATH=${PATH}:~/.local/bin

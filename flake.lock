@@ -65,11 +65,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783740617,
-        "narHash": "sha256-PpiT7xNxRbgwid42rPGQJnLZYpyPaqwPAqLwYl7O3U8=",
+        "lastModified": 1789186140,
+        "narHash": "sha256-CEKrGzjO7Zk+BC0bsIySyu7q0vdy68V5MMq8YNKPpsk=",
         "owner": "caelestia-dots",
         "repo": "cli",
-        "rev": "d2aaa733bebe5feec6cc44173a5d10c7e4e09a17",
+        "rev": "6b84ee5090ec50f36aa1a53990d57ab0013925a0",
         "type": "github"
       },
       "original": {
@@ -86,16 +86,16 @@
         "quickshell": "quickshell"
       },
       "locked": {
-        "lastModified": 1784192483,
-        "narHash": "sha256-IFcEO0a3PAHmzuAbrzlAW4mMgguvhVgJiX/xMiPLuIU=",
+        "lastModified": 1789736975,
+        "narHash": "sha256-PVYroXR/tuQdsWjp2XAqOhgY6dV2kN5nyzH4zha6ZPs=",
         "owner": "caelestia-dots",
         "repo": "shell",
-        "rev": "dbb6d6c029021145422255dee6cd7ba607be3a20",
+        "rev": "d999d4878ee4cec134168e60d913714566a8cfa6",
         "type": "github"
       },
       "original": {
         "owner": "caelestia-dots",
-        "ref": "v2.2.0",
+        "ref": "v2.5.0",
         "repo": "shell",
         "type": "github"
       }
@@ -158,16 +158,16 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1790708764,
-        "narHash": "sha256-uu452Xe23pSvFk7w7fKPjiaqY5QenUIljao2SFAxpc0=",
+        "lastModified": 1791993401,
+        "narHash": "sha256-N7e7oCKxeCoxek6UT8Lweq16rSsQQi34QMb7C2iNpm8=",
         "owner": "herdrdev",
         "repo": "herdr",
-        "rev": "7b116c05bfda646af39d2524c54e70c751f57ee8",
+        "rev": "2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01",
         "type": "github"
       },
       "original": {
         "owner": "herdrdev",
-        "ref": "v0.9.3",
+        "ref": "v0.9.5",
         "repo": "herdr",
         "type": "github"
       }
@@ -530,29 +530,34 @@
       }
     },
     "m3shapes": {
-      "flake": false,
+      "inputs": {
+        "nixpkgs": [
+          "caelestia-shell",
+          "nixpkgs"
+        ]
+      },
       "locked": {
-        "lastModified": 1781017666,
-        "narHash": "sha256-kfHyzZaPHgqZML48OA+5JwBOsLdQJ2ci/aGPShvUB4Y=",
+        "lastModified": 1787906858,
+        "narHash": "sha256-YZelgEZflFNwGutX4/tIzBdbOeghJgE2oDw0uWYGxns=",
         "owner": "soramanew",
         "repo": "m3shapes",
-        "rev": "bdc327b29f95394a732baf3c9b19658ba23755b6",
+        "rev": "32ad9ce328bb77ed349b40a3be10ee9ea610b8ab",
         "type": "github"
       },
       "original": {
         "owner": "soramanew",
         "repo": "m3shapes",
-        "rev": "bdc327b29f95394a732baf3c9b19658ba23755b6",
+        "rev": "32ad9ce328bb77ed349b40a3be10ee9ea610b8ab",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1783522502,
-        "narHash": "sha256-iffAls3iaNTyJC2faYcUXSI+Gp02cDjYl+MygxKl2GI=",
+        "lastModified": 1789149629,
+        "narHash": "sha256-H6GwaZzZf+4npqv0tph94w9tZddSjFjmQrVsW0z78uk=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "0bb7ec54c8483066ec9d7720e780a5caa71f8612",
+        "rev": "eaad089433ca2bb662274377d33df3d0e51ef28b",
         "type": "github"
       },
       "original": {
@@ -671,11 +676,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783673918,
-        "narHash": "sha256-cFG5vnmjJcZRVCSUaqQLOdwkX6iqF6bY8IvvmBSGSRs=",
+        "lastModified": 1787994703,
+        "narHash": "sha256-6SUZyyALo19heYPa/Xmu2H4zV+wvdfVX4fTcqbgHRnI=",
         "ref": "refs/heads/master",
-        "rev": "4df562dfb2475a9057f0f33a8db75808efad8670",
-        "revCount": 830,
+        "rev": "2d3b3e9c70ef380dff751b61d334dc88df016c29",
+        "revCount": 856,
         "type": "git",
         "url": "https://git.outfoxxed.me/outfoxxed/quickshell"
       },

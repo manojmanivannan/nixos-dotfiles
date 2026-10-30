@@ -1,5 +1,6 @@
 # Provides the `py-file-opener` CLI used by the `fo()` function in
-# zshrc_addon.zsh. Two provisioning strategies are supported; only ONE should
+# config/.config/zsh/zshrc.d/10-functions.zsh. Two provisioning strategies
+# are supported; only ONE should
 # be active at a time.
 #
 #   Option A (active)   — build py-file-opener as a pure Nix derivation and
@@ -22,14 +23,14 @@ let
   # ~/.scripts/.venv/bin/py-file-opener.
   py-file-opener = pkgs.python3.pkgs.buildPythonApplication {
     pname = "py-file-opener";
-    version = "0.1.0-unstable-2026-04-22";
+    version = "0.2.0";
     format = "pyproject"; # pyproject.toml + setuptools build backend
 
     src = pkgs.fetchFromGitHub {
       owner = "manojmanivannan";
       repo = "py-file-opener";
-      rev = "533bb87eb659d962c50734e65305c60bedf175a9";
-      hash = "sha256-U07AJWhmwIMfWqWGHN0wSoco9CXGwM887KqhrPVwjI0=";
+      rev = "61fe8ccb4f331858e658ab6ef535e6c1ff2d2c35";
+      hash = "sha256-E0BVSyTOX7VkVcgnUqaqECOwK5aVS/o41Fs0sV272A4=";
     };
 
     nativeBuildInputs = with pkgs.python3.pkgs; [
@@ -57,8 +58,8 @@ in
   #      `home.packages = [ py-file-opener ];` line.
   #   2. Uncomment the activationScripts block below.
   #   3. Add `uv` to home.packages in home-packages.nix.
-  #   4. In config/.config/zsh/zshrc_addon.zsh, revert the `fo()` call back to
-  #      `~/.scripts/.venv/bin/py-file-opener`.
+  #   4. In config/.config/zsh/zshrc.d/10-functions.zsh, revert the `fo()` call
+  #      back to `~/.scripts/.venv/bin/py-file-opener`.
   #
   # home.activationScripts.setupScriptsVenv =
   #   lib.hm.dag.entryAfter [ "writeBoundary" ] ''
