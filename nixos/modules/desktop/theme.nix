@@ -7,9 +7,11 @@
   # recolored by config/.config/gtk-4.0/gtk.css instead; they ignore GTK_THEME.
   # Dark mode for libadwaita is set via dconf in home-manager/modules/gtk.nix.
   environment.variables.GTK_THEME = "adw-gtk3-dark";
-  environment.variables.XCURSOR_THEME = "Catppuccin-Macchiato-Teal";
+  # Traditional X11-style arrow (phinger-cursors); -dark is the white-fill
+  # variant that stays visible on the dark theme.
+  environment.variables.XCURSOR_THEME = "phinger-cursors-dark";
   environment.variables.XCURSOR_SIZE = "24";
-  environment.variables.HYPRCURSOR_THEME = "Catppuccin-Macchiato-Teal";
+  environment.variables.HYPRCURSOR_THEME = "phinger-cursors-dark";
   environment.variables.HYPRCURSOR_SIZE = "24";
   qt.enable = true;
   qt.platformTheme = "gtk2";
@@ -21,8 +23,8 @@
     # `background` and the Caelestia shell's M3 `base` role); the rest are
     # warm-metal accents that mirror the ghostty 16-color palette
     # (config/.config/ghostty/config).
-    # Cursors stay Catppuccin-teal until warm variants are adopted (icons went
-    # warm via the Colloid-Orange variant above).
+    # Icons went warm via the Colloid-Orange variant above; cursors are the
+    # traditional X11 arrow (phinger-cursors, set above).
     colors = [
       "322a21"
       "e5805f"
@@ -71,7 +73,7 @@
   environment.systemPackages = with pkgs; [
     colloid-icon-theme
     adw-gtk3 # GTK3 port of libadwaita; warm-tinted via ~/.config/gtk-3.0/gtk.css
-    catppuccin-cursors.macchiatoTeal
+    phinger-cursors
 
     # gnome.gnome-tweaks
     # gnome.gnome-shell
