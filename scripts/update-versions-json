@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+# Regenerate versions.json from the pins actually present in the repo, then
+# compare each against its upstream (GitHub API, best-effort).
+#
+# Line numbers, versions and revs are re-derived from the source files on
+# every run, so nothing in here needs a manual bump when a pin moves — this
+# script is the generator; versions.json is the snapshot. Edit the pins in
+# the tree, not the JSON.
+#
+# A network failure on one entry is non-fatal: that entry keeps the previous
+# `latestUpstream`/`outdated` from the existing versions.json and a warning
+# goes to stderr. Used by scripts/update-flake and the pre-commit hook; also
+# fine to run standalone.
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+PREV=versions.json
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+: >"$TMP/packages.l"
+
+# Best-effort GitHub API fetch: empty output on any failure.
+gh() { curl -fsSL --max-time 15 "https://api.github.com$1" 2>/dev/null; }
+
+warn() { printf 'update-versions-json: %s\n' "$1" >&2; }
+
+# Previous value of a field for a package; rc 1 if unknown.
+prevpkg() { # prevpkg <name> <field>
+  [ -f "$PREV" ] || return 1
+  jq -e ".packages[] | select(.name == \"$1\") | .$2" "$PREV" 2>/dev/null | tail -n1
+}
+
+# Append the previous version of an entry verbatim (e.g. if the pin moved
+# somewhere the greps below can no longer reach) — never silently drop data.
+carryover() { # carryover <name>
+  if jq -e --arg n "$1" '.packages[] | select(.name == $n)' "$PREV" >/dev/null 2>&1; then
+    jq -c --arg n "$1" '.packages[] | select(.name == $n)' "$PREV" 2>/dev/null >>"$TMP/packages.l"
+  else
+    warn "no previous entry for $1 to carry over — it is missing from output"
+  fi
+}
+
+# --- flake inputs pinned to a release tag --------------------------------
+# Version lives in the input URL; latest is the max upstream tag (sort -V),
+# compared with any `v` prefix stripped on both sides.
+flake_tag() { # flake_tag <name> <owner/repo> <howToUpdate>
+  local name=$1 repo=$2 how=$3
+  local line url pinned latest pv lv outdated
+
+  line="$(grep -nE "^\s*${name}\.url = " flake.nix | head -n1 | cut -d: -f1 || true)"
+  if [ -z "$line" ]; then
+    warn "cannot find ${name}.url in flake.nix — carrying previous entry over"
+    carryover "$name"
+    return
+  fi
+
+  url="$(sed -n "${line}p" flake.nix | grep -oE 'github:[^"]+' || true)"
+  pinned="${url#github:$repo/}" # e.g. v0.9.5
+  latest="$(gh "/repos/$repo/tags?per_page=10" | jq -r '.[].name' 2>/dev/null | sort -V | tail -n1 || true)"
+
+  if [ -n "$latest" ]; then
+    pv="${pinned#v}"; lv="${latest#v}"
+    latest="$lv"; pinned="$pv"
+    if [ "$lv" = "$pv" ]; then outdated=false; else outdated=true; fi
+  else
+    warn "upstream tags for $repo failed to fetch — keeping previous comparison"
+    pinned="${pinned#v}"
+    latest="$(prevpkg "$name" latestUpstream || echo '?')"
+    outdated="$(prevpkg "$name" outdated || echo false)"
+  fi
+
+  jq -cn --arg name "$name" --arg version "$pinned" --arg latest "$latest" \
+    --argjson outdated "$outdated" --arg repo "$repo" --arg line "$line" --arg how "$how" \
+    '{name: $name, version: $version, latestUpstream: $latest, outdated: $outdated,
+      source: ("github:" + $repo), upstream: ("https://github.com/" + $repo),
+      pin: {file: "flake.nix", line: ($line | tonumber), kind: "flake-input-tag"},
+      howToUpdate: $how}' >>"$TMP/packages.l"
+}
+
+# --- flake inputs pinned to an nixpkgs branch ------------------------------
+# The branch is the last path component of the input URL.
+channel() { # channel <name> <owner/repo> <howToUpdate>
+  local name=$1 repo=$2 how=$3
+  local line url branch
+
+  line="$(grep -nE "^\s*${name}\.url = " flake.nix | head -n1 | cut -d: -f1 || true)"
+  if [ -z "$line" ]; then
+    warn "cannot find ${name}.url in flake.nix"
+    jq -cn --arg name "$name" --arg repo "$repo" --arg how "$how" \
+      '{name: $name, version: "?",
+        pin: {file: "flake.nix", line: null, kind: "flake-input-branch"},
+        howToUpdate: $how}' >>"$TMP/channels.l"
+    return
+  fi
+
+  url="$(sed -n "${line}p" flake.nix | grep -oE 'github:[^"]+' || true)"
+  branch="${url#github:$repo/}"
+  # Store the calendar version (26.05), not the flavor prefix (nixos-/release-).
+  branch="$(sed -E 's/^(nixos|release|unstable)-//' <<<"$branch")"
+
+  jq -cn --arg name "$name" --arg branch "$branch" --arg repo "$repo" \
+    --arg line "$line" --arg how "$how" \
+    '{name: $name, version: $branch,
+      pin: {file: "flake.nix", line: ($line | tonumber), kind: "flake-input-branch"},
+      howToUpdate: $how}' >>"$TMP/channels.l"
+}
+
+# --- pywhispercpp CUDA wheel (version lives inside a fetchurl URL) ----------
+# Source of truth is the wheel URL; the `version =` line above it and the
+# `hash =` line below it are located for the pin JSON. Wheels are filtered to
+# the cp313/cuda12 ABI this module builds against.
+wheel() { # wheel <file> <repo> <release-tag> <source-label> <howToUpdate>
+  local file=$1 repo=$2 tag=$3 label=$4 how=$5
+  local uline url pinned vline lines latest outdated
+  local cp313=cp313 # system python3 in hyprwhspr.nix
+
+  uline="$(grep -nE 'pywhispercpp-.*\.whl"' "$file" | head -n1 | cut -d: -f1 || true)"
+  if [ -z "$uline" ]; then
+    warn "cannot find the pywhispercpp wheel URL in $file — carrying previous entry over"
+    carryover pywhispercpp
+    return
+  fi
+  url="$(sed -n "${uline}p" "$file" | grep -oE 'https://[^"]+\.whl')"
+  # Version = "<x.y.z>[-<build>]"; non-greedy: [0-9…] up to the -cp313 tag.
+  pinned="$(sed -E "s/.*pywhispercpp-([0-9][0-9A-Za-z.]*(|-[0-9]+))-.*/\1/" <<<"$url")"
+
+  vline="$(sed -n "1,${uline}p" "$file" | grep -nE '^\s*version = "' | tail -n1 | cut -d: -f1 || true)"
+  if [ -n "$vline" ]; then
+    lines="[$vline,$uline,$((uline + 1))]"
+  else
+    lines="[$uline,$((uline + 1))]"
+    warn "no version = line found above the wheel URL in $file"
+  fi
+
+  # Latest = max version across the release's cp313/cuda12 wheels.
+  latest="$(gh "/repos/$repo/releases/tags/$tag" | jq -r '.assets[]?.name' 2>/dev/null |
+    grep -E "^pywhispercpp-[0-9][0-9A-Za-z.]*(-[0-9]+)?-${cp313}-.*cuda12.whl$" |
+    sed -E "s/^pywhispercpp-([0-9][0-9A-Za-z.]*(|-[0-9]+))-.*/\1/" | sort -V | tail -n1 || true)"
+
+  if [ -n "$latest" ]; then
+    if [ "$latest" = "$pinned" ]; then outdated=false; else outdated=true; fi
+  else
+    warn "wheels release for $repo/$tag failed to fetch — keeping previous comparison"
+    latest="$(prevpkg pywhispercpp latestUpstream || echo '?')"
+    outdated="$(prevpkg pywhispercpp outdated || echo false)"
+  fi
+
+  jq -cn --arg version "${pinned}-cuda12" --arg latest "$latest" \
+    --argjson outdated "$outdated" --arg repo "$repo" --arg tag "$tag" \
+    --arg label "$label" --arg url "$url" --arg file "$file" \
+    --argjson lines "$lines" --arg how "$how" \
+    '{name: "pywhispercpp", version: $version, latestUpstream: $latest, outdated: $outdated,
+      source: $label, upstream: ("https://github.com/" + $repo + "/releases/tag/" + $tag),
+      pin: {file: $file, lines: $lines, kind: "hardcoded-wheel-url-and-hash", url: $url},
+      howToUpdate: $how}' >>"$TMP/packages.l"
+}
+
+# --- git-rev pins (no upstream releases; latest = upstream HEAD) -----------
+rev_pkg() { # rev_pkg <name> <owner/repo> <file> <howToUpdate>
+  local name=$1 repo=$2 file=$3 how=$4
+  local vline version rline rev head latest outdated
+
+  vline="$(grep -nE '^\s*version = "' "$file" | head -n1 | cut -d: -f1 || true)"
+  rline="$(grep -nE '^\s*rev = "' "$file" | head -n1 | cut -d: -f1 || true)"
+  if [ -z "$vline" ] || [ -z "$rline" ]; then
+    warn "cannot find version/rev in $file — carrying previous entry over"
+    carryover "$name"
+    return
+  fi
+  version="$(sed -n "${vline}p" "$file" | sed -E 's/.*"([^"]+)".*/\1/')"
+  rev="$(sed -n "${rline}p" "$file" | sed -E 's/.*"([^"]+)".*/\1/')"
+
+  head="$(gh "/repos/$repo/commits?per_page=1" | jq -r '.[0].sha' 2>/dev/null || true)"
+  if [ -n "$head" ]; then
+    if [ "$head" = "$rev" ]; then
+      latest="$version (HEAD)"; outdated=false
+    else
+      latest="HEAD ${head:0:7}"; outdated=true
+    fi
+  else
+    warn "upstream HEAD for $name failed to fetch — keeping previous comparison"
+    latest="$(prevpkg "$name" latestUpstream || echo '?')"
+    outdated="$(prevpkg "$name" outdated || echo false)"
+  fi
+
+  jq -cn --arg name "$name" --arg version "$version" --arg latest "$latest" \
+    --argjson outdated "$outdated" --arg repo "$repo" --arg file "$file" \
+    --arg rev "$rev" --arg vline "$vline" --arg rline "$rline" --arg how "$how" \
+    '{name: $name, version: $version, latestUpstream: $latest, outdated: $outdated,
+      source: ("github:" + $repo), upstream: ("https://github.com/" + $repo),
+      pin: {file: $file, lines: [($vline | tonumber), ($rline | tonumber)],
+            kind: "hardcoded-version-and-git-rev", rev: $rev},
+      howToUpdate: $how}' >>"$TMP/packages.l"
+}
+
+# --- build the package list --------------------------------------------------
+flake_tag herdr herdrdev/herdr \
+  'Bump the URL tag in flake.nix, then `nix flake update herdr`'
+flake_tag caelestia-shell caelestia-dots/shell \
+  'Bump the URL tag in flake.nix, then `nix flake update caelestia-shell`'
+wheel nixos/modules/desktop/hyprwhspr.nix goodroot/hyprwhspr wheels-v2 \
+  "hyprwhspr 'wheels-v2' release wheel" \
+  'Update the wheel URL + sha256 in nixos/modules/desktop/hyprwhspr.nix (version string, fetchurl url and hash all carry the version)'
+rev_pkg py-file-opener manojmanivannan/py-file-opener home-manager/modules/py-file-opener.nix \
+  'Update `version` + `rev` + `hash` in home-manager/modules/py-file-opener.nix'
+
+# --- channel-pinned flake inputs ---------------------------------------------
+: >"$TMP/channels.l"
+channel nixpkgs NixOS/nixpkgs \
+  'Bump branch in flake.nix or `nix flake update nixpkgs`'
+channel home-manager nix-community/home-manager \
+  'Bump branch in flake.nix or `nix flake update home-manager`'
+
+# --- upstream-tracked flake inputs (unpinned) ---------------------------------
+# Verified against flake.nix so a removed input drops off the list naturally.
+: >"$TMP/tracked.l"
+for t in hyprland:hyprwm/Hyprland try:tobi/try hyprwhspr:goodroot/hyprwhspr \
+  antigravity-nix:jacopone/antigravity-nix; do
+  name="${t%%:*}"
+  # Matches both `name.url = "…"` (single-line) and `name = {` (multi-line).
+  if grep -qE "^\s*${name}(\.[a-zA-Z_.-]+)? ?=" flake.nix; then
+    jq -cn --arg name "$name" --arg url "github:${t#*:}" \
+      '{name: $name, url: $url, pinned: false}' >>"$TMP/tracked.l"
+  else
+    warn "tracked input $name not found in flake.nix — dropped from versions.json"
+  fi
+done
+
+# --- assemble and swap in ------------------------------------------------------
+jq -n \
+  --arg checked "$(date +%F)" \
+  --arg note "Manually-pinned packages/versions in this repo that do NOT come from nixpkgs. Each entry must be bumped by hand (edit the nix file, refresh the hash if the source changed, then rebuild). Verify against upstream before updating. Regenerated by scripts/update-versions-json — edit the pins in the tree, not this file." \
+  --rawfile packages "$TMP/packages.l" \
+  --rawfile channels "$TMP/channels.l" \
+  --rawfile tracked "$TMP/tracked.l" \
+  '{
+    _note: $note,
+    _checked: $checked,
+    packages: ($packages | split("\n") | map(select(length > 0) | fromjson)),
+    flakeInputs_channelPinned: ($channels | split("\n") | map(select(length > 0) | fromjson)),
+    flakeInputs_tracked: ($tracked | split("\n") | map(select(length > 0) | fromjson))
+  }' >"$TMP/new.json"
+
+jq . "$TMP/new.json" >"$PREV"
+
+OUTDATED="$(jq -r '[.packages[] | select(.outdated == true) | .name] | join(", ")' "$PREV")"
+if [ -n "$OUTDATED" ]; then
+  warn "outdated: $OUTDATED"
+else
+  printf 'versions.json regenerated — all %s package pins current\n' \
+    "$(jq '.packages | length' "$PREV")"
+fi

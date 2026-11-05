@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Refresh versions.json (the manual-pin manifest) whenever a pin source is
+# part of the commit — flake inputs, the hyprwhspr wheel, or py-file-opener.
+# Regeneration is best-effort: never block a commit over network trouble.
+
+cd "$(dirname "$0")/.."
+if git diff --cached --name-only --diff-filter=ACMR |
+    grep -qE '^flake\.(nix|lock)$|hyprwhspr\.nix$|py-file-opener\.nix$'; then
+  scripts/update-versions-json ||
+    echo "pre-commit: versions.json regeneration failed — committing with the on-disk copy" >&2
+  git add versions.json
+fi

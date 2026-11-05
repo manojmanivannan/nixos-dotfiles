@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# `nix flake update` wrapper: after updating flake.lock, regenerate
+# versions.json so the manual-pin manifest stays in sync with the tree.
+# Extra arguments are passed through (e.g. `scripts/update-flake herdr`).
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+nix flake update "$@"
+exec "$(dirname "$0")/update-versions-json"
