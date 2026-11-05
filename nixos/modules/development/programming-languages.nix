@@ -1,6 +1,10 @@
 { pkgs, config, ... }:
 
 {
+  imports = [
+    ./flutter.nix
+  ];
+
   # nix-ld provides a system-wide ldso loader so generic Linux binaries
   # (e.g. uv-managed cpython downloaded from python-build-standalone, and the
   # manylinux wheels it installs) run unpatched on NixOS.
