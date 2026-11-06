@@ -19,6 +19,27 @@
       User = user;
     };
 
+    settings.racknerd = {
+      HostName = "192.255.228.234";
+      User = user;
+      IdentityFile = "~/.ssh/id_ed25519";
+      IdentitiesOnly = true;
+      AddKeysToAgent = "yes";
+      TCPKeepAlive = false;
+      ServerAliveInterval = 60;
+      ServerAliveCountMax = 10;
+      ConnectTimeout = 5;
+    };
+
+    settings.racknerd-root = {
+      HostName = "192.255.228.234";
+      User = "root";
+      IdentityFile = "~/.ssh/id_ed25519";
+      IdentitiesOnly = true;
+      AddKeysToAgent = "yes";
+      ConnectTimeout = 5;
+    };
+
     # Defaults applied to every host. These are the legacy Home Manager
     # defaults, with `ServerAliveInterval` and `AddKeysToAgent` set to our
     # preferred values.
