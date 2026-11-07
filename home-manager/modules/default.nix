@@ -10,6 +10,7 @@
     ./hyprwhspr.nix
     ./py-file-opener.nix
     ./ssh.nix
+    ./ssh-url-handler.nix
     ./scripts.nix
     ./vim.nix
     ./zsh.nix
